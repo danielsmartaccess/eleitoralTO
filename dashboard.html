@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Dashboard — Pesquisa Eleitoral Tocantins 2026</title>
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong>FOCCUS PESQUISAS</strong>
+      <span>Dashboard de Coleta</span>
+    </div>
+    <div class="flex-entre" style="gap:0.6rem;">
+      <div id="status-conexao" class="status-conexao">-</div>
+      <button class="btn-texto" id="btn-sair-admin" style="color:#fff;">Sair</button>
+    </div>
+  </header>
+
+  <nav class="abas">
+    <a href="dashboard.html" class="ativo">Dashboard</a>
+    <a href="relatorio.html">Relatório</a>
+    <a href="admin.html">Administração</a>
+    <a href="auditoria.html">Auditoria</a>
+  </nav>
+
+  <main class="container">
+    <section class="cartao">
+      <h2 class="titulo-secao">Filtros</h2>
+      <div class="filtros">
+        <select id="filtro-rodada"><option value="">Rodada (todas)</option></select>
+        <select id="filtro-municipio"><option value="">Município (todos)</option></select>
+        <select id="filtro-sexo"><option value="">Sexo (todos)</option></select>
+        <select id="filtro-faixa-etaria"><option value="">Faixa etária (todas)</option></select>
+        <select id="filtro-escolaridade"><option value="">Escolaridade (todas)</option></select>
+        <input type="text" id="filtro-pesquisador" placeholder="Pesquisador contém..." />
+        <input type="date" id="filtro-data-inicio" title="Período - início" />
+        <input type="date" id="filtro-data-fim" title="Período - fim" />
+      </div>
+      <button class="btn btn-secundario mt-1" id="btn-aplicar-filtros" style="width:auto;">Aplicar filtros</button>
+    </section>
+
+    <section class="grade-indicadores" id="grade-indicadores"></section>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Cotas por município</h2>
+      <div id="cotas-municipio"></div>
+    </section>
+
+    <div class="aviso-metodologico" id="aviso-n">
+      Amostra exibida (N) é calculada sobre as entrevistas sincronizadas que atendem aos filtros
+      selecionados. Margem de erro e nível de confiança: <strong>não configurados</strong> — dependem
+      da metodologia definida pela Foccus (ver README).
+    </div>
+
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Avaliação do Governo (Q1)</h3><canvas id="grafico-q1"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Presidente (Q2)</h3><canvas id="grafico-q2"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Governador (Q5)</h3><canvas id="grafico-q5"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Senado — 1º voto (Q7)</h3><canvas id="grafico-q7-1"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Senado — 2º voto (Q7)</h3><canvas id="grafico-q7-2"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Deputado Federal (Q9)</h3><canvas id="grafico-q9"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Deputado Estadual (Q11)</h3><canvas id="grafico-q11"></canvas></div>
+      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Avaliação do Prefeito (Q12)</h3><canvas id="grafico-q12"></canvas></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="config/pesquisa.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

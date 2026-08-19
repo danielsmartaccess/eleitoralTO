@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Coleta — Pesquisa Eleitoral Tocantins 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/coleta.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong id="titulo-passo">Entrevista</strong>
+      <span id="contador-passo">- / -</span>
+    </div>
+    <div id="status-conexao" class="status-conexao">-</div>
+  </header>
+
+  <div class="barra-progresso"><div class="barra-progresso-preenchida" id="barra-progresso"></div></div>
+
+  <main class="container" id="area-passo">
+    <p class="texto-suave centro mt-1">Carregando entrevista...</p>
+  </main>
+
+  <div id="tela-sucesso" class="tela-sucesso oculto">
+    <div class="container centro">
+      <div class="icone-sucesso">✓</div>
+      <h1 id="sucesso-titulo">ENTREVISTA REGISTRADA</h1>
+      <p class="texto-suave">Entrevista: <strong id="sucesso-codigo">#--------</strong></p>
+      <div id="sucesso-status"></div>
+      <button class="btn btn-primario mt-1" id="btn-nova-apos-sucesso">INICIAR NOVA ENTREVISTA</button>
+      <button class="btn btn-secundario mt-1" id="btn-inicio-apos-sucesso">VOLTAR AO INÍCIO</button>
+    </div>
+  </div>
+
+  <footer class="rodape-fixo" id="rodape-navegacao">
+    <div class="grupo-botoes">
+      <button class="btn btn-secundario" id="btn-voltar">VOLTAR</button>
+      <button class="btn btn-primario" id="btn-proxima">PRÓXIMA</button>
+    </div>
+  </footer>
+
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="config/pesquisa.js"></script>
+  <script type="module" src="js/coleta.js"></script>
+</body>
+</html>

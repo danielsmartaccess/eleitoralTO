@@ -1,0 +1,18 @@
+/* ============================================================================
+   css/admin.css — telas administrativas (pesquisadores, entrevistas, cotas).
+   ============================================================================ */
+
+.tabela-wrap { overflow-x: auto; }
+
+.linha-toggle { display: flex; align-items: center; gap: 0.5rem; }
+
+.paginacao { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; }
+
+.tag-perfil {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+}

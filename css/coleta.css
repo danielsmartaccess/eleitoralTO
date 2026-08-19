@@ -1,0 +1,75 @@
+/* ============================================================================
+   css/coleta.css — wizard de coleta: uma pergunta por tela (Seção 42).
+   ============================================================================ */
+
+.barra-progresso {
+  height: 5px;
+  background: var(--cor-borda);
+  position: sticky;
+  top: 60px;
+  z-index: 19;
+}
+
+.barra-progresso-preenchida {
+  height: 100%;
+  background: var(--cor-acento);
+  width: 0%;
+  transition: width 0.25s ease;
+}
+
+#area-passo { padding-top: 1.25rem; }
+
+.pergunta-texto {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.pergunta-ajuda { color: var(--cor-texto-suave); font-size: 0.88rem; margin: -0.5rem 0 1rem; }
+
+.bloco-consentimento {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.voto-grupo { margin-bottom: 1.4rem; }
+.voto-grupo h3 { font-size: 0.95rem; color: var(--cor-primaria-escura); margin-bottom: 0.5rem; }
+
+.tela-sucesso {
+  position: fixed;
+  inset: 0;
+  background: var(--cor-branco);
+  z-index: 30;
+  overflow-y: auto;
+  padding-top: 3rem;
+}
+
+.icone-sucesso {
+  width: 84px; height: 84px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--cor-sucesso);
+  color: #fff;
+  font-size: 2.4rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#sucesso-status { margin: 1.25rem 0; text-align: left; }
+#sucesso-status p { margin: 0.35rem 0; }
+
+.info-municipio-box {
+  padding: 1rem;
+  background: var(--cor-primaria-clara);
+  border-radius: var(--raio);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cor-primaria-escura);
+}

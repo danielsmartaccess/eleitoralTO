@@ -1,0 +1,79 @@
+/* ============================================================================
+   css/dashboard.css — indicadores operacionais e gráficos (Seções 33/57).
+   ============================================================================ */
+
+.grade-indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.indicador {
+  background: var(--cor-branco);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--sombra);
+}
+
+.indicador .valor { font-size: 1.6rem; font-weight: 800; color: var(--cor-primaria-escura); }
+.indicador .rotulo { font-size: 0.78rem; color: var(--cor-texto-suave); text-transform: uppercase; letter-spacing: 0.03em; }
+
+.barra-meta {
+  height: 10px;
+  background: var(--cor-borda);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+.barra-meta > div { height: 100%; background: var(--cor-acento); }
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+
+.filtros select, .filtros input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.grade-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.grafico-caixa canvas { max-height: 280px; }
+
+.aviso-metodologico {
+  background: #fdf1de;
+  border: 1px solid #f0d29b;
+  color: #7a5000;
+  border-radius: var(--raio);
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+nav.abas {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.6rem 1rem 0;
+  background: var(--cor-primaria-escura);
+}
+nav.abas a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px 8px 0 0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+nav.abas a.ativo { background: var(--cor-fundo); color: var(--cor-primaria-escura); font-weight: 700; }

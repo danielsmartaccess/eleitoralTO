@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Login — Pesquisa Eleitoral Tocantins 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong>FOCCUS PESQUISAS</strong>
+      <span>Pesquisa Eleitoral Tocantins 2026</span>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 2.5rem;">
+    <section class="cartao centro" id="bloco-pesquisador">
+      <h1 class="titulo-secao" style="font-size:1.3rem;">Acesso do pesquisador</h1>
+      <p class="texto-suave">Digite o código fornecido pela sua supervisão para começar a coleta.</p>
+
+      <form id="form-login">
+        <div class="campo" style="text-align:left;">
+          <label for="input-token">Código do pesquisador</label>
+          <input type="text" id="input-token" autocomplete="off" autocapitalize="characters"
+                 placeholder="Ex.: PALMAS-001" required />
+        </div>
+        <p class="erro-campo oculto" id="erro-login"></p>
+        <button type="submit" class="btn btn-primario" id="btn-entrar">ENTRAR</button>
+      </form>
+
+      <p class="mt-1">
+        <a href="login.html?admin=1" id="link-admin">Sou supervisor(a) ou administrador(a)</a>
+      </p>
+    </section>
+
+    <section class="cartao centro oculto" id="bloco-admin">
+      <h1 class="titulo-secao" style="font-size:1.3rem;">Acesso administrativo</h1>
+      <p class="texto-suave">Dashboard, relatórios e administração — conta criada pela Foccus no Supabase.</p>
+
+      <form id="form-login-admin">
+        <div class="campo" style="text-align:left;">
+          <label for="input-email">E-mail</label>
+          <input type="email" id="input-email" autocomplete="username" required />
+        </div>
+        <div class="campo" style="text-align:left;">
+          <label for="input-senha">Senha</label>
+          <input type="password" id="input-senha" autocomplete="current-password" required />
+        </div>
+        <p class="erro-campo oculto" id="erro-login-admin"></p>
+        <button type="submit" class="btn btn-primario" id="btn-entrar-admin">ENTRAR</button>
+      </form>
+
+      <p class="mt-1"><a href="login.html">Sou pesquisador(a) de campo</a></p>
+    </section>
+  </main>
+
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

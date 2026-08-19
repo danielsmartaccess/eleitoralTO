@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Pesquisa Eleitoral Tocantins 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong>FOCCUS PESQUISAS</strong>
+      <span>Pesquisa Eleitoral Tocantins 2026</span>
+    </div>
+    <div id="status-conexao" class="status-conexao">-</div>
+  </header>
+
+  <main class="container">
+    <section class="cartao" id="cartao-pesquisador">
+      <p class="texto-suave">Carregando...</p>
+    </section>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Coleta</h2>
+      <button class="btn btn-primario" id="btn-nova-entrevista">+ Nova entrevista</button>
+    </section>
+
+    <section class="cartao oculto" id="cartao-pendentes">
+      <h2 class="titulo-secao">Entrevistas pendentes</h2>
+      <p class="texto-suave">Entrevistas iniciadas que ainda não foram finalizadas neste aparelho.</p>
+      <div id="lista-pendentes"></div>
+    </section>
+
+    <section class="cartao" id="cartao-cotas">
+      <div class="flex-entre">
+        <h2 class="titulo-secao">Cota da sua área</h2>
+        <button class="btn-texto" id="btn-atualizar-cotas">Atualizar</button>
+      </div>
+      <div id="lista-cotas"><p class="texto-suave">Conecte-se à internet para ver o progresso das cotas.</p></div>
+    </section>
+
+    <section class="cartao">
+      <div class="flex-entre">
+        <span class="texto-suave">Tamanho do texto</span>
+        <div class="grupo-botoes" style="width: auto; gap: 0.4rem;">
+          <button class="btn-texto" data-acao="fonte" data-escala="normal">A</button>
+          <button class="btn-texto" data-acao="fonte" data-escala="grande">A+</button>
+          <button class="btn-texto" data-acao="fonte" data-escala="enorme">A++</button>
+        </div>
+      </div>
+    </section>
+
+    <button class="btn btn-perigo" id="btn-sair">Sair</button>
+  </main>
+
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="config/pesquisa.js"></script>
+  <script type="module" src="js/inicio.js"></script>
+</body>
+</html>

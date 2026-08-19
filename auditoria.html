@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Auditoria — Pesquisa Eleitoral Tocantins 2026</title>
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong>FOCCUS PESQUISAS</strong>
+      <span>Auditoria de campo</span>
+    </div>
+    <div class="flex-entre" style="gap:0.6rem;">
+      <div id="status-conexao" class="status-conexao">-</div>
+      <button class="btn-texto" id="btn-sair-admin" style="color:#fff;">Sair</button>
+    </div>
+  </header>
+
+  <nav class="abas">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="relatorio.html">Relatório</a>
+    <a href="admin.html">Administração</a>
+    <a href="auditoria.html" class="ativo">Auditoria</a>
+  </nav>
+
+  <main class="container">
+    <div class="aviso-metodologico">
+      Estes indicadores <strong>sinalizam</strong> entrevistas para revisão da supervisão — eles nunca
+      invalidam ou apagam uma entrevista automaticamente (Seção 32 do briefing).
+    </div>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Entrevistas sinalizadas (duração curta ou sem GPS)</h2>
+      <div class="tabela-wrap" id="tabela-suspeitas"></div>
+    </section>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Volume por dispositivo</h2>
+      <p class="texto-suave">Limite operacional configurado: <span id="limite-dispositivo"></span> entrevistas/dispositivo.</p>
+      <div class="tabela-wrap" id="tabela-dispositivos"></div>
+    </section>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Falhas de sincronização registradas</h2>
+      <div class="tabela-wrap" id="tabela-falhas-sync"></div>
+    </section>
+
+    <section class="cartao">
+      <h2 class="titulo-secao">Duplicidade por session_id</h2>
+      <p class="texto-suave">
+        A tabela <code>entrevistas</code> tem uma constraint <code>UNIQUE(session_id)</code> — duplicidade
+        neste identificador é impedida pelo próprio banco, não apenas pela aplicação. Nenhuma linha
+        duplicada é possível de existir aqui.
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="config/pesquisa.js"></script>
+  <script type="module" src="js/auditoria-tela.js"></script>
+</body>
+</html>
