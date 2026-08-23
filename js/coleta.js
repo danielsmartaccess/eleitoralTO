@@ -1,20 +1,17 @@
 // ============================================================================
-// js/coleta.js — wizard de entrevista (coleta.html). Uma pergunta por tela
-// (Seção 42), salvamento progressivo a cada resposta (Seção 26), suporte a
-// retomada (Seção 3.3/26) e finalização com fila de sincronização (Seção 27).
+// js/coleta.js — wizard de entrevista (coleta.html). Uma pergunta por tela,
+// salvamento progressivo a cada resposta, suporte a retomada e finalização
+// com fila de sincronização.
 // ============================================================================
 
-import { exigirLoginPesquisador } from "./auth.js";
-import { salvarEntrevista, obterEntrevista } from "./db.js";
+import { obterNomePesquisador, salvarEntrevista, obterEntrevista } from "./db.js";
 import { getPassos, obterOpcoesOrdenadas, validarResposta, validarVotoDuplicado } from "./questionario.js";
-import { registrarEvento, EVENTOS, calcularDuracaoSegundos, avaliarSuspeitaDuracao } from "./auditoria.js";
 import { sincronizarTudo } from "./sync.js";
 import { iniciarIndicadorConexao, iniciarControleFonte, registrarServiceWorker } from "./app.js";
-import { gerarSessionId, escapeHtml, coletarDeviceInfo, codigoCurto, estaOnline, debounce } from "./utils.js";
+import { gerarSessionId, escapeHtml, codigoCurto, estaOnline, debounce } from "./utils.js";
 
 const config = window.PESQUISA_CONFIG;
 
-let sessao = null;
 let entrevista = null;
 let passos = [];
 let indiceAtual = 0;
@@ -28,31 +25,15 @@ const btnProxima = document.getElementById("btn-proxima");
 // Inicialização / retomada
 // ---------------------------------------------------------------------------
 
-function novaEntrevista() {
+function novaEntrevista(nomePesquisador) {
   const agora = new Date().toISOString();
   return {
     session_id: gerarSessionId(),
-    pesquisa_id: sessao.pesquisa_id,
-    rodada_id: sessao.rodada_id,
-    equipe_id: sessao.equipe_id,
-    pesquisador: sessao.nome,
+    pesquisador: nomePesquisador,
     status: "em_andamento",
-    municipio: sessao.municipio,
-    regiao: "",
-    zona_eleitoral: "",
-    sexo: null,
-    faixa_etaria: null,
-    escolaridade: null,
-    local_coleta: null,
-    consentimento: false,
+    municipio: config.pesquisa.municipio,
     coletado_em: agora,
     duracao_seg: null,
-    geo_lat: null,
-    geo_lng: null,
-    geo_accuracy: null,
-    geo_status: "pendente",
-    device_info: coletarDeviceInfo(),
-    suspeita_duracao: false,
     respostas: {},
     ordem_opcoes: {},
     passo_atual: 0,
@@ -60,34 +41,18 @@ function novaEntrevista() {
   };
 }
 
-function capturarGeolocalizacao() {
-  if (!config.geolocalizacao?.habilitado || !("geolocation" in navigator)) return;
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      entrevista.geo_lat = pos.coords.latitude;
-      entrevista.geo_lng = pos.coords.longitude;
-      entrevista.geo_accuracy = pos.coords.accuracy;
-      entrevista.geo_status = "ok";
-      await salvarEntrevista(entrevista);
-    },
-    async (err) => {
-      entrevista.geo_status = err.code === err.PERMISSION_DENIED ? "negado" : "indisponivel";
-      await salvarEntrevista(entrevista);
-    },
-    { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
-  );
-}
-
 async function inicializar() {
-  sessao = await exigirLoginPesquisador();
-  if (!sessao) return;
+  const nomePesquisador = await obterNomePesquisador();
+  if (!nomePesquisador) {
+    window.location.href = "index.html";
+    return;
+  }
 
   registrarServiceWorker();
   iniciarIndicadorConexao();
   iniciarControleFonte();
 
-  passos = getPassos(config, sessao);
+  passos = getPassos(config);
 
   const params = new URLSearchParams(window.location.search);
   const sessionIdRetomada = params.get("session");
@@ -97,22 +62,13 @@ async function inicializar() {
     if (existente && existente.status === "em_andamento") {
       entrevista = existente;
       indiceAtual = Math.min(entrevista.passo_atual || 0, passos.length - 1);
-      await registrarEvento(EVENTOS.RETOMADA_ENTREVISTA, {
-        entrevistaSessionId: entrevista.session_id,
-        equipeId: sessao.equipe_id,
-      });
     }
   }
 
   if (!entrevista) {
-    entrevista = novaEntrevista();
+    entrevista = novaEntrevista(nomePesquisador);
     indiceAtual = 0;
     await salvarEntrevista(entrevista);
-    await registrarEvento(EVENTOS.INICIO_ENTREVISTA, {
-      entrevistaSessionId: entrevista.session_id,
-      equipeId: sessao.equipe_id,
-    });
-    capturarGeolocalizacao();
   }
 
   renderizarPasso();
@@ -122,42 +78,18 @@ async function inicializar() {
 // Leitura/escrita do valor de cada passo no objeto `entrevista`
 // ---------------------------------------------------------------------------
 
-const CAMPOS_SOCIO_DIRETOS = {
-  municipio: "municipio",
-  regiao: "regiao",
-  zona_eleitoral: "zona_eleitoral",
-  sexo: "sexo",
-  faixa_etaria: "faixa_etaria",
-  escolaridade: "escolaridade",
-  local_coleta: "local_coleta",
-};
-
 function lerValorAtual(passo) {
-  if (passo.id === "consentimento") return entrevista.consentimento === true ? true : undefined;
-  if (CAMPOS_SOCIO_DIRETOS[passo.id]) return entrevista[CAMPOS_SOCIO_DIRETOS[passo.id]] || undefined;
   // two_votes guarda o estado de seleção (ids, não texto) num namespace à
   // parte de `respostas` — `respostas` só pode conter o formato serializável
-  // para o EAV (Seção 24), senão montarRespostasParaSync() geraria uma linha
-  // espúria "q7" sem valor.
-  if (passo.tipo === "two_votes" || passo.tipo === "multiple_choice") return (entrevista.estado_ui || {})[passo.id];
+  // para o EAV, senão montarRespostasParaSync() geraria uma linha espúria
+  // "q7" sem valor.
+  if (passo.tipo === "two_votes") return (entrevista.estado_ui || {})[passo.id];
   const resp = entrevista.respostas[passo.id];
   if (!resp) return undefined;
   return resp.valorId ?? resp.valor;
 }
 
 function gravarValor(passo, valor, extra = {}) {
-  if (passo.id === "consentimento") {
-    entrevista.consentimento = valor === true;
-    return;
-  }
-  if (CAMPOS_SOCIO_DIRETOS[passo.id]) {
-    // Campos sociodemográficos viram colunas próprias em `entrevistas`
-    // (Seção 23) e são usados em joins/filtros (cotas, dashboard) contra os
-    // ids canônicos do config — por isso gravamos o id da opção (ex.:
-    // "feminino"), nunca o rótulo exibido (ex.: "Feminino").
-    entrevista[CAMPOS_SOCIO_DIRETOS[passo.id]] = extra.valorId ?? valor;
-    return;
-  }
   entrevista.respostas[passo.id] = { valor, ...extra };
 }
 
@@ -169,8 +101,7 @@ const salvarComDebounce = debounce(() => salvarEntrevista(entrevista), 400);
 
 function renderizarPasso() {
   const passo = passos[indiceAtual];
-  document.getElementById("titulo-passo").textContent =
-    passo.grupo === "eleitoral" ? "Entrevista" : passo.grupo === "consentimento" ? "Consentimento" : "Perfil do entrevistado";
+  document.getElementById("titulo-passo").textContent = "Entrevista";
   document.getElementById("contador-passo").textContent = `${indiceAtual + 1} / ${passos.length}`;
   document.getElementById("barra-progresso").style.width = `${((indiceAtual + 1) / passos.length) * 100}%`;
 
@@ -184,52 +115,6 @@ function renderizarPasso() {
   wrap.className = "cartao";
 
   switch (passo.tipo) {
-    case "consentimento":
-      wrap.innerHTML = `
-        <p class="pergunta-texto">Antes de começar</p>
-        <div class="bloco-consentimento">${escapeHtml(passo.texto)}</div>
-        <div class="grupo-botoes">
-          <button class="btn btn-primario" id="btn-consentir">CONCORDO E CONTINUAR</button>
-        </div>
-        <button class="btn-texto mt-1" id="btn-nao-consentir">A pessoa não deseja participar</button>
-      `;
-      areaPasso.appendChild(wrap);
-      document.getElementById("btn-consentir").addEventListener("click", async () => {
-        gravarValor(passo, true);
-        await salvarEntrevista(entrevista);
-        avancar();
-      });
-      document.getElementById("btn-nao-consentir").addEventListener("click", () => {
-        alert("Entrevista não iniciada — a pessoa optou por não participar. Volte ao início para uma nova abordagem.");
-        window.location.href = "index.html";
-      });
-      break;
-
-    case "info_municipio":
-      wrap.innerHTML = `
-        <p class="pergunta-texto">${escapeHtml(passo.texto)}</p>
-        <div class="info-municipio-box">${escapeHtml(valorAtual || passo.valorPadrao || "-")}</div>
-        <p class="pergunta-ajuda">Município definido pelo cadastro do pesquisador.</p>
-      `;
-      areaPasso.appendChild(wrap);
-      if (!entrevista.municipio) gravarValor(passo, passo.valorPadrao);
-      break;
-
-    case "open_text_curto":
-      wrap.innerHTML = `
-        <p class="pergunta-texto">${escapeHtml(passo.texto)}</p>
-        <div class="campo">
-          <input type="text" id="input-texto-curto" maxlength="${passo.maxLength || 100}"
-                 value="${escapeHtml(valorAtual || "")}" />
-        </div>
-      `;
-      areaPasso.appendChild(wrap);
-      document.getElementById("input-texto-curto").addEventListener("input", (e) => {
-        gravarValor(passo, e.target.value);
-        salvarComDebounce();
-      });
-      break;
-
     case "single_choice":
       renderizarSingleChoice(wrap, passo, valorAtual);
       areaPasso.appendChild(wrap);
@@ -245,11 +130,6 @@ function renderizarPasso() {
       areaPasso.appendChild(wrap);
       break;
 
-    case "multiple_choice":
-      renderizarMultipleChoice(wrap, passo, valorAtual);
-      areaPasso.appendChild(wrap);
-      break;
-
     default:
       wrap.innerHTML = `<p class="pergunta-texto">${escapeHtml(passo.texto)}</p><p class="texto-suave">Tipo de pergunta não implementado.</p>`;
       areaPasso.appendChild(wrap);
@@ -261,7 +141,7 @@ function renderizarPasso() {
 // imediatamente aqui — e não só quando o pesquisador responde — porque senão
 // um fechamento inesperado do app entre "mostrar a pergunta" e "marcar a
 // resposta" perderia a ordem sorteada, e a retomada mostraria uma ordem
-// diferente da que o entrevistado já viu (quebra a garantia da Seção 7).
+// diferente da que o entrevistado já viu.
 function obterOpcoesOrdenadasPersistindo(passo) {
   const chaveAntes = JSON.stringify(entrevista.ordem_opcoes?.[passo.id] || null);
   const opcoes = obterOpcoesOrdenadas(passo, entrevista, config);
@@ -331,52 +211,11 @@ function renderizarOpenText(wrap, passo, valorAtual) {
   });
 }
 
-function renderizarMultipleChoice(wrap, passo, valorAtual) {
-  const selecionadas = new Set(valorAtual || []);
-  const opcoes = obterOpcoesOrdenadasPersistindo(passo);
-  wrap.innerHTML = `
-    <p class="pergunta-texto">${escapeHtml(passo.texto)}</p>
-    <div class="lista-opcoes">
-      ${opcoes
-        .map(
-          (op) => `
-        <label class="opcao-escolha ${selecionadas.has(op.id) ? "selecionada" : ""}">
-          <input type="checkbox" value="${escapeHtml(op.id)}" ${selecionadas.has(op.id) ? "checked" : ""} />
-          ${escapeHtml(op.texto)}
-        </label>`
-        )
-        .join("")}
-    </div>
-  `;
-  wrap.querySelectorAll(".opcao-escolha").forEach((label) => {
-    label.addEventListener("click", async (evt) => {
-      if (evt.target.tagName !== "INPUT") evt.target.closest("label").querySelector("input").click();
-      return;
-    });
-    label.querySelector("input").addEventListener("change", async (e) => {
-      if (e.target.checked) selecionadas.add(e.target.value);
-      else selecionadas.delete(e.target.value);
-      label.classList.toggle("selecionada", e.target.checked);
-
-      // `respostas` só guarda o formato serializável para o EAV (texto
-      // juntando os rótulos escolhidos); os ids marcados vivem em
-      // `estado_ui`, igual ao two_votes, para reconstruir os checkboxes
-      // numa retomada sem virar uma linha inválida em `respostas`.
-      const idsSelecionados = Array.from(selecionadas);
-      const textos = opcoes.filter((op) => selecionadas.has(op.id)).map((op) => op.texto);
-      entrevista.estado_ui = entrevista.estado_ui || {};
-      entrevista.estado_ui[passo.id] = idsSelecionados;
-      gravarValor(passo, textos.join(" | "));
-      await salvarEntrevista(entrevista);
-    });
-  });
-}
-
 function renderizarTwoVotes(wrap, passo, valorAtual) {
   const opcoes = obterOpcoesOrdenadasPersistindo(passo);
   const votoAtual = valorAtual || { voto1: null, voto2: null };
 
-  const opcaoHtml = (sufixo, votoSelecionado, votoOposto) =>
+  const opcaoHtml = (votoSelecionado, votoOposto) =>
     opcoes
       .map((op) => {
         const bloqueado = op.id !== config.NSNO_ID && op.id === votoOposto;
@@ -390,14 +229,14 @@ function renderizarTwoVotes(wrap, passo, valorAtual) {
       <h3>1º voto</h3>
       <select class="campo" id="select-voto1">
         <option value="">Selecione...</option>
-        ${opcaoHtml("1", votoAtual.voto1, votoAtual.voto2)}
+        ${opcaoHtml(votoAtual.voto1, votoAtual.voto2)}
       </select>
     </div>
     <div class="voto-grupo">
       <h3>2º voto</h3>
       <select class="campo" id="select-voto2">
         <option value="">Selecione...</option>
-        ${opcaoHtml("2", votoAtual.voto2, votoAtual.voto1)}
+        ${opcaoHtml(votoAtual.voto2, votoAtual.voto1)}
       </select>
     </div>
     <p class="erro-campo oculto" id="erro-voto-duplicado">O mesmo candidato não pode ser escolhido nos dois votos.</p>
@@ -481,24 +320,23 @@ function voltar() {
   window.scrollTo(0, 0);
 }
 
+function calcularDuracaoSegundos(inicioIso, fimIso) {
+  const inicio = new Date(inicioIso).getTime();
+  const fim = new Date(fimIso).getTime();
+  return Math.max(0, Math.round((fim - inicio) / 1000));
+}
+
 async function finalizarEntrevista() {
-  if (finalizando) return; // evita duplo clique / duplo envio (Seção 27)
+  if (finalizando) return; // evita duplo clique / duplo envio
   finalizando = true;
   btnProxima.disabled = true;
   btnProxima.innerHTML = `<span class="spinner"></span> Finalizando...`;
 
   const agora = new Date().toISOString();
   entrevista.duracao_seg = calcularDuracaoSegundos(entrevista.coletado_em, agora);
-  entrevista.suspeita_duracao = avaliarSuspeitaDuracao(entrevista.duracao_seg, config);
   entrevista.status = "completo";
   entrevista.sync_status = "pendente";
   await salvarEntrevista(entrevista);
-
-  await registrarEvento(EVENTOS.FIM_ENTREVISTA, {
-    entrevistaSessionId: entrevista.session_id,
-    equipeId: sessao.equipe_id,
-    metadata: { duracao_seg: entrevista.duracao_seg, suspeita_duracao: entrevista.suspeita_duracao },
-  });
 
   mostrarTelaSucesso();
 
@@ -524,8 +362,8 @@ function mostrarTelaSucesso() {
         if (!linha) return;
         // Reler do IndexedDB em vez de confiar na variável `entrevista` em
         // memória: js/sync.js opera sobre a sua própria cópia lida do banco
-        // local (listarPendentesSync), então o objeto aqui nunca é mutado
-        // por ele — só o registro salvo é que reflete o resultado real.
+        // local, então o objeto aqui nunca é mutado por ele — só o registro
+        // salvo é que reflete o resultado real.
         const atual = await obterEntrevista(entrevista.session_id);
         linha.textContent =
           atual?.sync_status === "sincronizado" ? "✓ Sincronizada com o servidor" : "⚠ Ainda na fila — será reenviada automaticamente";

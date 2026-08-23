@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1a3a6e" />
-  <title>Relatório — Pesquisa Eleitoral Tocantins 2026</title>
+  <title>Relatório — Pesquisa Eleitoral Araguaína 2026</title>
   <link rel="icon" href="assets/icons/icon-192.png" />
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
@@ -25,50 +25,19 @@
     <a href="dashboard.html">Dashboard</a>
     <a href="relatorio.html" class="ativo">Relatório</a>
     <a href="admin.html">Administração</a>
-    <a href="auditoria.html">Auditoria</a>
   </nav>
 
   <main class="container">
     <section class="cartao">
-      <h2 class="titulo-secao">Resumo executivo</h2>
+      <h2 class="titulo-secao">Resumo</h2>
       <div id="resumo-executivo"><p class="texto-suave">Carregando...</p></div>
     </section>
 
     <div class="aviso-metodologico">
-      Os percentuais abaixo são calculados sobre a amostra realizada (N exibido em cada bloco) e
-      <strong>não representam inferência populacional validada</strong> sem os parâmetros formais de
-      margem de erro/nível de confiança, que dependem da metodologia da Foccus (ver README).
+      Todos os percentuais abaixo são calculados sobre as entrevistas completas da pesquisa.
     </div>
 
-    <section class="cartao">
-      <h2 class="titulo-secao">Perfil da amostra</h2>
-      <div id="perfil-amostra"></div>
-    </section>
-
     <section class="cartao" id="secao-blocos"></section>
-
-    <section class="cartao">
-      <h2 class="titulo-secao">Cruzamentos</h2>
-      <div class="filtros">
-        <select id="cruz-questao">
-          <option value="q1">Avaliação do governo (Q1)</option>
-          <option value="q2">Presidente (Q2)</option>
-          <option value="q5">Governador (Q5)</option>
-          <option value="q7_1voto">Senado — 1º voto (Q7)</option>
-          <option value="q9">Deputado Federal (Q9)</option>
-          <option value="q11">Deputado Estadual (Q11)</option>
-          <option value="q12">Avaliação do prefeito (Q12)</option>
-        </select>
-        <select id="cruz-dimensao">
-          <option value="sexo">× Sexo</option>
-          <option value="faixa_etaria">× Faixa etária</option>
-          <option value="regiao">× Região</option>
-          <option value="escolaridade">× Escolaridade</option>
-        </select>
-      </div>
-      <button class="btn btn-secundario mt-1" id="btn-gerar-cruzamento" style="width:auto;">Gerar cruzamento</button>
-      <div class="tabela-wrap mt-1" id="tabela-cruzamento"></div>
-    </section>
   </main>
 
   <script type="module" src="config/supabase.js"></script>

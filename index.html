@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#1a3a6e" />
-  <title>Pesquisa Eleitoral Tocantins 2026</title>
+  <title>Pesquisa Eleitoral Araguaína 2026</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="assets/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
@@ -14,17 +14,29 @@
   <header class="cabecalho">
     <div class="marca">
       <strong>FOCCUS PESQUISAS</strong>
-      <span>Pesquisa Eleitoral Tocantins 2026</span>
+      <span>Pesquisa Eleitoral Araguaína 2026</span>
     </div>
     <div id="status-conexao" class="status-conexao">-</div>
   </header>
 
   <main class="container">
-    <section class="cartao" id="cartao-pesquisador">
+    <section class="cartao oculto" id="cartao-identificacao">
+      <h2 class="titulo-secao">Identificação do pesquisador</h2>
+      <p class="texto-suave">Digite seu nome para começar a coleta. Ele fica salvo neste aparelho.</p>
+      <form id="form-nome-pesquisador">
+        <div class="campo" style="text-align:left;">
+          <label for="input-nome-pesquisador">Nome do pesquisador</label>
+          <input type="text" id="input-nome-pesquisador" autocomplete="off" required />
+        </div>
+        <button type="submit" class="btn btn-primario">CONTINUAR</button>
+      </form>
+    </section>
+
+    <section class="cartao oculto" id="cartao-pesquisador">
       <p class="texto-suave">Carregando...</p>
     </section>
 
-    <section class="cartao">
+    <section class="cartao oculto" id="cartao-coleta">
       <h2 class="titulo-secao">Coleta</h2>
       <button class="btn btn-primario" id="btn-nova-entrevista">+ Nova entrevista</button>
     </section>
@@ -35,15 +47,7 @@
       <div id="lista-pendentes"></div>
     </section>
 
-    <section class="cartao" id="cartao-cotas">
-      <div class="flex-entre">
-        <h2 class="titulo-secao">Cota da sua área</h2>
-        <button class="btn-texto" id="btn-atualizar-cotas">Atualizar</button>
-      </div>
-      <div id="lista-cotas"><p class="texto-suave">Conecte-se à internet para ver o progresso das cotas.</p></div>
-    </section>
-
-    <section class="cartao">
+    <section class="cartao oculto" id="cartao-fonte">
       <div class="flex-entre">
         <span class="texto-suave">Tamanho do texto</span>
         <div class="grupo-botoes" style="width: auto; gap: 0.4rem;">
@@ -53,8 +57,6 @@
         </div>
       </div>
     </section>
-
-    <button class="btn btn-perigo" id="btn-sair">Sair</button>
   </main>
 
   <script type="module" src="config/supabase.js"></script>

@@ -72,13 +72,6 @@ export function estaOnline() {
   return typeof navigator !== "undefined" ? navigator.onLine : true;
 }
 
-/** Coleta metadados não identificáveis do dispositivo, só para diagnóstico/auditoria. */
-export function coletarDeviceInfo() {
-  const ua = navigator.userAgent || "desconhecido";
-  const tela = `${window.screen?.width || "?"}x${window.screen?.height || "?"}`;
-  return `${ua} | tela:${tela} | idioma:${navigator.language || "?"}`;
-}
-
 /** Gera um código curto e legível para exibir ao pesquisador (não é o id real). */
 export function codigoCurto(uuid) {
   return uuid ? uuid.replace(/-/g, "").slice(0, 8).toUpperCase() : "--------";

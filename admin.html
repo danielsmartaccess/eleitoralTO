@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1a3a6e" />
-  <title>Administração — Pesquisa Eleitoral Tocantins 2026</title>
+  <title>Administração — Pesquisa Eleitoral Araguaína 2026</title>
   <link rel="icon" href="assets/icons/icon-192.png" />
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
@@ -26,33 +26,20 @@
     <a href="dashboard.html">Dashboard</a>
     <a href="relatorio.html">Relatório</a>
     <a href="admin.html" class="ativo">Administração</a>
-    <a href="auditoria.html">Auditoria</a>
   </nav>
 
   <main class="container">
     <section class="cartao">
       <div class="flex-entre">
-        <h2 class="titulo-secao">Pesquisadores / equipes</h2>
-        <span class="texto-suave" id="contagem-equipes"></span>
+        <h2 class="titulo-secao">Pesquisadores em campo</h2>
+        <span class="texto-suave" id="contagem-pesquisadores"></span>
       </div>
       <div class="tabela-wrap">
         <table class="tabela-simples">
           <thead>
-            <tr><th>Nome</th><th>Município</th><th>Perfil</th><th>Último acesso</th><th>Status</th></tr>
+            <tr><th>Nome</th><th>Entrevistas coletadas</th><th>Hoje</th><th>Última coleta</th></tr>
           </thead>
-          <tbody id="tabela-equipes"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="cartao">
-      <h2 class="titulo-secao">Cotas (alvo x realizado)</h2>
-      <div class="tabela-wrap">
-        <table class="tabela-simples">
-          <thead>
-            <tr><th>Município</th><th>Sexo</th><th>Faixa etária</th><th>Alvo</th><th>Realizado</th><th>Status</th></tr>
-          </thead>
-          <tbody id="tabela-cotas"></tbody>
+          <tbody id="tabela-pesquisadores"></tbody>
         </table>
       </div>
     </section>
@@ -65,7 +52,7 @@
       <div class="tabela-wrap">
         <table class="tabela-simples">
           <thead>
-            <tr><th>Código</th><th>Pesquisador</th><th>Município</th><th>Status</th><th>Duração</th><th>GPS</th><th>Coletada em</th></tr>
+            <tr><th>Código</th><th>Pesquisador</th><th>Município</th><th>Status</th><th>Duração</th><th>Coletada em</th></tr>
           </thead>
           <tbody id="tabela-entrevistas"></tbody>
         </table>

@@ -14,7 +14,7 @@
 // antigos, então nunca fica um Service Worker preso a arquivos velhos.
 // ============================================================================
 
-const CACHE_VERSION = "eleitoral-to-v1.0.0";
+const CACHE_VERSION = "eleitoral-to-v2.0.0";
 const CACHE_SHELL = `shell-${CACHE_VERSION}`;
 const CACHE_RUNTIME = `runtime-${CACHE_VERSION}`;
 
@@ -26,7 +26,6 @@ const APP_SHELL_URLS = [
   "./dashboard.html",
   "./relatorio.html",
   "./admin.html",
-  "./auditoria.html",
   "./manifest.json",
   "./css/app.css",
   "./css/coleta.css",
@@ -40,8 +39,6 @@ const APP_SHELL_URLS = [
   "./js/auth.js",
   "./js/supabaseClient.js",
   "./js/questionario.js",
-  "./js/cotas.js",
-  "./js/auditoria.js",
   "./js/sync.js",
   "./js/inicio.js",
   "./js/login.js",
@@ -49,7 +46,6 @@ const APP_SHELL_URLS = [
   "./js/dashboard.js",
   "./js/relatorio.js",
   "./js/admin.js",
-  "./js/auditoria-tela.js",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/icons/icon-maskable-192.png",

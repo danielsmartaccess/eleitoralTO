@@ -1,9 +1,10 @@
 // ============================================================================
-// js/admin.js — área administrativa (Seção 44): pesquisadores, cotas,
-// entrevistas paginadas e exportação CSV.
+// js/admin.js — área administrativa: pesquisadores em campo (contagens
+// operacionais, não é "resultado da pesquisa"), entrevistas paginadas e
+// exportação CSV.
 //
-// A paginação da tabela de entrevistas é obrigatória (Seção 47): nunca
-// assumimos que a API devolve tudo de uma vez, sempre usamos `.range()`.
+// A paginação da tabela de entrevistas é obrigatória: nunca assumimos que a
+// API devolve tudo de uma vez, sempre usamos `.range()`.
 // ============================================================================
 
 import { exigirLoginAdmin, logoutAdmin } from "./auth.js";
@@ -15,91 +16,33 @@ const TAMANHO_PAGINA = 25;
 let paginaAtual = 0;
 
 // ---------------------------------------------------------------------------
-// Pesquisadores / equipes
+// Pesquisadores em campo (visão operacional)
 // ---------------------------------------------------------------------------
 
-async function carregarEquipes() {
+async function carregarPesquisadores() {
   const { data, error } = await supabase
-    .from("equipes")
-    .select("id, nome, municipio, perfil, ativo, ultimo_acesso")
-    .order("nome");
+    .from("vw_coleta_resumo")
+    .select("pesquisador, realizadas, hoje, ultima_coleta")
+    .order("realizadas", { ascending: false });
 
-  const tbody = document.getElementById("tabela-equipes");
-  if (error) {
-    tbody.innerHTML = `<tr><td colspan="5">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+  const tbody = document.getElementById("tabela-pesquisadores");
+  if (error || !data) {
+    tbody.innerHTML = `<tr><td colspan="4">Erro ao carregar: ${escapeHtml(error?.message || "sem dados")}</td></tr>`;
     return;
   }
 
-  document.getElementById("contagem-equipes").textContent = `${data.length} cadastrados`;
+  document.getElementById("contagem-pesquisadores").textContent = `${data.length} pesquisador(es)`;
 
   tbody.innerHTML = data
     .map(
-      (eq) => `
+      (p) => `
       <tr>
-        <td>${escapeHtml(eq.nome)}</td>
-        <td>${escapeHtml(eq.municipio)}</td>
-        <td><span class="tag-perfil">${escapeHtml(eq.perfil)}</span></td>
-        <td>${eq.ultimo_acesso ? formatarDataHora(eq.ultimo_acesso) : "nunca"}</td>
-        <td>
-          <label class="linha-toggle">
-            <input type="checkbox" data-toggle-ativo="${eq.id}" ${eq.ativo ? "checked" : ""} />
-            ${eq.ativo ? "Ativo" : "Inativo"}
-          </label>
-        </td>
+        <td>${escapeHtml(p.pesquisador)}</td>
+        <td class="mono">${p.realizadas}</td>
+        <td class="mono">${p.hoje}</td>
+        <td>${p.ultima_coleta ? formatarDataHora(p.ultima_coleta) : "-"}</td>
       </tr>`
     )
-    .join("");
-
-  tbody.querySelectorAll("[data-toggle-ativo]").forEach((input) => {
-    input.addEventListener("change", async (e) => {
-      const id = e.target.dataset.toggleAtivo;
-      const { error: erroUpdate } = await supabase.from("equipes").update({ ativo: e.target.checked }).eq("id", id);
-      if (erroUpdate) {
-        alert("Não foi possível atualizar: " + erroUpdate.message);
-        e.target.checked = !e.target.checked;
-      } else {
-        carregarEquipes();
-      }
-    });
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Cotas
-// ---------------------------------------------------------------------------
-
-function statusCotaTexto(alvo, realizado) {
-  if (!alvo) return { texto: "OK", classe: "badge-ok" };
-  if (realizado >= alvo) return { texto: "EXCEDIDA", classe: "badge-erro" };
-  if (realizado >= alvo * 0.8) return { texto: "ALERTA", classe: "badge-alerta" };
-  return { texto: "OK", classe: "badge-ok" };
-}
-
-async function carregarCotas() {
-  const { data, error } = await supabase
-    .from("vw_cotas_progresso")
-    .select("municipio, sexo, faixa_etaria, alvo, realizado")
-    .order("municipio");
-
-  const tbody = document.getElementById("tabela-cotas");
-  if (error || !data) {
-    tbody.innerHTML = `<tr><td colspan="6">Sem dados de cota.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = data
-    .map((c) => {
-      const st = statusCotaTexto(c.alvo, c.realizado);
-      return `
-      <tr>
-        <td>${escapeHtml(c.municipio)}</td>
-        <td>${escapeHtml(c.sexo || "-")}</td>
-        <td>${escapeHtml(c.faixa_etaria || "-")}</td>
-        <td>${c.alvo}</td>
-        <td>${c.realizado}</td>
-        <td><span class="badge ${st.classe}">${st.texto}</span></td>
-      </tr>`;
-    })
     .join("");
 }
 
@@ -113,13 +56,13 @@ async function carregarEntrevistas() {
 
   const { data, error, count } = await supabase
     .from("entrevistas")
-    .select("session_id, pesquisador, municipio, status, duracao_seg, geo_status, coletado_em", { count: "exact" })
+    .select("session_id, pesquisador, municipio, status, duracao_seg, coletado_em", { count: "exact" })
     .order("coletado_em", { ascending: false })
     .range(de, ate);
 
   const tbody = document.getElementById("tabela-entrevistas");
   if (error) {
-    tbody.innerHTML = `<tr><td colspan="7">Erro: ${escapeHtml(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6">Erro: ${escapeHtml(error.message)}</td></tr>`;
     return;
   }
 
@@ -132,7 +75,6 @@ async function carregarEntrevistas() {
         <td>${escapeHtml(e.municipio || "-")}</td>
         <td>${e.status === "completo" ? '<span class="badge badge-ok">completo</span>' : '<span class="badge badge-neutro">em andamento</span>'}</td>
         <td>${formatarDuracao(e.duracao_seg)}</td>
-        <td>${e.geo_status === "ok" ? '<span class="badge badge-ok">ok</span>' : `<span class="badge badge-neutro">${escapeHtml(e.geo_status || "-")}</span>`}</td>
         <td>${formatarDataHora(e.coletado_em)}</td>
       </tr>`
     )
@@ -145,8 +87,8 @@ async function carregarEntrevistas() {
 }
 
 // ---------------------------------------------------------------------------
-// Exportação CSV (Seção 59) — dataset achatado, paginado internamente para
-// nunca depender de uma única resposta gigante do PostgREST (Seção 47).
+// Exportação CSV — dataset achatado, paginado internamente para nunca
+// depender de uma única resposta gigante do PostgREST.
 // ---------------------------------------------------------------------------
 
 async function buscarTodasEntrevistasCompletas() {
@@ -156,7 +98,7 @@ async function buscarTodasEntrevistasCompletas() {
   while (true) {
     const { data, error } = await supabase
       .from("entrevistas")
-      .select("id, session_id, pesquisador, municipio, regiao, sexo, faixa_etaria, escolaridade, local_coleta, coletado_em, duracao_seg")
+      .select("id, session_id, pesquisador, municipio, coletado_em, duracao_seg")
       .eq("status", "completo")
       .range(de, de + passo - 1);
     if (error || !data || data.length === 0) break;
@@ -201,21 +143,22 @@ async function exportarCsv() {
     const respostasPorEntrevista = {};
     const colunasQuestoes = new Set();
     for (const r of respostas) {
-      if (r.questao.includes("__ordem")) continue; // metadado de auditoria, não entra no dataset de análise
+      if (r.questao.includes("__ordem")) continue; // metadado de randomização, não entra no dataset de análise
       respostasPorEntrevista[r.entrevista_id] = respostasPorEntrevista[r.entrevista_id] || {};
       respostasPorEntrevista[r.entrevista_id][r.questao] = r.valor;
       colunasQuestoes.add(r.questao);
     }
 
-    const colunasBase = ["session_id", "pesquisador", "municipio", "regiao", "sexo", "faixa_etaria", "escolaridade", "local_coleta", "coletado_em", "duracao_seg"];
-    const colunas = [...colunasBase, ...Array.from(colunasQuestoes).sort()];
+    const colunasBase = ["session_id", "pesquisador", "municipio", "coletado_em", "duracao_seg"];
+    const colunasOrdenadasQuestoes = Array.from(colunasQuestoes).sort();
+    const colunas = [...colunasBase, ...colunasOrdenadasQuestoes];
 
     const linhas = [colunas.join(",")];
     for (const e of entrevistas) {
       const respE = respostasPorEntrevista[e.id] || {};
       const linha = [
-        e.session_id, e.pesquisador, e.municipio, e.regiao, e.sexo, e.faixa_etaria, e.escolaridade, e.local_coleta, e.coletado_em, e.duracao_seg,
-        ...Array.from(colunasQuestoes).sort().map((q) => respE[q] ?? ""),
+        e.session_id, e.pesquisador, e.municipio, e.coletado_em, e.duracao_seg,
+        ...colunasOrdenadasQuestoes.map((q) => respE[q] ?? ""),
       ].map(paraCsvSeguro);
       linhas.push(linha.join(","));
     }
@@ -224,7 +167,7 @@ async function exportarCsv() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pesquisa-eleitoral-to-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `pesquisa-eleitoral-araguaina-2026-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -244,7 +187,7 @@ async function inicializar() {
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
-  await Promise.all([carregarEquipes(), carregarCotas(), carregarEntrevistas()]);
+  await Promise.all([carregarPesquisadores(), carregarEntrevistas()]);
 
   document.getElementById("btn-pagina-anterior").addEventListener("click", () => {
     paginaAtual = Math.max(0, paginaAtual - 1);
@@ -257,7 +200,7 @@ async function inicializar() {
   document.getElementById("btn-exportar-csv").addEventListener("click", exportarCsv);
   document.getElementById("btn-sair-admin").addEventListener("click", async () => {
     await logoutAdmin();
-    window.location.href = "login.html?admin=1";
+    window.location.href = "login.html";
   });
 }
 

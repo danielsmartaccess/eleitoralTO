@@ -12,8 +12,7 @@ const DB_NAME = "eleitoral_to_db";
 const DB_VERSION = 1;
 
 const STORE_ENTREVISTAS = "entrevistas";
-const STORE_AUDITORIA = "auditoria";
-const STORE_SESSAO = "sessao_pesquisador";
+const STORE_CONFIG_LOCAL = "config_local";
 
 let dbPromise = null;
 
@@ -33,12 +32,8 @@ export function abrirDB() {
         store.createIndex("sync_status", "sync_status", { unique: false });
       }
 
-      if (!db.objectStoreNames.contains(STORE_AUDITORIA)) {
-        db.createObjectStore(STORE_AUDITORIA, { keyPath: "id", autoIncrement: true });
-      }
-
-      if (!db.objectStoreNames.contains(STORE_SESSAO)) {
-        db.createObjectStore(STORE_SESSAO, { keyPath: "chave" });
+      if (!db.objectStoreNames.contains(STORE_CONFIG_LOCAL)) {
+        db.createObjectStore(STORE_CONFIG_LOCAL, { keyPath: "chave" });
       }
     };
 
@@ -133,58 +128,26 @@ export async function excluirEntrevista(sessionId) {
 }
 
 // ---------------------------------------------------------------------------
-// Auditoria local (espelha os eventos que também vão para a tabela `auditoria`
-// no Supabase; mantida localmente para funcionar 100% offline).
+// Nome do pesquisador (lembrado no aparelho, sem autenticação)
 // ---------------------------------------------------------------------------
 
-export async function registrarAuditoriaLocal(evento) {
-  const registro = { ...evento, timestamp: evento.timestamp || new Date().toISOString(), sync_status: "pendente" };
-  return comStore(STORE_AUDITORIA, "readwrite", (store) => {
-    store.add(registro);
+const CHAVE_PESQUISADOR = "pesquisador";
+
+export async function salvarNomePesquisador(nome) {
+  return comStore(STORE_CONFIG_LOCAL, "readwrite", (store) => {
+    store.put({ chave: CHAVE_PESQUISADOR, nome: (nome || "").trim() });
   });
 }
 
-export async function listarAuditoriaLocal() {
-  return comStore(STORE_AUDITORIA, "readonly", (store) =>
-    promisificarRequest(store.getAll())
+export async function obterNomePesquisador() {
+  const registro = await comStore(STORE_CONFIG_LOCAL, "readonly", (store) =>
+    promisificarRequest(store.get(CHAVE_PESQUISADOR))
   );
+  return registro?.nome || null;
 }
 
-export async function listarAuditoriaPendenteSync() {
-  const todas = await listarAuditoriaLocal();
-  return todas.filter((a) => a.sync_status !== "sincronizado");
-}
-
-export async function marcarAuditoriaSincronizada(id) {
-  return comStore(STORE_AUDITORIA, "readwrite", async (store) => {
-    const registro = await promisificarRequest(store.get(id));
-    if (registro) {
-      registro.sync_status = "sincronizado";
-      store.put(registro);
-    }
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Sessão do pesquisador logado (token validado, dados de contexto)
-// ---------------------------------------------------------------------------
-
-const CHAVE_SESSAO = "sessao_atual";
-
-export async function salvarSessaoPesquisador(sessao) {
-  return comStore(STORE_SESSAO, "readwrite", (store) => {
-    store.put({ chave: CHAVE_SESSAO, ...sessao });
-  });
-}
-
-export async function obterSessaoPesquisador() {
-  return comStore(STORE_SESSAO, "readonly", (store) =>
-    promisificarRequest(store.get(CHAVE_SESSAO))
-  );
-}
-
-export async function limparSessaoPesquisador() {
-  return comStore(STORE_SESSAO, "readwrite", (store) => {
-    store.delete(CHAVE_SESSAO);
+export async function limparNomePesquisador() {
+  return comStore(STORE_CONFIG_LOCAL, "readwrite", (store) => {
+    store.delete(CHAVE_PESQUISADOR);
   });
 }

@@ -1,25 +1,28 @@
 // ============================================================================
 // js/inicio.js — tela inicial do pesquisador (index.html).
-// Mostra quem está logado, entrevistas em andamento para retomar (Seção 26),
-// a cota da área (Seção 19) e o atalho para iniciar uma nova entrevista.
+// Sem autenticação: pede o nome do pesquisador uma vez (fica salvo no
+// aparelho), mostra entrevistas em andamento para retomar e o atalho para
+// iniciar uma nova entrevista.
 // ============================================================================
 
-import { exigirLoginPesquisador, logoutPesquisador } from "./auth.js";
-import { listarEmAndamento, excluirEntrevista } from "./db.js";
+import { obterNomePesquisador, salvarNomePesquisador, limparNomePesquisador, listarEmAndamento, excluirEntrevista } from "./db.js";
 import { iniciarSincronizacaoAutomatica } from "./sync.js";
 import { iniciarIndicadorConexao, iniciarControleFonte, registrarServiceWorker } from "./app.js";
-import { buscarCotasDoMunicipio, calcularStatusCota } from "./cotas.js";
-import { registrarEvento, EVENTOS } from "./auditoria.js";
 import { formatarDataHora, escapeHtml } from "./utils.js";
 
 const config = window.PESQUISA_CONFIG;
 
-async function renderizarCartaoPesquisador(sessao) {
+function renderizarCartaoPesquisador(nome) {
   document.getElementById("cartao-pesquisador").innerHTML = `
-    <h2 class="titulo-secao">Olá, ${escapeHtml(sessao.nome)}</h2>
-    <p class="texto-suave">Município: <strong>${escapeHtml(sessao.municipio)}</strong> ·
-      Perfil: ${escapeHtml(sessao.perfil)} · Rodada: ${escapeHtml(sessao.rodada_codigo || "-")}</p>
+    <h2 class="titulo-secao">Olá, ${escapeHtml(nome)}</h2>
+    <p class="texto-suave">Município: <strong>${escapeHtml(config.pesquisa.municipio)}</strong></p>
+    <button class="btn-texto" id="btn-trocar-pesquisador">Trocar pesquisador</button>
   `;
+  document.getElementById("btn-trocar-pesquisador").addEventListener("click", async () => {
+    if (!confirm("Trocar o pesquisador identificado neste aparelho?")) return;
+    await limparNomePesquisador();
+    window.location.reload();
+  });
 }
 
 async function renderizarPendentes() {
@@ -35,7 +38,7 @@ async function renderizarPendentes() {
 
   lista.innerHTML = pendentes
     .map((e) => {
-      const totalPerguntas = (config.perguntas?.length || 0) + 7; // socio + eleitoral, contagem aproximada para exibição
+      const totalPerguntas = config.perguntas?.length || 0;
       const respondidas = Object.keys(e.respostas || {}).length;
       return `
         <div class="cartao" style="margin-bottom:0.6rem;">
@@ -58,65 +61,49 @@ async function renderizarPendentes() {
   lista.querySelectorAll("[data-descartar]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!confirm("Descartar esta entrevista em andamento? Esta ação não pode ser desfeita.")) return;
-      const sessionId = btn.dataset.descartar;
-      await registrarEvento(EVENTOS.DESCARTE_ENTREVISTA, { entrevistaSessionId: sessionId });
-      await excluirEntrevista(sessionId);
+      await excluirEntrevista(btn.dataset.descartar);
       renderizarPendentes();
     });
   });
 }
 
-async function renderizarCotas(sessao) {
-  const container = document.getElementById("lista-cotas");
-  if (!config.cotas?.exibirParaPesquisador) {
-    document.getElementById("cartao-cotas").classList.add("oculto");
-    return;
-  }
+async function mostrarTelaPrincipal(nome) {
+  document.getElementById("cartao-identificacao").classList.add("oculto");
+  document.getElementById("cartao-pesquisador").classList.remove("oculto");
+  document.getElementById("cartao-coleta").classList.remove("oculto");
+  document.getElementById("cartao-fonte").classList.remove("oculto");
 
-  const cotas = await buscarCotasDoMunicipio(sessao.municipio);
-  if (cotas.length === 0) {
-    container.innerHTML = `<p class="texto-suave">Nenhuma cota configurada para ${escapeHtml(sessao.municipio)} ainda.</p>`;
-    return;
-  }
+  renderizarCartaoPesquisador(nome);
+  await renderizarPendentes();
 
-  container.innerHTML = cotas
-    .map((c) => {
-      const status = calcularStatusCota(c.alvo, c.realizado, config);
-      const classe = status === "OK" ? "badge-ok" : status === "ALERTA" ? "badge-alerta" : "badge-erro";
-      const partes = [c.sexo, c.faixa_etaria, c.escolaridade, c.regiao].filter(Boolean).join(" · ") || "Geral";
-      return `
-        <div class="flex-entre" style="padding:0.5rem 0; border-bottom:1px solid var(--cor-borda);">
-          <span>${escapeHtml(partes)}</span>
-          <span class="mono">${c.realizado} / ${c.alvo} <span class="badge ${classe}">${status}</span></span>
-        </div>`;
-    })
-    .join("");
+  document.getElementById("btn-nova-entrevista").addEventListener("click", () => {
+    window.location.href = "coleta.html";
+  });
+}
+
+function mostrarFormularioIdentificacao() {
+  document.getElementById("cartao-identificacao").classList.remove("oculto");
+  document.getElementById("form-nome-pesquisador").addEventListener("submit", async (evt) => {
+    evt.preventDefault();
+    const nome = document.getElementById("input-nome-pesquisador").value.trim();
+    if (!nome) return;
+    await salvarNomePesquisador(nome);
+    await mostrarTelaPrincipal(nome);
+  });
 }
 
 async function main() {
-  const sessao = await exigirLoginPesquisador();
-  if (!sessao) return;
-
   registrarServiceWorker();
   iniciarIndicadorConexao();
   iniciarControleFonte();
   iniciarSincronizacaoAutomatica();
 
-  await renderizarCartaoPesquisador(sessao);
-  await renderizarPendentes();
-  await renderizarCotas(sessao);
-
-  document.getElementById("btn-nova-entrevista").addEventListener("click", () => {
-    window.location.href = "coleta.html";
-  });
-
-  document.getElementById("btn-atualizar-cotas").addEventListener("click", () => renderizarCotas(sessao));
-
-  document.getElementById("btn-sair").addEventListener("click", async () => {
-    if (!confirm("Sair da sessão deste pesquisador neste aparelho?")) return;
-    await logoutPesquisador();
-    window.location.href = "login.html";
-  });
+  const nome = await obterNomePesquisador();
+  if (nome) {
+    await mostrarTelaPrincipal(nome);
+  } else {
+    mostrarFormularioIdentificacao();
+  }
 }
 
 main();
