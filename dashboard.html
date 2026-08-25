@@ -13,7 +13,7 @@
   <header class="cabecalho">
     <div class="marca">
       <strong>FOCCUS PESQUISAS</strong>
-      <span>Dashboard de Resultados</span>
+      <span>Dashboard de Resultados — Araguaína 2026</span>
     </div>
     <div class="flex-entre" style="gap:0.6rem;">
       <div id="status-conexao" class="status-conexao">-</div>
@@ -27,33 +27,87 @@
     <a href="admin.html">Administração</a>
   </nav>
 
-  <main class="container">
-    <section class="cartao">
-      <h2 class="titulo-secao">Filtros</h2>
+  <main class="container container-dashboard">
+    <section class="cartao cartao-filtros">
+      <div class="filtros-cabecalho">
+        <div>
+          <h2 class="titulo-secao">Filtros</h2>
+          <p class="texto-suave">Refine por pesquisador ou período de coleta.</p>
+        </div>
+        <span class="texto-suave mono" id="ultima-atualizacao"></span>
+      </div>
       <div class="filtros">
         <input type="text" id="filtro-pesquisador" placeholder="Pesquisador contém..." />
         <input type="date" id="filtro-data-inicio" title="Período - início" />
         <input type="date" id="filtro-data-fim" title="Período - fim" />
+        <button type="button" class="btn btn-primario" id="btn-aplicar-filtros">
+          <span id="spinner-filtros" class="spinner oculto"></span>
+          <span>Aplicar filtros</span>
+        </button>
       </div>
-      <button class="btn btn-secundario mt-1" id="btn-aplicar-filtros" style="width:auto;">Aplicar filtros</button>
     </section>
 
     <div class="aviso-metodologico">
-      Todos os valores abaixo são percentuais sobre as entrevistas completas que atendem aos filtros
-      selecionados.
+      <strong>Metodologia:</strong> todos os valores abaixo são percentuais sobre as entrevistas completas que
+      atendem aos filtros selecionados. Nenhum número absoluto de entrevistas é exibido nesta tela.
     </div>
 
+    <section class="grade-kpis" id="grade-kpis" aria-live="polite"></section>
+
+    <h2 class="titulo-bloco">Avaliação de governo</h2>
     <section class="grade-graficos">
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Avaliação do Governo do Estado (Q1)</h3><canvas id="grafico-q1"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Presidente (Q2)</h3><canvas id="grafico-q2"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">2º turno Presidente (Q3)</h3><canvas id="grafico-q3"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Governador (Q5)</h3><canvas id="grafico-q5"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">2º turno Governador (Q6)</h3><canvas id="grafico-q6"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Senado — 1º voto (Q7)</h3><canvas id="grafico-q7-1"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Senado — 2º voto (Q7)</h3><canvas id="grafico-q7-2"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Deputado Federal (Q9)</h3><canvas id="grafico-q9"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Deputado Estadual (Q11)</h3><canvas id="grafico-q11"></canvas></div>
-      <div class="cartao grafico-caixa"><h3 class="titulo-secao">Avaliação do Prefeito (Q12)</h3><canvas id="grafico-q12"></canvas></div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q1</span><h3 class="titulo-grafico">Avaliação do Governo do Estado</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q1"><canvas id="grafico-q1"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q12</span><h3 class="titulo-grafico">Avaliação do Prefeito</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q12"><canvas id="grafico-q12"></canvas></div>
+      </div>
+    </section>
+
+    <h2 class="titulo-bloco">Eleição para Presidente</h2>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q2</span><h3 class="titulo-grafico">Intenção de voto — 1º turno</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q2"><canvas id="grafico-q2"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q3</span><h3 class="titulo-grafico">Simulação de 2º turno</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q3"><canvas id="grafico-q3"></canvas></div>
+      </div>
+    </section>
+
+    <h2 class="titulo-bloco">Eleição para Governador</h2>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q5</span><h3 class="titulo-grafico">Intenção de voto — 1º turno</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q5"><canvas id="grafico-q5"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q6</span><h3 class="titulo-grafico">Simulação de 2º turno</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q6"><canvas id="grafico-q6"></canvas></div>
+      </div>
+    </section>
+
+    <h2 class="titulo-bloco">Congresso Nacional e Estadual</h2>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q7</span><h3 class="titulo-grafico">Senado — 1º voto</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q7-1"><canvas id="grafico-q7-1"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q7</span><h3 class="titulo-grafico">Senado — 2º voto</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q7-2"><canvas id="grafico-q7-2"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q9</span><h3 class="titulo-grafico">Deputado Federal</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q9"><canvas id="grafico-q9"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q11</span><h3 class="titulo-grafico">Deputado Estadual</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q11"><canvas id="grafico-q11"></canvas></div>
+      </div>
     </section>
   </main>
 

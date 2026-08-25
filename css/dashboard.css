@@ -2,55 +2,54 @@
    css/dashboard.css — indicadores operacionais e gráficos (Seções 33/57).
    ============================================================================ */
 
-.grade-indicadores {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+/* -------------------------------------------------------------------------
+   Layout — o dashboard é uma tela de leitura de dados, não um formulário
+   de uma mão só: usa mais largura em telas maiores, mas permanece em
+   coluna única no celular (o grid de gráficos cuida disso via auto-fit).
+   ------------------------------------------------------------------------- */
+main.container.container-dashboard {
+  max-width: 1480px;
 }
 
-.indicador {
-  background: var(--cor-branco);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  padding: 0.9rem 1rem;
-  box-shadow: var(--sombra);
-}
+/* -------------------------------------------------------------------------
+   Cartão de filtros
+   ------------------------------------------------------------------------- */
+.cartao-filtros { padding: 1.1rem 1.3rem 1.3rem; }
 
-.indicador .valor { font-size: 1.6rem; font-weight: 800; color: var(--cor-primaria-escura); }
-.indicador .rotulo { font-size: 0.78rem; color: var(--cor-texto-suave); text-transform: uppercase; letter-spacing: 0.03em; }
-
-.barra-meta {
-  height: 10px;
-  background: var(--cor-borda);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 0.4rem;
+.filtros-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
 }
-.barra-meta > div { height: 100%; background: var(--cor-acento); }
+.filtros-cabecalho .titulo-secao { margin-bottom: 0.2rem; }
+.filtros-cabecalho .texto-suave { margin: 0; }
 
 .filtros {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.6rem;
+  align-items: end;
 }
 
 .filtros select, .filtros input {
   width: 100%;
-  min-height: 44px;
+  min-height: 46px;
   padding: 0.5rem 0.7rem;
   border: 2px solid var(--cor-borda);
   border-radius: var(--raio);
 }
 
-.grade-graficos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+.filtros .btn {
+  min-height: 46px;
+  width: 100%;
 }
 
-.grafico-caixa canvas { max-height: 280px; }
-
+/* -------------------------------------------------------------------------
+   Aviso metodológico
+   ------------------------------------------------------------------------- */
 .aviso-metodologico {
   background: #fdf1de;
   border: 1px solid #f0d29b;
@@ -58,9 +57,142 @@
   border-radius: var(--raio);
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+.aviso-metodologico strong { color: #5c3d00; }
+
+/* -------------------------------------------------------------------------
+   KPIs — números-chave, sempre em percentual (nunca N absoluto).
+   ------------------------------------------------------------------------- */
+.grade-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi {
+  background: var(--cor-branco);
+  border: 1px solid var(--cor-borda);
+  border-left: 6px solid var(--cor-primaria);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1.3rem 1.5rem;
+}
+
+.kpi .kpi-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cor-texto-suave);
+}
+
+.kpi .kpi-rotulo .ponto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  flex: none;
+}
+
+.kpi .kpi-valor {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--cor-primaria-escura);
+  line-height: 1.1;
+  margin-top: 0.4rem;
+}
+
+.kpi .kpi-legenda {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+  margin-top: 0.35rem;
+}
+
+.kpi.positivo { border-left-color: var(--cor-sucesso); }
+.kpi.positivo .kpi-rotulo { color: var(--cor-sucesso); }
+.kpi.positivo .kpi-rotulo .ponto { background: var(--cor-sucesso); }
+
+.kpi.negativo { border-left-color: var(--cor-erro); }
+.kpi.negativo .kpi-rotulo { color: var(--cor-erro); }
+.kpi.negativo .kpi-rotulo .ponto { background: var(--cor-erro); }
+
+.kpi.vazio { color: var(--cor-texto-suave); }
+
+/* -------------------------------------------------------------------------
+   Títulos de bloco (agrupamento temático de gráficos)
+   ------------------------------------------------------------------------- */
+.titulo-bloco {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--cor-primaria-escura);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 2rem 0 0.9rem;
+  padding-left: 0.65rem;
+  border-left: 4px solid var(--cor-acento);
+}
+.titulo-bloco:first-of-type { margin-top: 0; }
+
+/* -------------------------------------------------------------------------
+   Grade de gráficos
+   ------------------------------------------------------------------------- */
+.grade-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}
+
+.grafico-caixa { padding: 1.35rem 1.5rem 1.6rem; }
+
+.grafico-cabecalho {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
   margin-bottom: 1rem;
 }
 
+.rotulo-questao {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  letter-spacing: 0.03em;
+}
+
+.titulo-grafico {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  margin: 0;
+}
+
+.grafico-canvas { position: relative; width: 100%; }
+
+.grafico-vazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* -------------------------------------------------------------------------
+   Navegação por abas
+   ------------------------------------------------------------------------- */
 nav.abas {
   display: flex;
   gap: 0.4rem;
