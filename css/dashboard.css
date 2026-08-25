@@ -8,7 +8,7 @@
    coluna única no celular (o grid de gráficos cuida disso via auto-fit).
    ------------------------------------------------------------------------- */
 main.container.container-dashboard {
-  max-width: 1480px;
+  max-width: 1180px;
 }
 
 /* -------------------------------------------------------------------------
@@ -140,38 +140,44 @@ main.container.container-dashboard {
 .titulo-bloco:first-of-type { margin-top: 0; }
 
 /* -------------------------------------------------------------------------
-   Grade de gráficos
+   Grade de gráficos — um gráfico por linha, em largura total: cada
+   pergunta é um "capítulo" do relatório, com espaço de sobra para nomes
+   longos de candidato e para o rótulo percentual de cada barra.
    ------------------------------------------------------------------------- */
 .grade-graficos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 1.25rem;
-  align-items: start;
-  margin-bottom: 0.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.grafico-caixa { padding: 1.35rem 1.5rem 1.6rem; }
+.grafico-caixa {
+  padding: 1.75rem 2rem 2rem;
+  box-shadow: 0 2px 8px rgba(16, 38, 71, 0.08), 0 1px 3px rgba(16, 38, 71, 0.06);
+}
 
 .grafico-cabecalho {
   display: flex;
   align-items: baseline;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
+  gap: 0.7rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--cor-borda);
 }
 
 .rotulo-questao {
   flex: none;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: var(--cor-primaria);
   background: var(--cor-primaria-clara);
-  padding: 0.2rem 0.5rem;
+  padding: 0.22rem 0.55rem;
   border-radius: 5px;
   letter-spacing: 0.03em;
 }
 
 .titulo-grafico {
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--cor-texto);
   margin: 0;
@@ -183,9 +189,9 @@ main.container.container-dashboard {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 140px;
+  min-height: 160px;
   color: var(--cor-texto-suave);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-align: center;
   padding: 0 1rem;
 }

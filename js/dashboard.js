@@ -121,21 +121,21 @@ const rotulosDiretos = {
     const { ctx, data } = chart;
     const meta = chart.getDatasetMeta(0);
     ctx.save();
-    ctx.font = "700 12.5px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
+    ctx.font = "700 14px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
     ctx.fillStyle = "#1a1a1a";
     ctx.textBaseline = "middle";
     ctx.textAlign = "left";
     data.datasets[0].data.forEach((valor, i) => {
       const bar = meta.data[i];
       if (!bar) return;
-      ctx.fillText(`${valor}%`, bar.x + 8, bar.y);
+      ctx.fillText(`${valor}%`, bar.x + 10, bar.y);
     });
     ctx.restore();
   },
 };
 
 function alturaGrafico(quantidadeItens) {
-  return Math.max(160, Math.min(700, quantidadeItens * 36 + 28));
+  return Math.max(190, Math.min(820, quantidadeItens * 44 + 36));
 }
 
 function renderizarGrafico(canvasId, itens, tipo) {
@@ -175,13 +175,13 @@ function renderizarGrafico(canvasId, itens, tipo) {
     type: "bar",
     data: {
       labels,
-      datasets: [{ data: valores, backgroundColor: cores, borderRadius: 4, maxBarThickness: 24 }],
+      datasets: [{ data: valores, backgroundColor: cores, borderRadius: 4, maxBarThickness: 26 }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: "y",
-      layout: { padding: { right: 46 } },
+      layout: { padding: { right: 54 } },
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
@@ -190,12 +190,12 @@ function renderizarGrafico(canvasId, itens, tipo) {
         x: {
           beginAtZero: true,
           max: 100,
-          ticks: { callback: (v) => `${v}%`, font: { size: 11 } },
+          ticks: { callback: (v) => `${v}%`, font: { size: 12.5 } },
           grid: { color: "#eceef1" },
         },
         y: {
           grid: { display: false },
-          ticks: { autoSkip: false, font: { size: 12.5, weight: "500" } },
+          ticks: { autoSkip: false, font: { size: 14, weight: "500" }, color: "#1a1a1a" },
         },
       },
     },
