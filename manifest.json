@@ -1,7 +1,7 @@
 {
-  "name": "Pesquisa Eleitoral Araguaína 2026 — Foccus Pesquisas",
-  "short_name": "Eleitoral Araguaína 2026",
-  "description": "Aplicativo de coleta de campo para a Pesquisa Eleitoral Araguaína 2026, com funcionamento 100% offline.",
+  "name": "Pesquisa Eleitoral Tocantins 2026 — Foccus Pesquisas",
+  "short_name": "Eleitoral Tocantins 2026",
+  "description": "Aplicativo de coleta de campo para as Pesquisas Eleitorais do Tocantins 2026 (Araguaína, Palmas), com funcionamento 100% offline.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

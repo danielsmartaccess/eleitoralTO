@@ -10,7 +10,7 @@ import { sincronizarTudo } from "./sync.js";
 import { iniciarIndicadorConexao, iniciarControleFonte, registrarServiceWorker } from "./app.js";
 import { gerarSessionId, escapeHtml, codigoCurto, estaOnline, debounce } from "./utils.js";
 
-const config = window.PESQUISA_CONFIG;
+let config = window.PESQUISA_CONFIG;
 
 let entrevista = null;
 let passos = [];
@@ -43,7 +43,7 @@ function novaEntrevista(nomePesquisador) {
 
 async function inicializar() {
   const nomePesquisador = await obterNomePesquisador();
-  if (!nomePesquisador) {
+  if (!nomePesquisador || !config) {
     window.location.href = "index.html";
     return;
   }
@@ -52,8 +52,6 @@ async function inicializar() {
   iniciarIndicadorConexao();
   iniciarControleFonte();
 
-  passos = getPassos(config);
-
   const params = new URLSearchParams(window.location.search);
   const sessionIdRetomada = params.get("session");
 
@@ -61,11 +59,18 @@ async function inicializar() {
     const existente = await obterEntrevista(sessionIdRetomada);
     if (existente && existente.status === "em_andamento") {
       entrevista = existente;
-      indiceAtual = Math.min(entrevista.passo_atual || 0, passos.length - 1);
+      // Uma entrevista retomada sempre usa o questionário do seu próprio
+      // município — não o da pesquisa selecionada no aparelho agora, que
+      // pode ter mudado entre o início e a retomada.
+      config = window.encontrarPesquisaPorMunicipio(existente.municipio) || config;
     }
   }
 
-  if (!entrevista) {
+  passos = getPassos(config);
+
+  if (entrevista) {
+    indiceAtual = Math.min(entrevista.passo_atual || 0, passos.length - 1);
+  } else {
     entrevista = novaEntrevista(nomePesquisador);
     indiceAtual = 0;
     await salvarEntrevista(entrevista);

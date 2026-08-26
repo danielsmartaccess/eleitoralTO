@@ -167,7 +167,7 @@ async function exportarCsv() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pesquisa-eleitoral-araguaina-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `pesquisa-eleitoral-tocantins-2026-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();

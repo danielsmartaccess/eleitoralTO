@@ -9,7 +9,8 @@ import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { getPassos } from "./questionario.js";
 
 let graficosAtivos = {};
-let passosCache = null;
+let passosCachePorMunicipio = {};
+let municipioSelecionado = null;
 
 // -----------------------------------------------------------------------
 // Paleta — categórica (candidatos, uma única série: identidade já vem do
@@ -28,12 +29,27 @@ const CORES_AVALIACAO = {
 const PERGUNTAS_AVALIACAO = new Set(["q1", "q12"]);
 
 function config() {
-  return window.PESQUISA_CONFIG;
+  return window.encontrarPesquisaPorMunicipio(municipioSelecionado) || window.listarPesquisasDisponiveis()[0];
 }
 
 function passos() {
-  if (!passosCache) passosCache = getPassos(config());
-  return passosCache;
+  if (!passosCachePorMunicipio[municipioSelecionado]) {
+    passosCachePorMunicipio[municipioSelecionado] = getPassos(config());
+  }
+  return passosCachePorMunicipio[municipioSelecionado];
+}
+
+/** Preenche o seletor de município/pesquisa a partir das pesquisas
+ *  cadastradas em config/pesquisa.js e define a seleção inicial. */
+function preencherFiltroMunicipio() {
+  const select = document.getElementById("filtro-municipio");
+  const disponiveis = window.listarPesquisasDisponiveis();
+  select.innerHTML = disponiveis
+    .map((p) => `<option value="${p.pesquisa.municipio}">${p.pesquisa.municipio}</option>`)
+    .join("");
+  municipioSelecionado = disponiveis[0]?.pesquisa.municipio || null;
+  select.value = municipioSelecionado;
+  document.getElementById("subtitulo-marca").textContent = `Dashboard de Resultados — ${config().pesquisa.municipio}`;
 }
 
 /** Opções canônicas (ordem do config) de uma pergunta, com NSNO ao final. */
@@ -46,6 +62,7 @@ function opcoesDaPergunta(perguntaId) {
 
 function lerFiltros() {
   return {
+    municipio: municipioSelecionado,
     pesquisador: document.getElementById("filtro-pesquisador").value || null,
     dataInicio: document.getElementById("filtro-data-inicio").value || null,
     dataFim: document.getElementById("filtro-data-fim").value || null,
@@ -53,6 +70,7 @@ function lerFiltros() {
 }
 
 function aplicarFiltrosNaQuery(query, filtros) {
+  if (filtros.municipio) query = query.eq("municipio", filtros.municipio);
   if (filtros.pesquisador) query = query.ilike("pesquisador", `%${filtros.pesquisador}%`);
   if (filtros.dataInicio) query = query.gte("coletado_em", filtros.dataInicio);
   if (filtros.dataFim) query = query.lte("coletado_em", filtros.dataFim + "T23:59:59");
@@ -331,6 +349,12 @@ async function inicializar() {
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
+  preencherFiltroMunicipio();
+  document.getElementById("filtro-municipio").addEventListener("change", (evt) => {
+    municipioSelecionado = evt.target.value;
+    document.getElementById("subtitulo-marca").textContent = `Dashboard de Resultados — ${config().pesquisa.municipio}`;
+    carregarTudo();
+  });
   document.getElementById("btn-aplicar-filtros").addEventListener("click", carregarTudo);
   document.getElementById("btn-sair-admin").addEventListener("click", async () => {
     await logoutAdmin();

@@ -1,18 +1,27 @@
-# Pesquisa Eleitoral Araguaína 2026 — App de Coleta
+# Pesquisa Eleitoral Tocantins 2026 — App de Coleta
 
 PWA offline-first de coleta de campo para pesquisa eleitoral, desenvolvido para
 a **Foccus Pesquisas**. HTML/CSS/JS puro (sem bundler, sem framework),
 IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 
+Cobre mais de um município na mesma instância do app: hoje **Araguaína** e
+**Palmas**, cada um como uma pesquisa própria em `config/pesquisa.js`
+(candidatos e prefeito atual diferentes; questionário e disputas
+estaduais/nacionais compartilhados). O pesquisador escolhe qual pesquisa vai
+coletar na tela inicial, e a escolha fica salva no aparelho.
+
 ## Arquitetura
 
 ```
-index.html    → app de campo (pesquisador): identificação por nome (sem
-                 login), nova entrevista, retomar entrevistas pendentes
+index.html    → app de campo (pesquisador): escolha da pesquisa/município,
+                 identificação por nome (sem login), nova entrevista,
+                 retomar entrevistas pendentes
 coleta.html    → wizard da entrevista, uma pergunta por tela, 100% offline-first
-dashboard.html/relatorio.html/admin.html → supervisão (Supabase Auth)
+dashboard.html/relatorio.html/admin.html → supervisão (Supabase Auth), com
+                 seletor de município/pesquisa para separar os resultados
 supabase-*.sql → schema, RLS/RPC e views
-config/pesquisa.js → questionário e candidatos — sem tocar em código
+config/pesquisa.js → registro de pesquisas (por município), questionário e
+                 candidatos — sem tocar em código
 ```
 
 ```
@@ -59,8 +68,8 @@ pesquisas → entrevistas → respostas (EAV)
 ```
 
 - **EAV em `respostas`** (`entrevista_id, questao, valor, valor_num,
-  ordem_exibicao`): trocar o questionário (Araguaína → Gurupi/Palmas, cada um
-  como uma nova linha em `pesquisas`) nunca exige migração de schema.
+  ordem_exibicao`): cada município (Araguaína, Palmas, ...) é uma nova linha
+  em `pesquisas` e nunca exige migração de schema.
 - **`entrevistas.session_id`** é a chave de idempotência: gerada no cliente
   (`crypto.randomUUID()`), `UNIQUE` no banco, usada em todo upsert. Reenviar a
   mesma entrevista nunca duplica.
@@ -104,10 +113,11 @@ fila de sincronização (js/sync.js) → rpc_sync_entrevista/rpc_sync_respostas 
 - Gatilhos de sincronização: ao finalizar (se online), ao reconectar, e a
   cada 30s enquanto online.
 
-## Questionário (Araguaína)
+## Questionário
 
-12 perguntas em `config/pesquisa.js`, motor genérico em
-`js/questionario.js` — tipos suportados: `single_choice`, `open_text`,
+12 perguntas por pesquisa, definidas uma única vez em `criarPerguntasPadrao()`
+(`config/pesquisa.js`) e reaproveitadas por todo município — motor genérico
+em `js/questionario.js`, tipos suportados: `single_choice`, `open_text`,
 `two_votes`.
 
 - **NS/NO** é sempre acrescentado pelo motor como última opção nas perguntas
@@ -117,10 +127,31 @@ fila de sincronização (js/sync.js) → rpc_sync_entrevista/rpc_sync_respostas 
   `"{questao}__ordem"` em `respostas`.
 - **Regra do Senado (Q7)**: o mesmo candidato real não pode ser 1º e 2º voto;
   NS/NO pode ser escolhido nos dois votos de forma independente.
-- **Q12** usa `config.prefeitoAtual` (`"Wagner Rodrigues"`).
+- **Q12** usa `config.prefeitoAtual` — `"Wagner Rodrigues"` em Araguaína,
+  `"Eduardo Siqueira"` em Palmas.
+- Presidente, Governador e Senado usam as mesmas listas de candidatos em
+  todo município (`CANDIDATOS_ESTADUAIS_TOCANTINS`), por serem disputas
+  estaduais/nacionais. Deputado Federal, Deputado Estadual e prefeito são
+  específicos de cada `PESQUISA_*` em `config/pesquisa.js`.
 
-Para agregar Gurupi/Palmas depois: nova linha em `pesquisas` (município) e,
-se o questionário mudar, um `config/pesquisa.js` próprio por rodada.
+### Múltiplas pesquisas (municípios)
+
+`PESQUISAS_CONFIG` em `config/pesquisa.js` registra uma pesquisa por
+município (hoje `araguaina` e `palmas`). Para adicionar uma nova:
+
+1. Criar um novo objeto `PESQUISA_*` (candidatos de Deputado
+   Federal/Estadual, `prefeitoAtual`, `pesquisa.nome`/`pesquisa.municipio`) e
+   registrá-lo em `PESQUISAS_CONFIG`.
+2. Rodar `supabase-migration-palmas.sql` como modelo — um `insert` análogo em
+   `pesquisas` para o novo município, sem apagar dados existentes.
+
+Na tela inicial (`index.html`), o pesquisador escolhe a pesquisa antes de se
+identificar; a escolha fica salva no aparelho (`localStorage`) com opção de
+"Trocar pesquisa". Ao retomar uma entrevista pendente, o app usa o
+questionário do município gravado na própria entrevista — não o da seleção
+atual do aparelho. Dashboard e Relatório têm um seletor de
+município/pesquisa próprio, para não misturar os resultados das diferentes
+cidades.
 
 ## Relatórios — só percentual
 
@@ -134,17 +165,25 @@ em `admin.html`, para gestão de campo.
 ### Supabase
 
 Projeto: `jzwxzajarahrntbgijfz` (`https://jzwxzajarahrntbgijfz.supabase.co`).
-Para recriar em outro projeto, execute nesta ordem via SQL Editor (ou
+Para recriar em outro projeto do zero, execute nesta ordem via SQL Editor (ou
 `apply_migration` do Supabase MCP):
 
 ```bash
-# 1. supabase-schema.sql   → tabelas, índices, seed (pesquisa de Araguaína)
+# 1. supabase-schema.sql   → tabelas, índices, seed (Araguaína + Palmas)
 # 2. supabase-policies.sql → RLS + as 2 funções SECURITY DEFINER
 # 3. supabase-views.sql    → views de dashboard/admin
 ```
 
 Depois, crie ao menos um usuário em **Authentication → Users → Add user**
 no Supabase Studio para acessar dashboard/relatório/admin.
+
+Se o projeto **já está em produção** (Araguaína já coletando em campo),
+**não rode `supabase-schema.sql` de novo** — ele dropa e recria as tabelas.
+Para adicionar Palmas a um banco existente, rode só:
+
+```bash
+# supabase-migration-palmas.sql → insere a pesquisa de Palmas (não destrutivo)
+```
 
 Atualize `config/supabase.js` se trocar de projeto (`url` e `anonKey`).
 
@@ -183,8 +222,8 @@ Sempre que alterar qualquer arquivo do app shell, incremente
 
 ## Operação de campo
 
-1. Pesquisador abre o app (idealmente instalado como PWA), digita o próprio
-   nome na primeira vez.
+1. Pesquisador abre o app (idealmente instalado como PWA), escolhe a
+   pesquisa/município na primeira vez e digita o próprio nome.
 2. Clica **+ Nova entrevista**, responde as 12 perguntas, uma por tela.
 3. Ao finalizar, o app tenta sincronizar imediatamente se houver internet;
    caso contrário, fica na fila local e sincroniza sozinho quando a conexão

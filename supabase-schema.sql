@@ -88,6 +88,8 @@ before update on public.entrevistas
 for each row execute function public.tg_set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- Seed inicial: pesquisa de Araguaína.
+-- Seed inicial: pesquisas de Araguaína e Palmas.
 insert into public.pesquisas (nome, municipio, ativa)
-values ('Pesquisa Eleitoral Araguaína 2026', 'Araguaína', true);
+values
+  ('Pesquisa Eleitoral Araguaína 2026', 'Araguaína', true),
+  ('Pesquisa Eleitoral Palmas 2026', 'Palmas', true);

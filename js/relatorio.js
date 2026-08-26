@@ -9,7 +9,11 @@ import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { escapeHtml } from "./utils.js";
 
-const config = window.PESQUISA_CONFIG;
+let municipioSelecionado = null;
+
+function config() {
+  return window.encontrarPesquisaPorMunicipio(municipioSelecionado) || window.listarPesquisasDisponiveis()[0];
+}
 
 const BLOCOS_FECHADOS = [
   { titulo: "Avaliação do Governo do Estado (Q1)", questao: "q1" },
@@ -51,11 +55,9 @@ async function buscarRespostasPorQuestao(questao) {
   let de = 0;
   const passo = 1000;
   while (true) {
-    const { data, error } = await supabase
-      .from("vw_respostas_dashboard")
-      .select("valor")
-      .eq("questao", questao)
-      .range(de, de + passo - 1);
+    let query = supabase.from("vw_respostas_dashboard").select("valor").eq("questao", questao);
+    if (municipioSelecionado) query = query.eq("municipio", municipioSelecionado);
+    const { data, error } = await query.range(de, de + passo - 1);
     if (error || !data || data.length === 0) break;
     registros.push(...data);
     if (data.length < passo) break;
@@ -105,9 +107,24 @@ async function renderizarBlocos() {
 
 async function renderizarResumo() {
   document.getElementById("resumo-executivo").innerHTML = `
-    <p><strong>Pesquisa:</strong> ${escapeHtml(config.pesquisa.nome)}</p>
-    <p><strong>Município:</strong> ${escapeHtml(config.pesquisa.municipio)}</p>
+    <p><strong>Pesquisa:</strong> ${escapeHtml(config().pesquisa.nome)}</p>
+    <p><strong>Município:</strong> ${escapeHtml(config().pesquisa.municipio)}</p>
   `;
+}
+
+function preencherFiltroMunicipio() {
+  const select = document.getElementById("filtro-municipio");
+  const disponiveis = window.listarPesquisasDisponiveis();
+  select.innerHTML = disponiveis
+    .map((p) => `<option value="${p.pesquisa.municipio}">${p.pesquisa.municipio}</option>`)
+    .join("");
+  municipioSelecionado = disponiveis[0]?.pesquisa.municipio || null;
+  select.value = municipioSelecionado;
+}
+
+async function recarregarTudo() {
+  await renderizarResumo();
+  await renderizarBlocos();
 }
 
 async function inicializar() {
@@ -117,8 +134,13 @@ async function inicializar() {
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
-  await renderizarResumo();
-  await renderizarBlocos();
+  preencherFiltroMunicipio();
+  document.getElementById("filtro-municipio").addEventListener("change", (evt) => {
+    municipioSelecionado = evt.target.value;
+    recarregarTudo();
+  });
+
+  await recarregarTudo();
 
   document.getElementById("btn-sair-admin").addEventListener("click", async () => {
     await logoutAdmin();

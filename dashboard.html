@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1a3a6e" />
-  <title>Dashboard — Pesquisa Eleitoral Araguaína 2026</title>
+  <title>Dashboard — Pesquisa Eleitoral Tocantins 2026</title>
   <link rel="icon" href="assets/icons/icon-192.png" />
   <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
@@ -13,7 +13,7 @@
   <header class="cabecalho">
     <div class="marca">
       <strong>FOCCUS PESQUISAS</strong>
-      <span>Dashboard de Resultados — Araguaína 2026</span>
+      <span id="subtitulo-marca">Dashboard de Resultados</span>
     </div>
     <div class="flex-entre" style="gap:0.6rem;">
       <div id="status-conexao" class="status-conexao">-</div>
@@ -37,6 +37,7 @@
         <span class="texto-suave mono" id="ultima-atualizacao"></span>
       </div>
       <div class="filtros">
+        <select id="filtro-municipio" title="Município / pesquisa" aria-label="Município / pesquisa"></select>
         <input type="text" id="filtro-pesquisador" placeholder="Pesquisador contém..." />
         <input type="date" id="filtro-data-inicio" title="Período - início" />
         <input type="date" id="filtro-data-fim" title="Período - fim" />
