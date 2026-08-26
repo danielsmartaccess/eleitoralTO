@@ -8,7 +8,7 @@
 
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
-import { escapeHtml, agregarTextoLivre } from "./utils.js";
+import { escapeHtml, agregarTextoLivre, distribuirPercentuais } from "./utils.js";
 
 let municipioSelecionado = null;
 
@@ -30,18 +30,16 @@ const BLOCOS_FECHADOS = [
 ];
 
 const BLOCOS_ABERTOS = [
-  { titulo: "Governador(a) — resposta espontânea (Q4)", questao: "q4" },
-  { titulo: "Deputado Federal — resposta espontânea (Q8)", questao: "q8" },
-  { titulo: "Deputado Estadual — resposta espontânea (Q10)", questao: "q10" },
+  { titulo: "Governador(a) — resposta espontânea (Q4)", questao: "q4", candidatosRef: "governador" },
+  { titulo: "Deputado Federal — resposta espontânea (Q8)", questao: "q8", candidatosRef: "deputadoFederal" },
+  { titulo: "Deputado Estadual — resposta espontânea (Q10)", questao: "q10", candidatosRef: "deputadoEstadual" },
 ];
 
-function tabelaPercentual(contagem, total) {
-  const linhas = Object.entries(contagem)
-    .sort((a, b) => b[1] - a[1])
-    .map(([label, qtd]) => {
-      const pct = total > 0 ? ((qtd / total) * 100).toFixed(1) : "0.0";
-      return `<tr><td>${escapeHtml(label)}</td><td class="mono">${pct}%</td></tr>`;
-    })
+/** Recebe itens já com percentual calculado (soma exata em 100%, ver
+ *  distribuirPercentuais em utils.js) e apenas formata a tabela. */
+function tabelaPercentual(itens) {
+  const linhas = itens
+    .map(({ label, pct }) => `<tr><td>${escapeHtml(label)}</td><td class="mono">${pct.toFixed(2)}%</td></tr>`)
     .join("");
   return `
     <table class="tabela-simples">
@@ -73,7 +71,10 @@ async function renderizarBlocosFechados(alvo) {
     const registros = await buscarRespostasPorQuestao(bloco.questao);
     const contagem = {};
     for (const r of registros) contagem[r.valor || "Não informado"] = (contagem[r.valor || "Não informado"] || 0) + 1;
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(contagem, registros.length)}</div>`;
+    const entradas = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
+    const percentuais = distribuirPercentuais(entradas.map(([, qtd]) => qtd), registros.length);
+    const itens = entradas.map(([label], i) => ({ label, pct: percentuais[i] }));
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}</div>`;
   }
   alvo.innerHTML += html;
 }
@@ -82,12 +83,12 @@ async function renderizarBlocosAbertos(alvo) {
   let html = "";
   for (const bloco of BLOCOS_ABERTOS) {
     const registros = await buscarRespostasPorQuestao(bloco.questao);
-    const { itens, total } = agregarTextoLivre(
+    const candidatos = config().candidatos[bloco.candidatosRef] || [];
+    const { itens } = agregarTextoLivre(
       registros.map((r) => r.valor),
-      { limite: 10 }
+      { limite: 10, candidatos }
     );
-    const contagem = Object.fromEntries(itens.map((i) => [i.label, i.contagem]));
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(contagem, total)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta.</p></div>`;
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta.</p></div>`;
   }
   alvo.innerHTML += html;
 }

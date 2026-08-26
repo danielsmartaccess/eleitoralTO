@@ -12,7 +12,7 @@
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { getPassos } from "./questionario.js";
-import { agregarTextoLivre } from "./utils.js";
+import { agregarTextoLivre, distribuirPercentuais } from "./utils.js";
 
 let graficosAtivos = {};
 let passosCachePorMunicipio = {};
@@ -98,26 +98,26 @@ async function buscarAgregado(dbQuestao, filtros) {
 }
 
 /** Monta a série [{id, label, pct}] a partir do agregado, na ordem canônica
- *  do config. Se `ordenarPorValor`, reordena por percentual desc. mantendo
- *  NSNO sempre por último (candidatos); avaliações mantêm a ordem fixa
- *  Ótimo→Péssimo, onde a posição já carrega o sentido do dado. */
+ *  do config. Os percentuais são distribuídos juntos (não item a item) para
+ *  que a soma do gráfico feche exatamente em 100% — ver distribuirPercentuais.
+ *  Se `ordenarPorValor`, reordena por percentual desc. mantendo NSNO sempre
+ *  por último (candidatos); avaliações mantêm a ordem fixa Ótimo→Péssimo,
+ *  onde a posição já carrega o sentido do dado. */
 function montarSerie(perguntaId, agregado, { ordenarPorValor = false } = {}) {
   const c = config();
   const opcoes = opcoesDaPergunta(perguntaId);
   const { contagem, total } = agregado;
 
   const rotulosConhecidos = new Set(opcoes.map((o) => o.texto));
-  let itens = opcoes.map((op) => ({
-    id: op.id,
-    label: op.texto,
-    pct: total > 0 ? Number((((contagem[op.texto] || 0) / total) * 100).toFixed(1)) : 0,
-  }));
-
+  const base = opcoes.map((op) => ({ id: op.id, label: op.texto, contagem: contagem[op.texto] || 0 }));
   for (const chave of Object.keys(contagem)) {
     if (!rotulosConhecidos.has(chave)) {
-      itens.push({ id: chave, label: chave, pct: total > 0 ? Number(((contagem[chave] / total) * 100).toFixed(1)) : 0 });
+      base.push({ id: chave, label: chave, contagem: contagem[chave] });
     }
   }
+
+  const percentuais = distribuirPercentuais(base.map((b) => b.contagem), total);
+  let itens = base.map((b, i) => ({ id: b.id, label: b.label, pct: percentuais[i] }));
 
   if (ordenarPorValor) {
     const nsno = itens.filter((i) => i.id === c.NSNO_ID);
@@ -153,7 +153,7 @@ const rotulosDiretos = {
     data.datasets[0].data.forEach((valor, i) => {
       const bar = meta.data[i];
       if (!bar) return;
-      ctx.fillText(`${valor}%`, bar.x + 10, bar.y);
+      ctx.fillText(`${valor.toFixed(2)}%`, bar.x + 10, bar.y);
     });
     ctx.restore();
   },
@@ -209,7 +209,7 @@ function renderizarGrafico(canvasId, itens, tipo) {
       layout: { padding: { right: 54 } },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toFixed(2)}%` } },
       },
       scales: {
         x: {
@@ -243,6 +243,15 @@ async function carregarGrafico(canvasId, perguntaId, dbQuestao, filtros, opcoes)
 // -----------------------------------------------------------------------
 const LIMITE_MENCOES_ESPONTANEAS = 8;
 
+// Pergunta espontânea (open_text) → lista de candidatos da pergunta
+// estimulada equivalente, usada para agrupar grafias diferentes do mesmo
+// candidato (ver casarComCandidato em utils.js).
+const CANDIDATOS_POR_PERGUNTA_ABERTA = {
+  q4: "governador",
+  q8: "deputadoFederal",
+  q10: "deputadoEstadual",
+};
+
 async function buscarValoresAbertos(dbQuestao, filtros) {
   let query = supabase.from("vw_respostas_dashboard").select("valor").eq("questao", dbQuestao);
   query = aplicarFiltrosNaQuery(query, filtros);
@@ -253,7 +262,9 @@ async function buscarValoresAbertos(dbQuestao, filtros) {
 
 async function carregarGraficoAberto(canvasId, dbQuestao, filtros) {
   const valores = await buscarValoresAbertos(dbQuestao, filtros);
-  const { itens } = agregarTextoLivre(valores, { limite: LIMITE_MENCOES_ESPONTANEAS });
+  const refCandidatos = CANDIDATOS_POR_PERGUNTA_ABERTA[dbQuestao];
+  const candidatos = (refCandidatos && config().candidatos[refCandidatos]) || [];
+  const { itens } = agregarTextoLivre(valores, { limite: LIMITE_MENCOES_ESPONTANEAS, candidatos });
   renderizarGrafico(canvasId, itens, "espontanea");
 }
 
@@ -261,7 +272,10 @@ async function carregarGraficoAberto(canvasId, dbQuestao, filtros) {
 // KPIs — números-chave de aprovação/rejeição e liderança, sempre em %.
 // -----------------------------------------------------------------------
 function pct(itens, ids) {
-  return Number(itens.filter((i) => ids.includes(i.id)).reduce((s, i) => s + i.pct, 0).toFixed(1));
+  return itens
+    .filter((i) => ids.includes(i.id))
+    .reduce((s, i) => s + i.pct, 0)
+    .toFixed(2);
 }
 
 function liderDentre(itens) {
@@ -320,7 +334,7 @@ function renderizarKPIs({ q1, q12, q2, q5 }) {
   if (liderPresidente) {
     blocos.push(kpiHtml({
       rotulo: "Líder — Presidente",
-      valor: `${liderPresidente.pct}%`,
+      valor: `${liderPresidente.pct.toFixed(2)}%`,
       legenda: liderPresidente.label,
     }));
   }
@@ -329,7 +343,7 @@ function renderizarKPIs({ q1, q12, q2, q5 }) {
   if (liderGovernador) {
     blocos.push(kpiHtml({
       rotulo: "Líder — Governador",
-      valor: `${liderGovernador.pct}%`,
+      valor: `${liderGovernador.pct.toFixed(2)}%`,
       legenda: liderGovernador.label,
     }));
   }
