@@ -1,12 +1,18 @@
 // ============================================================================
 // js/dashboard.js — resultados da pesquisa (intenção de voto/avaliação),
 // sempre em percentual — nunca exibe contagens absolutas nem o N da amostra.
+//
+// Página pública (sem login): este é o link que vai para o cliente. O
+// Supabase libera SELECT no role `anon` só para a view vw_respostas_dashboard
+// (ver supabase-views.sql) — nada de autenticação aqui. A área administrativa
+// (pesquisadores em campo, exportação CSV) continua exigindo login, em
+// admin.html/js/admin.js.
 // ============================================================================
 
-import { exigirLoginAdmin, logoutAdmin } from "./auth.js";
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { getPassos } from "./questionario.js";
+import { agregarTextoLivre } from "./utils.js";
 
 let graficosAtivos = {};
 let passosCachePorMunicipio = {};
@@ -127,6 +133,7 @@ function coresPara(itens, tipo) {
   if (tipo === "avaliacao") {
     return itens.map((i) => (i.id === c.NSNO_ID ? COR_NSNO : CORES_AVALIACAO[i.id] || COR_PRINCIPAL));
   }
+  if (tipo === "espontanea") return itens.map(() => COR_PRINCIPAL);
   return itens.map((i) => (i.id === c.NSNO_ID ? COR_NSNO : COR_PRINCIPAL));
 }
 
@@ -230,6 +237,27 @@ async function carregarGrafico(canvasId, perguntaId, dbQuestao, filtros, opcoes)
 }
 
 // -----------------------------------------------------------------------
+// Respostas espontâneas (open_text: Q4/Q8/Q10) — mesma agregação por
+// menção usada no relatório (js/relatorio.js), mas exibida como gráfico de
+// barras, no padrão das demais perguntas do dashboard.
+// -----------------------------------------------------------------------
+const LIMITE_MENCOES_ESPONTANEAS = 8;
+
+async function buscarValoresAbertos(dbQuestao, filtros) {
+  let query = supabase.from("vw_respostas_dashboard").select("valor").eq("questao", dbQuestao);
+  query = aplicarFiltrosNaQuery(query, filtros);
+  const { data, error } = await query.range(0, 4999);
+  if (error || !data) return [];
+  return data.map((linha) => linha.valor);
+}
+
+async function carregarGraficoAberto(canvasId, dbQuestao, filtros) {
+  const valores = await buscarValoresAbertos(dbQuestao, filtros);
+  const { itens } = agregarTextoLivre(valores, { limite: LIMITE_MENCOES_ESPONTANEAS });
+  renderizarGrafico(canvasId, itens, "espontanea");
+}
+
+// -----------------------------------------------------------------------
 // KPIs — números-chave de aprovação/rejeição e liderança, sempre em %.
 // -----------------------------------------------------------------------
 function pct(itens, ids) {
@@ -321,16 +349,19 @@ async function carregarTudo() {
       carregarGrafico("grafico-q1", "q1", "q1", filtros),
       carregarGrafico("grafico-q2", "q2", "q2", filtros, { ordenarPorValor: true }),
       carregarGrafico("grafico-q3", "q3", "q3", filtros, { ordenarPorValor: true }),
+      carregarGraficoAberto("grafico-q4", "q4", filtros),
       carregarGrafico("grafico-q5", "q5", "q5", filtros, { ordenarPorValor: true }),
       carregarGrafico("grafico-q6", "q6", "q6", filtros, { ordenarPorValor: true }),
       carregarGrafico("grafico-q7-1", "q7", "q7_1voto", filtros, { ordenarPorValor: true }),
       carregarGrafico("grafico-q7-2", "q7", "q7_2voto", filtros, { ordenarPorValor: true }),
+      carregarGraficoAberto("grafico-q8", "q8", filtros),
       carregarGrafico("grafico-q9", "q9", "q9", filtros, { ordenarPorValor: true }),
+      carregarGraficoAberto("grafico-q10", "q10", filtros),
       carregarGrafico("grafico-q11", "q11", "q11", filtros, { ordenarPorValor: true }),
       carregarGrafico("grafico-q12", "q12", "q12", filtros),
     ]);
 
-    const [q1, q2, , q5, , , , , , q12] = resultados;
+    const [q1, q2, , , q5, , , , , , , , q12] = resultados;
     renderizarKPIs({ q1, q12, q2, q5 });
 
     const agora = new Date();
@@ -343,9 +374,6 @@ async function carregarTudo() {
 }
 
 async function inicializar() {
-  const usuario = await exigirLoginAdmin();
-  if (!usuario) return;
-
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
@@ -356,10 +384,6 @@ async function inicializar() {
     carregarTudo();
   });
   document.getElementById("btn-aplicar-filtros").addEventListener("click", carregarTudo);
-  document.getElementById("btn-sair-admin").addEventListener("click", async () => {
-    await logoutAdmin();
-    window.location.href = "login.html";
-  });
 
   await carregarTudo();
 }

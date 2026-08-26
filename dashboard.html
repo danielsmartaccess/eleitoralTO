@@ -17,14 +17,12 @@
     </div>
     <div class="flex-entre" style="gap:0.6rem;">
       <div id="status-conexao" class="status-conexao">-</div>
-      <button class="btn-texto" id="btn-sair-admin" style="color:#fff;">Sair</button>
     </div>
   </header>
 
   <nav class="abas">
     <a href="dashboard.html" class="ativo">Dashboard</a>
     <a href="relatorio.html">Relatório</a>
-    <a href="admin.html">Administração</a>
   </nav>
 
   <main class="container container-dashboard">
@@ -82,6 +80,10 @@
     <h2 class="titulo-bloco">Eleição para Governador</h2>
     <section class="grade-graficos">
       <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q4</span><h3 class="titulo-grafico">Resposta espontânea (não estimulada)</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q4"><canvas id="grafico-q4"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
         <div class="grafico-cabecalho"><span class="rotulo-questao">Q5</span><h3 class="titulo-grafico">Intenção de voto — 1º turno</h3></div>
         <div class="grafico-canvas" id="wrap-grafico-q5"><canvas id="grafico-q5"></canvas></div>
       </div>
@@ -102,11 +104,19 @@
         <div class="grafico-canvas" id="wrap-grafico-q7-2"><canvas id="grafico-q7-2"></canvas></div>
       </div>
       <div class="cartao grafico-caixa">
-        <div class="grafico-cabecalho"><span class="rotulo-questao">Q9</span><h3 class="titulo-grafico">Deputado Federal</h3></div>
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q8</span><h3 class="titulo-grafico">Deputado Federal — resposta espontânea</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q8"><canvas id="grafico-q8"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q9</span><h3 class="titulo-grafico">Deputado Federal — estimulada</h3></div>
         <div class="grafico-canvas" id="wrap-grafico-q9"><canvas id="grafico-q9"></canvas></div>
       </div>
       <div class="cartao grafico-caixa">
-        <div class="grafico-cabecalho"><span class="rotulo-questao">Q11</span><h3 class="titulo-grafico">Deputado Estadual</h3></div>
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q10</span><h3 class="titulo-grafico">Deputado Estadual — resposta espontânea</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-q10"><canvas id="grafico-q10"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q11</span><h3 class="titulo-grafico">Deputado Estadual — estimulada</h3></div>
         <div class="grafico-canvas" id="wrap-grafico-q11"><canvas id="grafico-q11"></canvas></div>
       </div>
     </section>

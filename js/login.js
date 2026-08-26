@@ -20,7 +20,7 @@ function limparErro(id) {
 
 async function redirecionarSeJaLogado() {
   const usuario = await obterUsuarioAdmin();
-  if (usuario) window.location.href = "dashboard.html";
+  if (usuario) window.location.href = "admin.html";
 }
 
 document.getElementById("form-login-admin").addEventListener("submit", async (evt) => {
@@ -34,7 +34,7 @@ document.getElementById("form-login-admin").addEventListener("submit", async (ev
   btn.innerHTML = `<span class="spinner"></span> Entrando...`;
   try {
     await loginAdmin(email, senha);
-    window.location.href = "dashboard.html";
+    window.location.href = "admin.html";
   } catch (erro) {
     mostrarErro("erro-login-admin", erro.message);
     btn.disabled = false;

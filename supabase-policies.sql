@@ -11,9 +11,12 @@
 -- validam mais um `equipe_id` — validam apenas que os dados obrigatórios
 -- (session_id, pesquisador) estão presentes.
 --
--- Dashboard/Relatório/Admin usam Supabase Auth real (e-mail/senha, criadas
--- pela Foccus no Studio) — RLS libera SELECT apenas para o role
--- `authenticated`.
+-- Admin usa Supabase Auth real (e-mail/senha, criadas pela Foccus no
+-- Studio) — RLS libera SELECT nas tabelas base (entrevistas, respostas,
+-- pesquisas) e em vw_coleta_resumo apenas para o role `authenticated`.
+-- Dashboard/Relatório são páginas públicas (o link que vai para o cliente,
+-- sem login): leem só a view vw_respostas_dashboard, liberada também para
+-- `anon` — ver supabase-views.sql.
 -- ============================================================================
 
 alter table public.pesquisas enable row level security;

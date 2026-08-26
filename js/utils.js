@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // js/utils.js — funções utilitárias puras, sem dependência de IndexedDB,
 // Supabase ou DOM específico de tela. Mantido pequeno de propósito.
 // ============================================================================
@@ -75,4 +75,50 @@ export function estaOnline() {
 /** Gera um código curto e legível para exibir ao pesquisador (não é o id real). */
 export function codigoCurto(uuid) {
   return uuid ? uuid.replace(/-/g, "").slice(0, 8).toUpperCase() : "--------";
+}
+
+/** Chave de agrupamento para respostas espontâneas: remove acentos, caixa e
+ *  espaços extras para que "Lula", "lula " e "LULA" caiam no mesmo grupo. */
+export function normalizarChaveTexto(texto) {
+  return (texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+/**
+ * Agrega respostas de texto livre (Seções abertas do questionário) em menções
+ * únicas, em % do total de respostas recebidas. Respostas equivalentes por
+ * normalização (acento/caixa/espaço) são somadas num único grupo, exibido com
+ * o rótulo (grafia) mais frequente dentro do grupo. Vazias viram "Não
+ * informado". Retorna só as `limite` menções mais citadas — o restante segue
+ * fazendo parte do total (denominador), só não aparece individualmente.
+ */
+export function agregarTextoLivre(valores, { limite = 10 } = {}) {
+  const grupos = new Map();
+  let total = 0;
+
+  for (const bruto of valores) {
+    const rotulo = (bruto || "").trim() || "Não informado";
+    total++;
+    const chave = normalizarChaveTexto(rotulo);
+    if (!grupos.has(chave)) grupos.set(chave, new Map());
+    const rotulos = grupos.get(chave);
+    rotulos.set(rotulo, (rotulos.get(rotulo) || 0) + 1);
+  }
+
+  const itens = Array.from(grupos.values()).map((rotulos) => {
+    const [rotuloMaisFrequente] = Array.from(rotulos.entries()).sort((a, b) => b[1] - a[1])[0];
+    const contagem = Array.from(rotulos.values()).reduce((s, n) => s + n, 0);
+    return {
+      label: rotuloMaisFrequente,
+      contagem,
+      pct: total > 0 ? Number(((contagem / total) * 100).toFixed(1)) : 0,
+    };
+  });
+
+  itens.sort((a, b) => b.contagem - a.contagem);
+  return { itens: itens.slice(0, limite), total };
 }

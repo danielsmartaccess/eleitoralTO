@@ -2,12 +2,13 @@
 // js/relatorio.js — resultados da pesquisa por pergunta, sempre em
 // percentual. Nunca exibe N/contagens absolutas — nem o total de
 // entrevistados.
+//
+// Página pública (sem login) — ver nota equivalente em js/dashboard.js.
 // ============================================================================
 
-import { exigirLoginAdmin, logoutAdmin } from "./auth.js";
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
-import { escapeHtml } from "./utils.js";
+import { escapeHtml, agregarTextoLivre } from "./utils.js";
 
 let municipioSelecionado = null;
 
@@ -81,17 +82,12 @@ async function renderizarBlocosAbertos(alvo) {
   let html = "";
   for (const bloco of BLOCOS_ABERTOS) {
     const registros = await buscarRespostasPorQuestao(bloco.questao);
-    const contagem = {};
-    for (const r of registros) {
-      const chave = (r.valor || "Não informado").trim() || "Não informado";
-      contagem[chave] = (contagem[chave] || 0) + 1;
-    }
-    const top10 = Object.fromEntries(
-      Object.entries(contagem)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
+    const { itens, total } = agregarTextoLivre(
+      registros.map((r) => r.valor),
+      { limite: 10 }
     );
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(top10, registros.length)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta.</p></div>`;
+    const contagem = Object.fromEntries(itens.map((i) => [i.label, i.contagem]));
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(contagem, total)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta.</p></div>`;
   }
   alvo.innerHTML += html;
 }
@@ -128,9 +124,6 @@ async function recarregarTudo() {
 }
 
 async function inicializar() {
-  const usuario = await exigirLoginAdmin();
-  if (!usuario) return;
-
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
@@ -141,11 +134,6 @@ async function inicializar() {
   });
 
   await recarregarTudo();
-
-  document.getElementById("btn-sair-admin").addEventListener("click", async () => {
-    await logoutAdmin();
-    window.location.href = "login.html";
-  });
 }
 
 inicializar();
