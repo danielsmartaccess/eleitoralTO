@@ -48,7 +48,11 @@ async function inicializar() {
     return;
   }
 
-  registrarServiceWorker();
+  // recarregarAoAtualizar: false — nunca recarregar sozinho no meio de uma
+  // entrevista por causa de um deploy novo em segundo plano (ver nota em
+  // js/app.js). O pesquisador só pega a versão nova ao abrir uma nova
+  // entrevista a partir de index.html.
+  registrarServiceWorker({ recarregarAoAtualizar: false });
   iniciarIndicadorConexao();
   iniciarControleFonte();
 
