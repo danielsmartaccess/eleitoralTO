@@ -16,13 +16,58 @@ const TAMANHO_PAGINA = 25;
 let paginaAtual = 0;
 
 // ---------------------------------------------------------------------------
-// Pesquisadores em campo (visão operacional)
+// Resumo totalizado por município
+// ---------------------------------------------------------------------------
+
+async function carregarResumoMunicipio() {
+  const { data, error } = await supabase
+    .from("vw_resumo_municipio")
+    .select("municipio, completas, em_andamento, hoje, total")
+    .order("municipio", { ascending: true });
+
+  const grade = document.getElementById("grade-resumo-municipio");
+  if (error || !data) {
+    grade.innerHTML = `<div class="kpi vazio">Erro ao carregar: ${escapeHtml(error?.message || "sem dados")}</div>`;
+    return;
+  }
+
+  const totalGeral = data.reduce(
+    (acc, m) => ({
+      completas: acc.completas + m.completas,
+      em_andamento: acc.em_andamento + m.em_andamento,
+      hoje: acc.hoje + m.hoje,
+      total: acc.total + m.total,
+    }),
+    { completas: 0, em_andamento: 0, hoje: 0, total: 0 }
+  );
+
+  const cartaoMunicipio = (nome, m) => `
+    <div class="kpi">
+      <div class="kpi-rotulo"><span class="ponto"></span>${escapeHtml(nome)}</div>
+      <div class="kpi-valor">${m.completas}</div>
+      <div class="kpi-legenda">completas · ${m.em_andamento} em andamento · ${m.hoje} hoje · ${m.total} no total</div>
+    </div>`;
+
+  grade.innerHTML =
+    data.map((m) => cartaoMunicipio(m.municipio, m)).join("") +
+    `<div class="kpi positivo">
+      <div class="kpi-rotulo"><span class="ponto"></span>Total geral</div>
+      <div class="kpi-valor">${totalGeral.completas}</div>
+      <div class="kpi-legenda">completas · ${totalGeral.em_andamento} em andamento · ${totalGeral.hoje} hoje · ${totalGeral.total} no total</div>
+    </div>`;
+
+  document.getElementById("atualizado-resumo").textContent = formatarDataHora(new Date().toISOString());
+}
+
+// ---------------------------------------------------------------------------
+// Pesquisadores em campo (visão operacional) — agrupados por município.
 // ---------------------------------------------------------------------------
 
 async function carregarPesquisadores() {
   const { data, error } = await supabase
     .from("vw_coleta_resumo")
-    .select("pesquisador, realizadas, hoje, ultima_coleta")
+    .select("pesquisador, municipio, realizadas, hoje, ultima_coleta")
+    .order("municipio", { ascending: true })
     .order("realizadas", { ascending: false });
 
   const tbody = document.getElementById("tabela-pesquisadores");
@@ -33,17 +78,39 @@ async function carregarPesquisadores() {
 
   document.getElementById("contagem-pesquisadores").textContent = `${data.length} pesquisador(es)`;
 
-  tbody.innerHTML = data
-    .map(
-      (p) => `
+  const grupos = new Map();
+  for (const p of data) {
+    const chave = p.municipio || "(sem município)";
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(p);
+  }
+
+  let html = "";
+  for (const [municipio, pesquisadores] of grupos) {
+    const subtotalRealizadas = pesquisadores.reduce((acc, p) => acc + p.realizadas, 0);
+    const subtotalHoje = pesquisadores.reduce((acc, p) => acc + p.hoje, 0);
+
+    html += `<tr class="linha-grupo"><td colspan="4">${escapeHtml(municipio)}</td></tr>`;
+    html += pesquisadores
+      .map(
+        (p) => `
       <tr>
         <td>${escapeHtml(p.pesquisador)}</td>
         <td class="mono">${p.realizadas}</td>
         <td class="mono">${p.hoje}</td>
         <td>${p.ultima_coleta ? formatarDataHora(p.ultima_coleta) : "-"}</td>
       </tr>`
-    )
-    .join("");
+      )
+      .join("");
+    html += `<tr class="linha-subtotal">
+      <td>Subtotal ${escapeHtml(municipio)}</td>
+      <td class="mono">${subtotalRealizadas}</td>
+      <td class="mono">${subtotalHoje}</td>
+      <td></td>
+    </tr>`;
+  }
+
+  tbody.innerHTML = html;
 }
 
 // ---------------------------------------------------------------------------
@@ -187,7 +254,7 @@ async function inicializar() {
   registrarServiceWorker();
   iniciarIndicadorConexao();
 
-  await Promise.all([carregarPesquisadores(), carregarEntrevistas()]);
+  await Promise.all([carregarResumoMunicipio(), carregarPesquisadores(), carregarEntrevistas()]);
 
   document.getElementById("btn-pagina-anterior").addEventListener("click", () => {
     paginaAtual = Math.max(0, paginaAtual - 1);

@@ -4,6 +4,23 @@
 
 .tabela-wrap { overflow-x: auto; }
 
+.tabela-simples .linha-grupo td {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.tabela-simples .linha-subtotal td {
+  font-weight: 700;
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+}
+
 .linha-toggle { display: flex; align-items: center; gap: 0.5rem; }
 
 .paginacao { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; }
