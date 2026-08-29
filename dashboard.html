@@ -120,6 +120,75 @@
         <div class="grafico-canvas" id="wrap-grafico-q11"><canvas id="grafico-q11"></canvas></div>
       </div>
     </section>
+
+    <h2 class="titulo-bloco">Cruzamentos analíticos — para onde vai o voto</h2>
+    <p class="texto-suave descricao-bloco">
+      Cada linha da matriz soma 100%: é a distribuição, entre os candidatos a Governador, do voto de quem
+      escolheu cada opção na outra disputa. Quanto mais forte a cor, maior a concentração. Linhas com base
+      amostral pequena demais para leitura estável são omitidas — nenhum número absoluto é exibido.
+    </p>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q9 × Q5</span><h3 class="titulo-grafico">Deputado Federal × Governador</h3></div>
+        <div id="cruz-q9-q5"></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q11 × Q5</span><h3 class="titulo-grafico">Deputado Estadual × Governador</h3></div>
+        <div id="cruz-q11-q5"></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q2 × Q5</span><h3 class="titulo-grafico">Presidente × Governador — nacionalização do voto</h3></div>
+        <div id="cruz-q2-q5"></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q1 × Q5</span><h3 class="titulo-grafico">Avaliação do Governo × voto para Governador</h3></div>
+        <div id="cruz-q1-q5"></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q7</span><h3 class="titulo-grafico">Senado — 1º voto × 2º voto (voto casado)</h3></div>
+        <div id="cruz-senado"></div>
+      </div>
+    </section>
+
+    <h2 class="titulo-bloco">Transferência de votos — 1º para 2º turno</h2>
+    <p class="texto-suave descricao-bloco">
+      Para cada candidato do 1º turno, como o seu eleitorado se redistribui na simulação de 2º turno:
+      revela a retenção dos finalistas e o destino dos votos dos candidatos eliminados.
+    </p>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q5 → Q6</span><h3 class="titulo-grafico">Governador</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-transf-gov"><canvas id="grafico-transf-gov"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q2 → Q3</span><h3 class="titulo-grafico">Presidente</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-transf-pres"><canvas id="grafico-transf-pres"></canvas></div>
+      </div>
+    </section>
+
+    <h2 class="titulo-bloco">Indicadores complementares</h2>
+    <p class="texto-suave descricao-bloco">
+      Leituras que os gráficos por pergunta não deixam ver: qual disputa está mais indefinida e quanto do
+      voto estimulado de cada candidato já vem de forma espontânea (força de marca / <em>top of mind</em>).
+    </p>
+    <section class="grade-graficos">
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">NS/NO</span><h3 class="titulo-grafico">Indecisão comparada por disputa</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-indecisao"><canvas id="grafico-indecisao"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q4 × Q5</span><h3 class="titulo-grafico">Governador — lembrança espontânea × voto estimulado</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-esp-gov"><canvas id="grafico-esp-gov"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q8 × Q9</span><h3 class="titulo-grafico">Deputado Federal — lembrança espontânea × voto estimulado</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-esp-fed"><canvas id="grafico-esp-fed"></canvas></div>
+      </div>
+      <div class="cartao grafico-caixa">
+        <div class="grafico-cabecalho"><span class="rotulo-questao">Q10 × Q11</span><h3 class="titulo-grafico">Deputado Estadual — lembrança espontânea × voto estimulado</h3></div>
+        <div class="grafico-canvas" id="wrap-grafico-esp-est"><canvas id="grafico-esp-est"></canvas></div>
+      </div>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>

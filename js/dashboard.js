@@ -12,7 +12,7 @@
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { getPassos } from "./questionario.js";
-import { agregarTextoLivre, distribuirPercentuais } from "./utils.js";
+import { agregarTextoLivre, distribuirPercentuais, escapeHtml } from "./utils.js";
 
 let graficosAtivos = {};
 let passosCachePorMunicipio = {};
@@ -266,6 +266,304 @@ async function carregarGraficoAberto(canvasId, dbQuestao, filtros) {
   const candidatos = (refCandidatos && config().candidatos[refCandidatos]) || [];
   const { itens } = agregarTextoLivre(valores, { limite: LIMITE_MENCOES_ESPONTANEAS, candidatos });
   renderizarGrafico(canvasId, itens, "espontanea");
+  return itens;
+}
+
+// =======================================================================
+// Análises avançadas — cruzamentos por entrevista (efeito de arrastamento,
+// transferência 1º→2º turno, espontânea × estimulada, indecisão comparada).
+//
+// Tudo continua em percentual: as matrizes são normalizadas por LINHA
+// (cada linha soma 100% — é a distribuição do voto daquele grupo), e
+// linhas com base amostral abaixo de LIMIAR_BASE_CRUZAMENTO são omitidas
+// em vez de exibir um N pequeno e instável. Nenhum número absoluto aparece.
+// =======================================================================
+const LIMIAR_BASE_CRUZAMENTO = 30;
+const CORES_EMPILHADA = ["#0d366b", "#2a78d6", "#7a1f9c", "#b8790a"];
+
+/** Map<entrevista_id, valor> para uma questão, respeitando os filtros. */
+async function buscarMapaRespostas(dbQuestao, filtros) {
+  let query = supabase
+    .from("vw_respostas_dashboard")
+    .select("entrevista_id,valor")
+    .eq("questao", dbQuestao);
+  query = aplicarFiltrosNaQuery(query, filtros);
+  const { data, error } = await query.range(0, 4999);
+  const mapa = new Map();
+  if (error || !data) return mapa;
+  for (const linha of data) {
+    if (linha.entrevista_id) mapa.set(linha.entrevista_id, linha.valor || "Não informado");
+  }
+  return mapa;
+}
+
+/** Rótulos canônicos (ordem do config, NSNO por último) de uma pergunta. */
+function rotulosCanonicos(perguntaId) {
+  return opcoesDaPergunta(perguntaId).map((o) => o.texto);
+}
+
+/**
+ * Cruza duas perguntas por entrevista. Linhas = respostas de A; colunas =
+ * respostas de B. Cada linha é a distribuição percentual (soma 100) do
+ * eleitorado daquela resposta de A entre as opções de B. Só entram no
+ * denominador entrevistas com resposta válida (rótulo canônico) nas duas
+ * perguntas. Linhas com base < limiarBase são devolvidas em `omitidas`.
+ */
+function construirCruzamento(mapaA, mapaB, rotulosA, rotulosB, { limiarBase = LIMIAR_BASE_CRUZAMENTO } = {}) {
+  const setA = new Set(rotulosA);
+  const setB = new Set(rotulosB);
+  const idsPorRotuloA = new Map(rotulosA.map((r) => [r, []]));
+
+  for (const [id, valorA] of mapaA) {
+    if (!setA.has(valorA) || !mapaB.has(id)) continue;
+    if (!setB.has(mapaB.get(id))) continue;
+    idsPorRotuloA.get(valorA).push(id);
+  }
+
+  const linhas = [];
+  const omitidas = [];
+  for (const rotulo of rotulosA) {
+    const ids = idsPorRotuloA.get(rotulo);
+    if (ids.length < limiarBase) {
+      if (ids.length > 0) omitidas.push(rotulo);
+      continue;
+    }
+    const contagem = rotulosB.map((rb) => ids.filter((id) => mapaB.get(id) === rb).length);
+    const pcts = distribuirPercentuais(contagem, ids.length);
+    linhas.push({ rotulo, celulas: rotulosB.map((rb, i) => ({ coluna: rb, pct: pcts[i] })) });
+  }
+  return { linhas, colunas: rotulosB, omitidas };
+}
+
+/** Heatmap tabular: cor da célula proporcional ao percentual da linha. */
+function renderizarHeatmap(containerId, cruzamento, { corRGB = "26,58,110" } = {}) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const { linhas, colunas, omitidas } = cruzamento;
+
+  if (!linhas.length) {
+    el.innerHTML = `<div class="grafico-vazio">Sem base amostral suficiente para este cruzamento nos filtros atuais.</div>`;
+    return;
+  }
+
+  const thead = `<tr><th class="canto"></th>${colunas.map((c) => `<th>${escapeHtml(c)}</th>`).join("")}</tr>`;
+  const corpo = linhas
+    .map((ln) => {
+      const tds = ln.celulas
+        .map((cel) => {
+          const alpha = cel.pct === 0 ? 0 : Math.min(0.9, 0.08 + (cel.pct / 100) * 0.82);
+          const claro = alpha < 0.5;
+          return `<td style="background:rgba(${corRGB},${alpha.toFixed(3)});color:${claro ? "#1a1a1a" : "#fff"}">${cel.pct.toFixed(1)}%</td>`;
+        })
+        .join("");
+      return `<tr><th>${escapeHtml(ln.rotulo)}</th>${tds}</tr>`;
+    })
+    .join("");
+
+  const nota = omitidas.length
+    ? `<p class="nota-cruzamento">Linhas omitidas por base amostral reduzida: ${omitidas.map(escapeHtml).join(", ")}.</p>`
+    : "";
+  el.innerHTML = `<div class="tabela-scroll"><table class="matriz-cruzamento"><thead>${thead}</thead><tbody>${corpo}</tbody></table></div>${nota}`;
+}
+
+/** Plugin Chart.js: percentual centrado em cada segmento largo o bastante. */
+const rotulosSegmento = {
+  id: "rotulosSegmento",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = "700 12px " + (getComputedStyle(document.body).fontFamily || "sans-serif");
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#fff";
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach((bar, i) => {
+        const val = ds.data[i];
+        if (val == null || val < 8) return;
+        if (Math.abs(bar.x - bar.base) < 26) return;
+        ctx.fillText(`${val.toFixed(0)}%`, (bar.x + bar.base) / 2, bar.y);
+      });
+    });
+    ctx.restore();
+  },
+};
+
+/** Barras 100% empilhadas horizontais — usado para transferência de voto. */
+function renderizarBarrasEmpilhadas(canvasId, cruzamento) {
+  const canvas = document.getElementById(canvasId);
+  const wrap = document.getElementById(`wrap-${canvasId}`);
+  if (!canvas || !wrap) return;
+  if (graficosAtivos[canvasId]) {
+    graficosAtivos[canvasId].destroy();
+    delete graficosAtivos[canvasId];
+  }
+
+  const { linhas, colunas } = cruzamento;
+  const vazio = wrap.querySelector(".grafico-vazio");
+  if (!linhas.length) {
+    canvas.classList.add("oculto");
+    wrap.style.height = "";
+    if (!vazio) {
+      const d = document.createElement("div");
+      d.className = "grafico-vazio";
+      d.textContent = "Sem base amostral suficiente para os filtros selecionados.";
+      wrap.appendChild(d);
+    }
+    return;
+  }
+  if (vazio) vazio.remove();
+  canvas.classList.remove("oculto");
+  wrap.style.height = `${alturaGrafico(linhas.length + 1)}px`;
+
+  const c = config();
+  const corDe = (i) => (colunas[i] === c.NSNO_TEXTO ? COR_NSNO : CORES_EMPILHADA[i % CORES_EMPILHADA.length]);
+  const datasets = colunas.map((col, i) => ({
+    label: col,
+    data: linhas.map((l) => l.celulas[i].pct),
+    backgroundColor: corDe(i),
+    borderWidth: 0,
+    maxBarThickness: 34,
+  }));
+
+  graficosAtivos[canvasId] = new Chart(canvas, {
+    type: "bar",
+    data: { labels: linhas.map((l) => l.rotulo), datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      plugins: {
+        legend: { display: true, position: "bottom", labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%` } },
+      },
+      scales: {
+        x: { stacked: true, min: 0, max: 100, ticks: { callback: (v) => `${v}%` }, grid: { color: "#eceef1" } },
+        y: { stacked: true, grid: { display: false }, ticks: { font: { size: 13, weight: "500" }, color: "#1a1a1a" } },
+      },
+    },
+    plugins: [rotulosSegmento],
+  });
+}
+
+/** Barras agrupadas: lembrança espontânea × voto estimulado, por candidato. */
+function renderizarComparativoEspontanea(canvasId, itensEspontaneos, serieEstimulada, candidatos) {
+  const canvas = document.getElementById(canvasId);
+  const wrap = document.getElementById(`wrap-${canvasId}`);
+  if (!canvas || !wrap) return;
+  if (graficosAtivos[canvasId]) {
+    graficosAtivos[canvasId].destroy();
+    delete graficosAtivos[canvasId];
+  }
+
+  const espPorLabel = new Map((itensEspontaneos || []).map((i) => [i.label, i.pct]));
+  const linhas = (candidatos || [])
+    .map((cand) => ({
+      label: cand.texto,
+      espontanea: espPorLabel.get(cand.texto) || 0,
+      estimulada: serieEstimulada?.find((s) => s.id === cand.id)?.pct || 0,
+    }))
+    .filter((l) => l.espontanea > 0 || l.estimulada > 0)
+    .sort((a, b) => b.estimulada - a.estimulada)
+    .slice(0, 8);
+
+  const vazio = wrap.querySelector(".grafico-vazio");
+  if (!linhas.length) {
+    canvas.classList.add("oculto");
+    wrap.style.height = "";
+    if (!vazio) {
+      const d = document.createElement("div");
+      d.className = "grafico-vazio";
+      d.textContent = "Sem dados para os filtros selecionados.";
+      wrap.appendChild(d);
+    }
+    return;
+  }
+  if (vazio) vazio.remove();
+  canvas.classList.remove("oculto");
+  wrap.style.height = `${alturaGrafico(Math.ceil(linhas.length * 1.7) + 1)}px`;
+
+  graficosAtivos[canvasId] = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: linhas.map((l) => l.label),
+      datasets: [
+        { label: "Espontânea (lembrança)", data: linhas.map((l) => l.espontanea), backgroundColor: "#8fb4e6", maxBarThickness: 15 },
+        { label: "Estimulada (voto)", data: linhas.map((l) => l.estimulada), backgroundColor: COR_PRINCIPAL, maxBarThickness: 15 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      plugins: {
+        legend: { display: true, position: "bottom", labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%` } },
+      },
+      scales: {
+        x: { beginAtZero: true, ticks: { callback: (v) => `${v}%` }, grid: { color: "#eceef1" } },
+        y: { grid: { display: false }, ticks: { font: { size: 13 }, color: "#1a1a1a" } },
+      },
+    },
+  });
+}
+
+function pctNSNO(serie) {
+  const item = (serie || []).find((i) => i.id === config().NSNO_ID);
+  return item ? item.pct : 0;
+}
+
+/** Indecisão (NS/NO) comparada entre todas as disputas — qual está mais aberta. */
+function renderizarIndecisao(series) {
+  const itens = [
+    { id: "pres1", label: "Presidente — 1º turno", pct: pctNSNO(series.q2) },
+    { id: "pres2", label: "Presidente — 2º turno", pct: pctNSNO(series.q3) },
+    { id: "gov1", label: "Governador — 1º turno", pct: pctNSNO(series.q5) },
+    { id: "gov2", label: "Governador — 2º turno", pct: pctNSNO(series.q6) },
+    { id: "depfed", label: "Deputado Federal", pct: pctNSNO(series.q9) },
+    { id: "depest", label: "Deputado Estadual", pct: pctNSNO(series.q11) },
+  ];
+  renderizarGrafico("grafico-indecisao", itens, "candidatos");
+}
+
+async function carregarAnalisesAvancadas(filtros, series) {
+  const [mGov, mGov2, mPres, mPres2, mAval, mDepF, mDepE, mSen1, mSen2] = await Promise.all([
+    buscarMapaRespostas("q5", filtros),
+    buscarMapaRespostas("q6", filtros),
+    buscarMapaRespostas("q2", filtros),
+    buscarMapaRespostas("q3", filtros),
+    buscarMapaRespostas("q1", filtros),
+    buscarMapaRespostas("q9", filtros),
+    buscarMapaRespostas("q11", filtros),
+    buscarMapaRespostas("q7_1voto", filtros),
+    buscarMapaRespostas("q7_2voto", filtros),
+  ]);
+
+  const colsGov = rotulosCanonicos("q5");
+  renderizarHeatmap("cruz-q9-q5", construirCruzamento(mDepF, mGov, rotulosCanonicos("q9"), colsGov));
+  renderizarHeatmap("cruz-q11-q5", construirCruzamento(mDepE, mGov, rotulosCanonicos("q11"), colsGov));
+  renderizarHeatmap("cruz-q2-q5", construirCruzamento(mPres, mGov, rotulosCanonicos("q2"), colsGov));
+  renderizarHeatmap("cruz-q1-q5", construirCruzamento(mAval, mGov, rotulosCanonicos("q1"), colsGov));
+  renderizarHeatmap(
+    "cruz-senado",
+    construirCruzamento(mSen1, mSen2, rotulosCanonicos("q7"), rotulosCanonicos("q7"), { limiarBase: 20 })
+  );
+
+  renderizarBarrasEmpilhadas(
+    "grafico-transf-gov",
+    construirCruzamento(mGov, mGov2, rotulosCanonicos("q5"), rotulosCanonicos("q6"), { limiarBase: 20 })
+  );
+  renderizarBarrasEmpilhadas(
+    "grafico-transf-pres",
+    construirCruzamento(mPres, mPres2, rotulosCanonicos("q2"), rotulosCanonicos("q3"), { limiarBase: 20 })
+  );
+
+  renderizarIndecisao(series);
+
+  const cand = config().candidatos;
+  renderizarComparativoEspontanea("grafico-esp-gov", series.q4esp, series.q5, cand.governador);
+  renderizarComparativoEspontanea("grafico-esp-fed", series.q8esp, series.q9, cand.deputadoFederal);
+  renderizarComparativoEspontanea("grafico-esp-est", series.q10esp, series.q11, cand.deputadoEstadual);
 }
 
 // -----------------------------------------------------------------------
@@ -375,8 +673,14 @@ async function carregarTudo() {
       carregarGrafico("grafico-q12", "q12", "q12", filtros),
     ]);
 
-    const [q1, q2, , , q5, , , , , , , , q12] = resultados;
+    const [q1, q2, q3, q4esp, q5, q6, , , q8esp, q9, q10esp, q11, q12] = resultados;
     renderizarKPIs({ q1, q12, q2, q5 });
+
+    try {
+      await carregarAnalisesAvancadas(filtros, { q2, q3, q5, q6, q9, q11, q4esp, q8esp, q10esp });
+    } catch (erro) {
+      console.error("Falha ao carregar análises avançadas:", erro);
+    }
 
     const agora = new Date();
     document.getElementById("ultima-atualizacao").textContent =

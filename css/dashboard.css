@@ -197,6 +197,63 @@ main.container.container-dashboard {
 }
 
 /* -------------------------------------------------------------------------
+   Texto introdutório de um bloco temático
+   ------------------------------------------------------------------------- */
+.descricao-bloco {
+  margin: -0.4rem 0 1.1rem;
+  max-width: 70ch;
+  line-height: 1.5;
+  font-size: 0.85rem;
+}
+
+/* -------------------------------------------------------------------------
+   Matriz de cruzamento — heatmap tabular (formatação condicional por %).
+   A cor de fundo de cada célula é aplicada inline por js/dashboard.js.
+   ------------------------------------------------------------------------- */
+.tabela-scroll { overflow-x: auto; }
+
+table.matriz-cruzamento {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+table.matriz-cruzamento th,
+table.matriz-cruzamento td {
+  padding: 0.5rem 0.65rem;
+  text-align: center;
+  border: 1px solid var(--cor-borda);
+  white-space: nowrap;
+}
+
+table.matriz-cruzamento thead th {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+table.matriz-cruzamento tbody th {
+  text-align: left;
+  background: #fafbfc;
+  color: var(--cor-texto);
+  font-weight: 700;
+  position: sticky;
+  left: 0;
+}
+
+table.matriz-cruzamento td { font-weight: 600; }
+
+.nota-cruzamento {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--cor-texto-suave);
+}
+
+/* -------------------------------------------------------------------------
    Navegação por abas
    ------------------------------------------------------------------------- */
 nav.abas {
