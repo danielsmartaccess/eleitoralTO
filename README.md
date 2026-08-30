@@ -4,8 +4,8 @@ PWA offline-first de coleta de campo para pesquisa eleitoral, desenvolvido para
 a **Foccus Pesquisas**. HTML/CSS/JS puro (sem bundler, sem framework),
 IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 
-Cobre mais de um município na mesma instância do app: hoje **Araguaína** e
-**Palmas**, cada um como uma pesquisa própria em `config/pesquisa.js`
+Cobre mais de um município na mesma instância do app: hoje **Araguaína**,
+**Palmas** e **Gurupi**, cada um como uma pesquisa própria em `config/pesquisa.js`
 (candidatos e prefeito atual diferentes; questionário e disputas
 estaduais/nacionais compartilhados). O pesquisador escolhe qual pesquisa vai
 coletar na tela inicial, e a escolha fica salva no aparelho.
@@ -155,7 +155,7 @@ em `js/questionario.js`, tipos suportados: `single_choice`, `open_text`,
 ### Múltiplas pesquisas (municípios)
 
 `PESQUISAS_CONFIG` em `config/pesquisa.js` registra uma pesquisa por
-município (hoje `araguaina` e `palmas`). Para adicionar uma nova:
+município (hoje `araguaina`, `palmas` e `gurupi`). Para adicionar uma nova:
 
 1. Criar um novo objeto `PESQUISA_*` (candidatos de Deputado
    Federal/Estadual, `prefeitoAtual`, `pesquisa.nome`/`pesquisa.municipio`) e

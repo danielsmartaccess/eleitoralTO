@@ -178,7 +178,7 @@ function criarPerguntasPadrao() {
       id: "q12",
       tipo: "single_choice",
       // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
-      texto: "Como você avalia a administração do atual prefeito {{prefeito}}?",
+      texto: "Como você avalia a administração do(a) atual prefeito(a) {{prefeito}}?",
       obrigatoria: true,
       randomize: false,
       opcoes: [
@@ -298,11 +298,56 @@ const PESQUISA_PALMAS = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Gurupi 2026
+// --------------------------------------------------------------------
+const PESQUISA_GURUPI = {
+  id: "gurupi",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Gurupi 2026",
+    municipio: "Gurupi",
+  },
+  prefeitoAtual: "Josi Nunes",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_TOCANTINS,
+    deputadoFederal: [
+      { id: "luana_nunes", texto: "Luana Nunes" },
+      { id: "fabio_vaz", texto: "Fabio Vaz" },
+      { id: "felipe_martins", texto: "Felipe Martins" },
+      { id: "sandoval_cardoso", texto: "Sandoval Cardoso" },
+      { id: "irata", texto: "Iratã" },
+      { id: "ricardo_ayres", texto: "Ricardo Ayres" },
+      { id: "janad_valcari", texto: "Janad Valcari" },
+      { id: "alfredo_junior", texto: "Alfredo Júnior" },
+      { id: "jair_farias", texto: "Jair Farias" },
+    ],
+    deputadoEstadual: [
+      { id: "eduardo_fortes", texto: "Eduardo Fortes" },
+      { id: "gutierres", texto: "Gutierres" },
+      { id: "eduardo_do_dertins", texto: "Eduardo do Dertins" },
+      { id: "gleydson_nato", texto: "Gleydson Nato" },
+      { id: "ivanilson", texto: "Ivanilson" },
+      { id: "toinho_andrade", texto: "Toinho Andrade" },
+      { id: "leo_barbosa", texto: "Léo Barbosa" },
+      { id: "prof_junior_geo", texto: "Prof. Júnior Geo" },
+      { id: "carlos_amastha", texto: "Carlos Amastha" },
+      { id: "vanda_monteiro", texto: "Vanda Monteiro" },
+      { id: "ivory_de_lira", texto: "Ivory de Lira" },
+      { id: "claudia_lelis", texto: "Cláudia Lelis" },
+      { id: "dulce_miranda", texto: "Dulce Miranda" },
+    ],
+  },
+  perguntas: criarPerguntasPadrao(),
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
   araguaina: PESQUISA_ARAGUAINA,
   palmas: PESQUISA_PALMAS,
+  gurupi: PESQUISA_GURUPI,
 };
 
 const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";
