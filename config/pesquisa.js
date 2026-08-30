@@ -336,6 +336,7 @@ const PESQUISA_GURUPI = {
       { id: "ivory_de_lira", texto: "Ivory de Lira" },
       { id: "claudia_lelis", texto: "Cláudia Lelis" },
       { id: "dulce_miranda", texto: "Dulce Miranda" },
+      { id: "valdemar_junior", texto: "Valdemar Júnior" },
     ],
   },
   perguntas: criarPerguntasPadrao(),
