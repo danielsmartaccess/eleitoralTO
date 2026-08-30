@@ -110,7 +110,7 @@ function criarPerguntasPadrao() {
       texto: "Se a eleição fosse hoje, em quem você votaria para Governador(a) do Estado do Tocantins?",
       obrigatoria: true,
       maxLength: 120,
-      atalhos: ["Não sabe", "Não opinou", "Nenhum", "Outro"],
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
     },
     {
       id: "q5",
@@ -148,7 +148,7 @@ function criarPerguntasPadrao() {
       texto: "Se a eleição fosse hoje, em quem você votaria para Deputado Federal do Estado do Tocantins?",
       obrigatoria: true,
       maxLength: 120,
-      atalhos: ["Não sabe", "Não opinou", "Nenhum", "Outro"],
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
     },
     {
       id: "q9",
@@ -164,7 +164,7 @@ function criarPerguntasPadrao() {
       texto: "Se a eleição fosse hoje, em quem você votaria para Deputado Estadual do Tocantins?",
       obrigatoria: true,
       maxLength: 120,
-      atalhos: ["Não sabe", "Não opinou", "Nenhum", "Outro"],
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
     },
     {
       id: "q11",
