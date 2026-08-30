@@ -12,7 +12,7 @@
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
 import { getPassos } from "./questionario.js";
-import { agregarTextoLivre, distribuirPercentuais, escapeHtml } from "./utils.js";
+import { agregarTextoLivre, distribuirPercentuais, escapeHtml, LIMITE_MENCOES_ESPONTANEAS } from "./utils.js";
 
 let graficosAtivos = {};
 let passosCachePorMunicipio = {};
@@ -238,10 +238,11 @@ async function carregarGrafico(canvasId, perguntaId, dbQuestao, filtros, opcoes)
 
 // -----------------------------------------------------------------------
 // Respostas espontâneas (open_text: Q4/Q8/Q10) — mesma agregação por
-// menção usada no relatório (js/relatorio.js), mas exibida como gráfico de
-// barras, no padrão das demais perguntas do dashboard.
+// menção usada no relatório (js/relatorio.js), inclusive o mesmo corte
+// (LIMITE_MENCOES_ESPONTANEAS, definido em utils.js) para que o rótulo
+// "Demais menções (dispersas)" signifique a mesma coisa nas duas telas;
+// aqui só muda a apresentação (gráfico de barras).
 // -----------------------------------------------------------------------
-const LIMITE_MENCOES_ESPONTANEAS = 8;
 
 // Pergunta espontânea (open_text) → lista de candidatos da pergunta
 // estimulada equivalente, usada para agrupar grafias diferentes do mesmo

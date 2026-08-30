@@ -8,7 +8,7 @@
 
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
-import { escapeHtml, agregarTextoLivre, distribuirPercentuais } from "./utils.js";
+import { escapeHtml, agregarTextoLivre, distribuirPercentuais, LIMITE_MENCOES_ESPONTANEAS } from "./utils.js";
 
 let municipioSelecionado = null;
 
@@ -86,9 +86,9 @@ async function renderizarBlocosAbertos(alvo) {
     const candidatos = config().candidatos[bloco.candidatosRef] || [];
     const { itens } = agregarTextoLivre(
       registros.map((r) => r.valor),
-      { limite: 10, candidatos }
+      { limite: LIMITE_MENCOES_ESPONTANEAS, candidatos }
     );
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta.</p></div>`;
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta. "Demais menções (dispersas)" soma as citações fora das ${LIMITE_MENCOES_ESPONTANEAS} mais lembradas; não equivale a "não sabe/não respondeu".</p></div>`;
   }
   alvo.innerHTML += html;
 }

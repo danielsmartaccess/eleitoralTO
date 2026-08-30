@@ -196,10 +196,15 @@ function casarComCandidato(texto, candidatos) {
  * caixa/espaço). Vazias viram "Não informado".
  *
  * Retorna as `limite` menções mais citadas; o restante é somado numa menção
- * "Outros" (quando houver) para que a soma dos percentuais exibidos feche em
- * 100% — nenhuma menção real fica escondida do denominador nem do total.
+ * "Demais menções (dispersas)" (quando houver) para que a soma dos percentuais
+ * exibidos feche em 100% — nenhuma menção real fica escondida do denominador
+ * nem do total. Esse rótulo NÃO representa "não sabe / não respondeu" (que vira
+ * "Não informado" à parte); é só a cauda pulverizada de citações fora do topo.
  */
-export function agregarTextoLivre(valores, { limite = 10, candidatos = [] } = {}) {
+export const LIMITE_MENCOES_ESPONTANEAS = 10;
+export const ROTULO_MENCOES_DISPERSAS = "Demais menções (dispersas)";
+
+export function agregarTextoLivre(valores, { limite = LIMITE_MENCOES_ESPONTANEAS, candidatos = [] } = {}) {
   const grupos = new Map();
   let total = 0;
 
@@ -224,7 +229,7 @@ export function agregarTextoLivre(valores, { limite = 10, candidatos = [] } = {}
   const principais = grupoItens.slice(0, limite);
   const resto = grupoItens.slice(limite);
   const contagemResto = resto.reduce((s, i) => s + i.contagem, 0);
-  const listaFinal = contagemResto > 0 ? [...principais, { label: "Outros", contagem: contagemResto }] : principais;
+  const listaFinal = contagemResto > 0 ? [...principais, { label: ROTULO_MENCOES_DISPERSAS, contagem: contagemResto }] : principais;
 
   const percentuais = distribuirPercentuais(listaFinal.map((i) => i.contagem), total);
   const itens = listaFinal.map((i, idx) => ({ label: i.label, contagem: i.contagem, pct: percentuais[idx] }));

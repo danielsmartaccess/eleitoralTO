@@ -14,7 +14,7 @@
 // antigos, então nunca fica um Service Worker preso a arquivos velhos.
 // ============================================================================
 
-const CACHE_VERSION = "eleitoral-to-v2.6.0";
+const CACHE_VERSION = "eleitoral-to-v2.7.0";
 const CACHE_SHELL = `shell-${CACHE_VERSION}`;
 const CACHE_RUNTIME = `runtime-${CACHE_VERSION}`;
 
