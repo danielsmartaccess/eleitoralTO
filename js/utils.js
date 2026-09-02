@@ -117,7 +117,12 @@ export function distribuirPercentuais(contagens, total, casas = 2) {
 // Títulos/prefixos comuns em candidaturas que, sozinhos, não identificam uma
 // pessoa específica (aparecem como possível token de várias respostas sem
 // ligação com o nome real do candidato).
-const TOKENS_IRRELEVANTES = new Set(["dr", "dra", "sr", "sra"]);
+//
+// "nao"/"sabe"/"opinou"/"nenhum" são as palavras das respostas-atalho de
+// não-resposta (Q4/Q8/Q10). Sem elas na lista, a tolerância de Levenshtein
+// casa "nao" (de "Não sabe") com o token distintivo "nato" de "Gleydson Nato"
+// e joga toda a não-resposta sob o candidato — ver casarComCandidato.
+const TOKENS_IRRELEVANTES = new Set(["dr", "dra", "sr", "sra", "nao", "sabe", "opinou", "nenhum"]);
 
 function tokensSignificativos(texto) {
   return normalizarChaveTexto(texto)
