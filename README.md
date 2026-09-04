@@ -5,7 +5,7 @@ a **Foccus Pesquisas**. HTML/CSS/JS puro (sem bundler, sem framework),
 IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 
 Cobre mais de um município na mesma instância do app: hoje **Araguaína**,
-**Palmas**, **Gurupi** e **Porto Nacional**, cada um como uma pesquisa própria em `config/pesquisa.js`
+**Palmas**, **Gurupi**, **Porto Nacional** e **Paraíso do Tocantins**, cada um como uma pesquisa própria em `config/pesquisa.js`
 (candidatos e prefeito atual diferentes; questionário e disputas
 estaduais/nacionais compartilhados). O pesquisador escolhe qual pesquisa vai
 coletar na tela inicial, e a escolha fica salva no aparelho.
@@ -155,8 +155,8 @@ em `js/questionario.js`, tipos suportados: `single_choice`, `open_text`,
 ### Múltiplas pesquisas (municípios)
 
 `PESQUISAS_CONFIG` em `config/pesquisa.js` registra uma pesquisa por
-município (hoje `araguaina`, `palmas`, `gurupi` e `porto_nacional`). Para
-adicionar uma nova:
+município (hoje `araguaina`, `palmas`, `gurupi`, `porto_nacional` e
+`paraiso`). Para adicionar uma nova:
 
 1. Criar um novo objeto `PESQUISA_*` (candidatos de Deputado
    Federal/Estadual, `prefeitoAtual`, `pesquisa.nome`/`pesquisa.municipio`) e
@@ -259,6 +259,7 @@ mais de uma vez):
 # supabase-migration-palmas.sql          → insere a pesquisa de Palmas
 # supabase-migration-gurupi.sql          → insere a pesquisa de Gurupi
 # supabase-migration-porto-nacional.sql  → insere a pesquisa de Porto Nacional
+# supabase-migration-paraiso.sql         → insere a pesquisa de Paraíso do Tocantins
 # supabase-migration-resumo-municipio.sql → adiciona o resumo por município ao admin
 # (para os cruzamentos do dashboard, reexecutar supabase-views.sql basta —
 #  vw_respostas_dashboard já expõe entrevista_id e não mudou de contrato)

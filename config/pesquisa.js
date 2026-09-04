@@ -393,6 +393,58 @@ const PESQUISA_PORTO_NACIONAL = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Paraíso do Tocantins 2026
+// --------------------------------------------------------------------
+const PESQUISA_PARAISO = {
+  id: "paraiso",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Paraíso do Tocantins 2026",
+    municipio: "Paraíso do Tocantins",
+  },
+  prefeitoAtual: "Celso Morais",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_TOCANTINS,
+    deputadoFederal: [
+      { id: "janad_valcari", texto: "Janad Valcari" },
+      { id: "fabio_vaz", texto: "Fábio Vaz" },
+      { id: "osires_damaso", texto: "Osires Damaso" },
+      { id: "sandoval_cardoso", texto: "Sandoval Cardoso" },
+      { id: "ricardo_ayres", texto: "Ricardo Ayres" },
+      { id: "lucas_campelo", texto: "Lucas Campelo" },
+      { id: "alfredo_junior", texto: "Alfredo Júnior" },
+      { id: "jair_farias", texto: "Jair Farias" },
+      { id: "felipe_martins", texto: "Felipe Martins" },
+      { id: "irata_abreu", texto: "Iratã Abreu" },
+      { id: "tiago_dimas", texto: "Tiago Dimas" },
+      { id: "mauricio_buffon", texto: "Maurício Buffon" },
+      { id: "celio_moura", texto: "Célio Moura" },
+    ],
+    deputadoEstadual: [
+      { id: "prof_deley", texto: "Prof. Deley" },
+      { id: "nilton_franco", texto: "Nilton Franco" },
+      { id: "carlos_amastha", texto: "Carlos Amastha" },
+      { id: "valdemar_junior", texto: "Valdemar Júnior" },
+      { id: "leo_barbosa", texto: "Léo Barbosa" },
+      { id: "prof_junior_geo", texto: "Prof. Júnior Geo" },
+      { id: "toinho_andrade", texto: "Toinho Andrade" },
+      { id: "silvaney_rabelo", texto: "Silvaney Rabelo" },
+      { id: "moisemar_marinho", texto: "Moisemar Marinho" },
+      { id: "eduardo_fortes", texto: "Eduardo Fortes" },
+      { id: "vanda_monteiro", texto: "Vanda Monteiro" },
+      { id: "claudia_lelis", texto: "Cláudia Lelis" },
+      { id: "eduardo_mantoan", texto: "Eduardo Mantoan" },
+      { id: "rubens_uchoa", texto: "Rubens Uchôa" },
+      { id: "dulce_miranda", texto: "Dulce Miranda" },
+      { id: "cleiton_cardoso", texto: "Cleiton Cardoso" },
+      { id: "ivory_de_lira", texto: "Ivory de Lira" },
+    ],
+  },
+  perguntas: criarPerguntasPadrao(),
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
@@ -400,6 +452,7 @@ const PESQUISAS_CONFIG = {
   palmas: PESQUISA_PALMAS,
   gurupi: PESQUISA_GURUPI,
   porto_nacional: PESQUISA_PORTO_NACIONAL,
+  paraiso: PESQUISA_PARAISO,
 };
 
 const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";
