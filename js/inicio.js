@@ -25,7 +25,7 @@ function atualizarCabecalho() {
 
 function renderizarListaPesquisas() {
   const lista = document.getElementById("lista-pesquisas");
-  const disponiveis = window.listarPesquisasDisponiveis();
+  const disponiveis = window.listarPesquisasParaColeta();
 
   lista.innerHTML = disponiveis
     .map(

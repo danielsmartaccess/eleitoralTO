@@ -202,6 +202,10 @@ const PESQUISA_ARAGUAINA = {
     nome: "Pesquisa Eleitoral Araguaína 2026",
     municipio: "Araguaína",
   },
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Wagner Rodrigues",
   NSNO_ID,
   NSNO_TEXTO,
@@ -253,6 +257,7 @@ const PESQUISA_PALMAS = {
     nome: "Pesquisa Eleitoral Palmas 2026",
     municipio: "Palmas",
   },
+  ativoParaColeta: false,
   prefeitoAtual: "Eduardo Siqueira",
   NSNO_ID,
   NSNO_TEXTO,
@@ -307,6 +312,7 @@ const PESQUISA_GURUPI = {
     nome: "Pesquisa Eleitoral Gurupi 2026",
     municipio: "Gurupi",
   },
+  ativoParaColeta: false,
   prefeitoAtual: "Josi Nunes",
   NSNO_ID,
   NSNO_TEXTO,
@@ -352,6 +358,7 @@ const PESQUISA_PORTO_NACIONAL = {
     nome: "Pesquisa Eleitoral Porto Nacional 2026",
     municipio: "Porto Nacional",
   },
+  ativoParaColeta: false,
   prefeitoAtual: "Ronivon Maciel",
   NSNO_ID,
   NSNO_TEXTO,
@@ -401,6 +408,7 @@ const PESQUISA_PARAISO = {
     nome: "Pesquisa Eleitoral Paraíso do Tocantins 2026",
     municipio: "Paraíso do Tocantins",
   },
+  ativoParaColeta: false,
   prefeitoAtual: "Celso Morais",
   NSNO_ID,
   NSNO_TEXTO,
@@ -445,9 +453,242 @@ const PESQUISA_PARAISO = {
 };
 
 // --------------------------------------------------------------------
+// Disputas estaduais/nacionais — Maranhão. Compartilhadas entre todas as
+// pesquisas municipais do MA, igual ao padrão do Tocantins acima.
+// --------------------------------------------------------------------
+const CANDIDATOS_ESTADUAIS_MARANHAO = {
+  presidente: [
+    { id: "lula", texto: "Lula" },
+    { id: "flavio_bolsonaro", texto: "Flávio Bolsonaro" },
+    { id: "ronaldo_caiado", texto: "Ronaldo Caiado" },
+    { id: "romeu_zema", texto: "Romeu Zema" },
+    { id: "augusto_cury", texto: "Augusto Cury" },
+    { id: "renan_santos", texto: "Renan Santos" },
+  ],
+  presidente2Turno: [
+    { id: "lula", texto: "Lula" },
+    { id: "flavio_bolsonaro", texto: "Flávio Bolsonaro" },
+  ],
+  governador: [
+    { id: "orleans_brandao", texto: "Orleans Brandão" },
+    { id: "eduardo_braide", texto: "Eduardo Braide" },
+    { id: "roberto_rocha", texto: "Roberto Rocha" },
+    { id: "felipe_camarao", texto: "Felipe Camarão" },
+  ],
+  // Lista recebida em 2026-09-13; usuário sinalizou que ainda pode ajustar
+  // esta relação (ver conversa) — conferir antes de abrir a coleta em campo.
+  senado: [
+    { id: "lahesio_bonfim", texto: "Lahésio Bonfim" },
+    { id: "roseana_sarney", texto: "Roseana Sarney" },
+    { id: "weverton_rocha", texto: "Weverton Rocha" },
+    { id: "andre_fufuca", texto: "André Fufuca" },
+    { id: "eliziane_gama", texto: "Eliziane Gama" },
+    { id: "dr_hilton_goncalo", texto: "Dr. Hilton Gonçalo" },
+    { id: "cidonio_goncalves", texto: "Cidônio Gonçalves" },
+  ],
+};
+
+// --------------------------------------------------------------------
+// Questionário padrão Maranhão — mesma lógica de criarPerguntasPadrao()
+// acima, mas segue a ordem/formato do questionário aplicado no MA: inclui
+// avaliação separada do governo Lula (q1) e do governo estadual (q2), e a
+// pergunta sobre o(a) prefeito(a) é binária (aprova/desaprova), não em
+// escala de 5 pontos.
+// --------------------------------------------------------------------
+function criarPerguntasPadraoMaranhao() {
+  return [
+    {
+      id: "q1",
+      tipo: "single_choice",
+      texto: "Como você avalia o governo do Presidente Lula?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "otimo", texto: "Ótimo", valorNum: 5 },
+        { id: "bom", texto: "Bom", valorNum: 4 },
+        { id: "regular", texto: "Regular", valorNum: 3 },
+        { id: "ruim", texto: "Ruim", valorNum: 2 },
+        { id: "pessimo", texto: "Péssimo", valorNum: 1 },
+      ],
+    },
+    {
+      id: "q2",
+      tipo: "single_choice",
+      texto: "Como você avalia o governo do Maranhão na gestão Carlos Brandão?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "otimo", texto: "Ótimo", valorNum: 5 },
+        { id: "bom", texto: "Bom", valorNum: 4 },
+        { id: "regular", texto: "Regular", valorNum: 3 },
+        { id: "ruim", texto: "Ruim", valorNum: 2 },
+        { id: "pessimo", texto: "Péssimo", valorNum: 1 },
+      ],
+    },
+    {
+      id: "q3",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos a Presidente da República você votaria?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "presidente",
+    },
+    {
+      id: "q4",
+      tipo: "single_choice",
+      texto:
+        "Pensando no segundo turno, entre Lula e Flávio Bolsonaro, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "presidente2Turno",
+    },
+    {
+      id: "q5",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Governador do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q6",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos a Governador você votaria?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "governador",
+    },
+    {
+      id: "q7",
+      tipo: "two_votes",
+      texto:
+        "Considerando que neste ano você terá a opção de escolher dois candidatos para o Senado Federal, qual seria seu primeiro e segundo voto se a eleição ocorresse hoje?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "senado",
+      regraVotoDuplicado: "proibirMesmoCandidatoRealNosDoisVotos",
+    },
+    {
+      id: "q8",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q9",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoFederal",
+    },
+    {
+      id: "q10",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q11",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoEstadual",
+    },
+    {
+      id: "q12",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova a atual administração do(a) prefeito(a) {{prefeito}}?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+  ];
+}
+
+// --------------------------------------------------------------------
+// Pesquisa: São Bernardo (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_SAO_BERNARDO_MA = {
+  id: "sao_bernardo_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral São Bernardo (MA) 2026",
+    municipio: "São Bernardo",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Chico Carvalho",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "ze_carlos_da_caixa", texto: "Zé Carlos da Caixa" },
+      { id: "fernando_braide", texto: "Fernando Braide" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "leandro_belo", texto: "Leandro Belo" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "gilvan_do_pt", texto: "Gilvan do PT" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Magalhães de Almeida (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_MAGALHAES_ALMEIDA_MA = {
+  id: "magalhaes_almeida_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Magalhães de Almeida (MA) 2026",
+    municipio: "Magalhães de Almeida",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Nonato Carvalho",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "otelino_neto", texto: "Otelino Neto" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "dr_yglesio", texto: "Dr. Yglésio" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "ivo_resende", texto: "Ivo Resende" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "tulio_resende", texto: "Túlio Resende" },
+      { id: "ana_do_gas", texto: "Ana do Gás" },
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
+  sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
+  magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araguaina: PESQUISA_ARAGUAINA,
   palmas: PESQUISA_PALMAS,
   gurupi: PESQUISA_GURUPI,
@@ -459,6 +700,13 @@ const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";
 
 function listarPesquisasDisponiveis() {
   return Object.values(PESQUISAS_CONFIG);
+}
+
+/** Só as pesquisas com coleta em campo ainda aberta — usada na tela de
+ *  escolha de pesquisa (js/inicio.js). Municípios já encerrados continuam em
+ *  listarPesquisasDisponiveis() para dashboard/relatório/admin. */
+function listarPesquisasParaColeta() {
+  return listarPesquisasDisponiveis().filter((p) => p.ativoParaColeta !== false);
 }
 
 function obterIdPesquisaSelecionada() {
@@ -490,6 +738,7 @@ function encontrarPesquisaPorMunicipio(municipio) {
 if (typeof window !== "undefined") {
   window.PESQUISAS_CONFIG = PESQUISAS_CONFIG;
   window.listarPesquisasDisponiveis = listarPesquisasDisponiveis;
+  window.listarPesquisasParaColeta = listarPesquisasParaColeta;
   window.obterIdPesquisaSelecionada = obterIdPesquisaSelecionada;
   window.definirPesquisaSelecionada = definirPesquisaSelecionada;
   window.limparPesquisaSelecionada = limparPesquisaSelecionada;

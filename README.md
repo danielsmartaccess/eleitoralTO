@@ -1,14 +1,18 @@
-# Pesquisa Eleitoral Tocantins 2026 — App de Coleta
+# Pesquisa Eleitoral 2026 — App de Coleta
 
 PWA offline-first de coleta de campo para pesquisa eleitoral, desenvolvido para
 a **Foccus Pesquisas**. HTML/CSS/JS puro (sem bundler, sem framework),
 IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 
-Cobre mais de um município na mesma instância do app: hoje **Araguaína**,
-**Palmas**, **Gurupi**, **Porto Nacional** e **Paraíso do Tocantins**, cada um como uma pesquisa própria em `config/pesquisa.js`
-(candidatos e prefeito atual diferentes; questionário e disputas
-estaduais/nacionais compartilhados). O pesquisador escolhe qual pesquisa vai
-coletar na tela inicial, e a escolha fica salva no aparelho.
+Cobre mais de um município/estado na mesma instância do app, cada um como uma
+pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
+diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
+do mesmo estado). Coleta em campo atualmente aberta no **Maranhão**
+(**São Bernardo** e **Magalhães de Almeida**); os municípios do Tocantins já
+coletados (**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional** e
+**Paraíso do Tocantins**) seguem só para consulta em dashboard/relatório/admin
+(`ativoParaColeta: false` em `config/pesquisa.js`). O pesquisador escolhe qual
+pesquisa vai coletar na tela inicial, e a escolha fica salva no aparelho.
 
 ## Arquitetura
 
