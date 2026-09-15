@@ -697,11 +697,125 @@ const PESQUISA_MAGALHAES_ALMEIDA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Araioses (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_ARAIOSES_MA = {
+  id: "araioses_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Araioses (MA) 2026",
+    municipio: "Araioses",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Neto Carvalho",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "pedro_lucas_fernandes", texto: "Pedro Lucas Fernandes" },
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "paulo_case", texto: "Paulo Casé" },
+      { id: "abigail_cunha", texto: "Abigail Cunha" },
+      { id: "claudio_cunha", texto: "Cláudio Cunha" },
+      { id: "adelson_soares", texto: "Adelson Soares" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Tutóia (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_TUTOIA_MA = {
+  id: "tutoia_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Tutóia (MA) 2026",
+    municipio: "Tutóia",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Viriato Cardoso",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "larissa_dp", texto: "Larissa DP" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "ze_farias", texto: "Zé Farias" },
+      { id: "paula_prata", texto: "Paula Prata" },
+      { id: "claudia_coutinho", texto: "Cláudia Coutinho" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Santa Quitéria do Maranhão (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_SANTA_QUITERIA_MA = {
+  id: "santa_quiteria_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Santa Quitéria do Maranhão (MA) 2026",
+    municipio: "Santa Quitéria do Maranhão",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Sâmia Moreira",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "dr_joel", texto: "Dr. Joel" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "ze_farias", texto: "Zé Farias" },
+      { id: "junior_viana", texto: "Júnior Viana" },
+      { id: "dino_aldenora_belo", texto: "Dino Aldenora Belo" },
+    ],
+  },
+  // q13 é exclusiva de Santa Quitéria do Maranhão (não faz parte do
+  // questionário padrão do Maranhão).
+  perguntas: [
+    ...criarPerguntasPadraoMaranhao(),
+    {
+      id: "q13",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Santa Quitéria do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ],
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
+  araioses_ma: PESQUISA_ARAIOSES_MA,
+  tutoia_ma: PESQUISA_TUTOIA_MA,
+  santa_quiteria_ma: PESQUISA_SANTA_QUITERIA_MA,
   araguaina: PESQUISA_ARAGUAINA,
   palmas: PESQUISA_PALMAS,
   gurupi: PESQUISA_GURUPI,

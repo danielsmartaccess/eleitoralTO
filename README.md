@@ -8,7 +8,8 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Maranhão**
-(**São Bernardo** e **Magalhães de Almeida**); os municípios do Tocantins já
+(**São Bernardo**, **Magalhães de Almeida**, **Araioses**, **Tutóia** e
+**Santa Quitéria do Maranhão**); os municípios do Tocantins já
 coletados (**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional** e
 **Paraíso do Tocantins**) seguem só para consulta em dashboard/relatório/admin
 (`ativoParaColeta: false` em `config/pesquisa.js`). O pesquisador escolhe qual
