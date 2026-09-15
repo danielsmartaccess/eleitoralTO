@@ -680,7 +680,20 @@ const PESQUISA_MAGALHAES_ALMEIDA_MA = {
       { id: "aluisio_santos", texto: "Aluísio Santos" },
     ],
   },
-  perguntas: criarPerguntasPadraoMaranhao(),
+  // q13 é exclusiva de Magalhães de Almeida (não faz parte do questionário
+  // padrão do Maranhão, então não aparece em São Bernardo).
+  perguntas: [
+    ...criarPerguntasPadraoMaranhao(),
+    {
+      id: "q13",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Magalhães de Almeida?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ],
 };
 
 // --------------------------------------------------------------------
