@@ -808,6 +808,47 @@ const PESQUISA_SANTA_QUITERIA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Água Doce do Maranhão (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_AGUA_DOCE_DO_MARANHAO_MA = {
+  id: "agua_doce_do_maranhao_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Água Doce do Maranhão (MA) 2026",
+    municipio: "Água Doce do Maranhão",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Eliane Dias",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "pedro_lucas_fernandes", texto: "Pedro Lucas Fernandes" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "adriana_mascarenhas", texto: "Adriana Mascarenhas" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "adael_da_pesca", texto: "Adael da Pesca" },
+      { id: "bira_do_pindare", texto: "Bira do Pindaré" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+    ],
+    deputadoEstadual: [
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "abigail_cunha", texto: "Abigail Cunha" },
+      { id: "adelmo_soares", texto: "Adelmo Soares" },
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "dr_kaio_hortegal", texto: "Dr. Kaio Hortegal" },
+      { id: "adriana_mendes", texto: "Adriana Mendes" },
+      { id: "claudio_cunha", texto: "Cláudio Cunha" },
+      { id: "bruna_pessoa", texto: "Bruna Pessoa" },
+      { id: "antonio_pereira", texto: "Antônio Pereira" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
@@ -816,6 +857,7 @@ const PESQUISAS_CONFIG = {
   araioses_ma: PESQUISA_ARAIOSES_MA,
   tutoia_ma: PESQUISA_TUTOIA_MA,
   santa_quiteria_ma: PESQUISA_SANTA_QUITERIA_MA,
+  agua_doce_do_maranhao_ma: PESQUISA_AGUA_DOCE_DO_MARANHAO_MA,
   araguaina: PESQUISA_ARAGUAINA,
   palmas: PESQUISA_PALMAS,
   gurupi: PESQUISA_GURUPI,
