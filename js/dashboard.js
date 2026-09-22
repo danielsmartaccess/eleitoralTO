@@ -32,10 +32,28 @@ const CORES_AVALIACAO = {
   ruim: "#dd5f5b",
   pessimo: "#a3201f", pessima: "#a3201f",
 };
-const PERGUNTAS_AVALIACAO = new Set(["q1", "q12"]);
+const CORES_AVALIACAO_EXT = { ...CORES_AVALIACAO, aprova: CORES_AVALIACAO.bom, desaprova: CORES_AVALIACAO.ruim };
 
 function config() {
   return window.encontrarPesquisaPorMunicipio(municipioSelecionado) || window.listarPesquisasDisponiveis()[0];
+}
+
+/** Resolve o id real da pergunta (q1, q2, ...) para um papel semântico
+ *  (ex.: "presidente1Turno"), segundo o questionário do município ativo.
+ *  Necessário porque a MESMA disputa cai em ids diferentes conforme o
+ *  questionário (Tocantins x Maranhão) — ver PERGUNTAS_SEMANTICAS_* em
+ *  config/pesquisa.js. Retorna undefined se o município não tiver essa
+ *  pergunta (ex.: "governador2Turno" não existe no Maranhão). */
+function idPara(papel) {
+  return config().perguntasSemanticas?.[papel];
+}
+
+/** Papéis cujo resultado é uma "avaliação" (Ótimo→Péssimo ou
+ *  Aprova/Desaprova) — muda a paleta de cores do gráfico e, nos KPIs,
+ *  o cálculo de aprovação/reprovação. Calculado por papel (não por id
+ *  fixo) porque o id que representa cada papel varia por questionário. */
+function papeisDeAvaliacao() {
+  return new Set(["avaliacaoEstadual", "avaliacaoPresidente", "avaliacaoPrefeito"]);
 }
 
 function passos() {
@@ -131,7 +149,7 @@ function montarSerie(perguntaId, agregado, { ordenarPorValor = false } = {}) {
 function coresPara(itens, tipo) {
   const c = config();
   if (tipo === "avaliacao") {
-    return itens.map((i) => (i.id === c.NSNO_ID ? COR_NSNO : CORES_AVALIACAO[i.id] || COR_PRINCIPAL));
+    return itens.map((i) => (i.id === c.NSNO_ID ? COR_NSNO : CORES_AVALIACAO_EXT[i.id] || COR_PRINCIPAL));
   }
   if (tipo === "espontanea") return itens.map(() => COR_PRINCIPAL);
   return itens.map((i) => (i.id === c.NSNO_ID ? COR_NSNO : COR_PRINCIPAL));
@@ -228,29 +246,53 @@ function renderizarGrafico(canvasId, itens, tipo) {
   });
 }
 
-async function carregarGrafico(canvasId, perguntaId, dbQuestao, filtros, opcoes) {
-  const agregado = await buscarAgregado(dbQuestao, filtros);
+/** Mostra/oculta o cartão inteiro do painel — usado para papéis que não
+ *  existem no questionário do município ativo (ex.: "governador2Turno" no
+ *  Maranhão, ou "avaliacaoPresidente" fora do Maranhão), em vez de deixar
+ *  um card permanentemente vazio no ar. `elId` é o id de qualquer elemento
+ *  dentro do cartão (o wrap do canvas, ou a própria div do heatmap). */
+function definirVisibilidadeCartao(elId, visivel) {
+  document.getElementById(elId)?.closest(".cartao")?.classList.toggle("oculto", !visivel);
+}
+
+/** Atualiza o texto do "rotulo-questao" (badge Q1, Q2, ...) de um cartão
+ *  para o(s) id(s) real(is) da pergunta no questionário do município
+ *  ativo — o mesmo papel semântico cai em ids diferentes conforme o
+ *  questionário (ver idPara). */
+function rotularBadge(elId, ids, separador = " × ") {
+  const badge = document.getElementById(elId)?.closest(".cartao")?.querySelector(".rotulo-questao");
+  if (badge) badge.textContent = [].concat(ids).filter(Boolean).map((id) => id.toUpperCase()).join(separador);
+}
+
+async function carregarGrafico(canvasId, papel, filtros, opcoes, sufixoDb = "") {
+  const perguntaId = idPara(papel);
+  definirVisibilidadeCartao(`wrap-${canvasId}`, !!perguntaId);
+  if (!perguntaId) return [];
+  rotularBadge(`wrap-${canvasId}`, perguntaId);
+  const agregado = await buscarAgregado(perguntaId + sufixoDb, filtros);
   const itens = montarSerie(perguntaId, agregado, opcoes);
-  const tipo = PERGUNTAS_AVALIACAO.has(perguntaId) ? "avaliacao" : "candidatos";
+  const tipo = papeisDeAvaliacao().has(papel) ? "avaliacao" : "candidatos";
   renderizarGrafico(canvasId, itens, tipo);
   return itens;
 }
 
 // -----------------------------------------------------------------------
-// Respostas espontâneas (open_text: Q4/Q8/Q10) — mesma agregação por
-// menção usada no relatório (js/relatorio.js), inclusive o mesmo corte
-// (LIMITE_MENCOES_ESPONTANEAS, definido em utils.js) para que o rótulo
-// "Demais menções (dispersas)" signifique a mesma coisa nas duas telas;
-// aqui só muda a apresentação (gráfico de barras).
+// Respostas espontâneas (open_text: governador/depFederal/depEstadual
+// abertas) — mesma agregação por menção usada no relatório
+// (js/relatorio.js), inclusive o mesmo corte (LIMITE_MENCOES_ESPONTANEAS,
+// definido em utils.js) para que o rótulo "Demais menções (dispersas)"
+// signifique a mesma coisa nas duas telas; aqui só muda a apresentação
+// (gráfico de barras).
 // -----------------------------------------------------------------------
 
 // Pergunta espontânea (open_text) → lista de candidatos da pergunta
 // estimulada equivalente, usada para agrupar grafias diferentes do mesmo
-// candidato (ver casarComCandidato em utils.js).
-const CANDIDATOS_POR_PERGUNTA_ABERTA = {
-  q4: "governador",
-  q8: "deputadoFederal",
-  q10: "deputadoEstadual",
+// candidato (ver casarComCandidato em utils.js). Chaveado pelo papel
+// semântico, não pelo id — o id real varia por questionário.
+const CANDIDATOS_POR_PAPEL_ABERTO = {
+  governadorAberta: "governador",
+  depFederalAberta: "deputadoFederal",
+  depEstadualAberta: "deputadoEstadual",
 };
 
 async function buscarValoresAbertos(dbQuestao, filtros) {
@@ -261,9 +303,13 @@ async function buscarValoresAbertos(dbQuestao, filtros) {
   return data.map((linha) => linha.valor);
 }
 
-async function carregarGraficoAberto(canvasId, dbQuestao, filtros) {
+async function carregarGraficoAberto(canvasId, papel, filtros) {
+  const dbQuestao = idPara(papel);
+  definirVisibilidadeCartao(`wrap-${canvasId}`, !!dbQuestao);
+  if (!dbQuestao) return [];
+  rotularBadge(`wrap-${canvasId}`, dbQuestao);
   const valores = await buscarValoresAbertos(dbQuestao, filtros);
-  const refCandidatos = CANDIDATOS_POR_PERGUNTA_ABERTA[dbQuestao];
+  const refCandidatos = CANDIDATOS_POR_PAPEL_ABERTO[papel];
   const candidatos = (refCandidatos && config().candidatos[refCandidatos]) || [];
   const { itens } = agregarTextoLivre(valores, { limite: LIMITE_MENCOES_ESPONTANEAS, candidatos });
   renderizarGrafico(canvasId, itens, "espontanea");
@@ -514,57 +560,81 @@ function pctNSNO(serie) {
   return item ? item.pct : 0;
 }
 
-/** Indecisão (NS/NO) comparada entre todas as disputas — qual está mais aberta. */
+/** Indecisão (NS/NO) comparada entre todas as disputas — qual está mais
+ *  aberta. Omite "Governador — 2º turno" quando o município não tem essa
+ *  pergunta (Maranhão). */
 function renderizarIndecisao(series) {
   const itens = [
-    { id: "pres1", label: "Presidente — 1º turno", pct: pctNSNO(series.q2) },
-    { id: "pres2", label: "Presidente — 2º turno", pct: pctNSNO(series.q3) },
-    { id: "gov1", label: "Governador — 1º turno", pct: pctNSNO(series.q5) },
-    { id: "gov2", label: "Governador — 2º turno", pct: pctNSNO(series.q6) },
-    { id: "depfed", label: "Deputado Federal", pct: pctNSNO(series.q9) },
-    { id: "depest", label: "Deputado Estadual", pct: pctNSNO(series.q11) },
-  ];
+    { id: "pres1", label: "Presidente — 1º turno", pct: pctNSNO(series.presidente1Turno) },
+    { id: "pres2", label: "Presidente — 2º turno", pct: pctNSNO(series.presidente2Turno) },
+    { id: "gov1", label: "Governador — 1º turno", pct: pctNSNO(series.governadorEstimulada) },
+    idPara("governador2Turno") && { id: "gov2", label: "Governador — 2º turno", pct: pctNSNO(series.governador2Turno) },
+    { id: "depfed", label: "Deputado Federal", pct: pctNSNO(series.depFederalEstimulada) },
+    { id: "depest", label: "Deputado Estadual", pct: pctNSNO(series.depEstadualEstimulada) },
+  ].filter(Boolean);
   renderizarGrafico("grafico-indecisao", itens, "candidatos");
 }
 
 async function carregarAnalisesAvancadas(filtros, series) {
+  const idGov = idPara("governadorEstimulada");
+  const idGov2 = idPara("governador2Turno");
+  const idPres1 = idPara("presidente1Turno");
+  const idPres2 = idPara("presidente2Turno");
+  const idAval = idPara("avaliacaoEstadual");
+  const idDepF = idPara("depFederalEstimulada");
+  const idDepE = idPara("depEstadualEstimulada");
+  const idSenado = idPara("senado");
+
   const [mGov, mGov2, mPres, mPres2, mAval, mDepF, mDepE, mSen1, mSen2] = await Promise.all([
-    buscarMapaRespostas("q5", filtros),
-    buscarMapaRespostas("q6", filtros),
-    buscarMapaRespostas("q2", filtros),
-    buscarMapaRespostas("q3", filtros),
-    buscarMapaRespostas("q1", filtros),
-    buscarMapaRespostas("q9", filtros),
-    buscarMapaRespostas("q11", filtros),
-    buscarMapaRespostas("q7_1voto", filtros),
-    buscarMapaRespostas("q7_2voto", filtros),
+    buscarMapaRespostas(idGov, filtros),
+    idGov2 ? buscarMapaRespostas(idGov2, filtros) : Promise.resolve(new Map()),
+    buscarMapaRespostas(idPres1, filtros),
+    buscarMapaRespostas(idPres2, filtros),
+    buscarMapaRespostas(idAval, filtros),
+    buscarMapaRespostas(idDepF, filtros),
+    buscarMapaRespostas(idDepE, filtros),
+    buscarMapaRespostas(`${idSenado}_1voto`, filtros),
+    buscarMapaRespostas(`${idSenado}_2voto`, filtros),
   ]);
 
-  const colsGov = rotulosCanonicos("q5");
-  renderizarHeatmap("cruz-q9-q5", construirCruzamento(mDepF, mGov, rotulosCanonicos("q9"), colsGov));
-  renderizarHeatmap("cruz-q11-q5", construirCruzamento(mDepE, mGov, rotulosCanonicos("q11"), colsGov));
-  renderizarHeatmap("cruz-q2-q5", construirCruzamento(mPres, mGov, rotulosCanonicos("q2"), colsGov));
-  renderizarHeatmap("cruz-q1-q5", construirCruzamento(mAval, mGov, rotulosCanonicos("q1"), colsGov));
+  const colsGov = rotulosCanonicos(idGov);
+  renderizarHeatmap("cruz-q9-q5", construirCruzamento(mDepF, mGov, rotulosCanonicos(idDepF), colsGov));
+  rotularBadge("cruz-q9-q5", [idDepF, idGov]);
+  renderizarHeatmap("cruz-q11-q5", construirCruzamento(mDepE, mGov, rotulosCanonicos(idDepE), colsGov));
+  rotularBadge("cruz-q11-q5", [idDepE, idGov]);
+  renderizarHeatmap("cruz-q2-q5", construirCruzamento(mPres, mGov, rotulosCanonicos(idPres1), colsGov));
+  rotularBadge("cruz-q2-q5", [idPres1, idGov]);
+  renderizarHeatmap("cruz-q1-q5", construirCruzamento(mAval, mGov, rotulosCanonicos(idAval), colsGov));
+  rotularBadge("cruz-q1-q5", [idAval, idGov]);
   renderizarHeatmap(
     "cruz-senado",
-    construirCruzamento(mSen1, mSen2, rotulosCanonicos("q7"), rotulosCanonicos("q7"), { limiarBase: 20 })
+    construirCruzamento(mSen1, mSen2, rotulosCanonicos(idSenado), rotulosCanonicos(idSenado), { limiarBase: 20 })
   );
+  rotularBadge("cruz-senado", [idSenado]);
 
-  renderizarBarrasEmpilhadas(
-    "grafico-transf-gov",
-    construirCruzamento(mGov, mGov2, rotulosCanonicos("q5"), rotulosCanonicos("q6"), { limiarBase: 20 })
-  );
+  definirVisibilidadeCartao("wrap-grafico-transf-gov", !!idGov2);
+  if (idGov2) {
+    renderizarBarrasEmpilhadas(
+      "grafico-transf-gov",
+      construirCruzamento(mGov, mGov2, rotulosCanonicos(idGov), rotulosCanonicos(idGov2), { limiarBase: 20 })
+    );
+    rotularBadge("wrap-grafico-transf-gov", [idGov, idGov2], " → ");
+  }
   renderizarBarrasEmpilhadas(
     "grafico-transf-pres",
-    construirCruzamento(mPres, mPres2, rotulosCanonicos("q2"), rotulosCanonicos("q3"), { limiarBase: 20 })
+    construirCruzamento(mPres, mPres2, rotulosCanonicos(idPres1), rotulosCanonicos(idPres2), { limiarBase: 20 })
   );
+  rotularBadge("wrap-grafico-transf-pres", [idPres1, idPres2], " → ");
 
   renderizarIndecisao(series);
 
   const cand = config().candidatos;
-  renderizarComparativoEspontanea("grafico-esp-gov", series.q4esp, series.q5, cand.governador);
-  renderizarComparativoEspontanea("grafico-esp-fed", series.q8esp, series.q9, cand.deputadoFederal);
-  renderizarComparativoEspontanea("grafico-esp-est", series.q10esp, series.q11, cand.deputadoEstadual);
+  renderizarComparativoEspontanea("grafico-esp-gov", series.governadorAberta, series.governadorEstimulada, cand.governador);
+  renderizarComparativoEspontanea("grafico-esp-fed", series.depFederalAberta, series.depFederalEstimulada, cand.deputadoFederal);
+  renderizarComparativoEspontanea("grafico-esp-est", series.depEstadualAberta, series.depEstadualEstimulada, cand.deputadoEstadual);
+  rotularBadge("wrap-grafico-esp-gov", [idPara("governadorAberta"), idGov]);
+  rotularBadge("wrap-grafico-esp-fed", [idPara("depFederalAberta"), idDepF]);
+  rotularBadge("wrap-grafico-esp-est", [idPara("depEstadualAberta"), idDepE]);
 }
 
 // -----------------------------------------------------------------------
@@ -579,7 +649,7 @@ function pct(itens, ids) {
 
 function liderDentre(itens) {
   const c = config();
-  const candidatos = itens.filter((i) => i.id !== c.NSNO_ID);
+  const candidatos = (itens || []).filter((i) => i.id !== c.NSNO_ID);
   if (!candidatos.length) return null;
   return candidatos.reduce((melhor, atual) => (atual.pct > melhor.pct ? atual : melhor), candidatos[0]);
 }
@@ -593,43 +663,64 @@ function kpiHtml({ rotulo, valor, legenda, classe }) {
     </div>`;
 }
 
-function renderizarKPIs({ q1, q12, q2, q5 }) {
+// IDs das opções que contam como resposta "positiva"/"negativa" em
+// qualquer pergunta de avaliação — cobre tanto a escala de 5 pontos
+// (Ótimo...Péssimo, usada em avaliacaoEstadual/avaliacaoPresidente e no
+// Q12 do Tocantins) quanto a binária Aprova/Desaprova (Q12 do Maranhão).
+// Cada pergunta só contém os ids do seu próprio esquema, então somar por
+// essa lista única funciona nos dois questionários sem precisar de
+// condicional por município.
+const IDS_POSITIVOS_AVALIACAO = ["otimo", "otima", "bom", "boa", "aprova"];
+const IDS_NEGATIVOS_AVALIACAO = ["ruim", "pessimo", "pessima", "desaprova"];
+
+const KPIS_AVALIACAO = [
+  {
+    papel: "avaliacaoEstadual",
+    rotuloPositivo: "Aprovação do Governo",
+    rotuloNegativo: "Reprovação do Governo",
+    legendaPositiva: "Somatório de Ótimo + Bom",
+    legendaNegativa: "Somatório de Ruim + Péssimo",
+  },
+  {
+    papel: "avaliacaoPresidente",
+    rotuloPositivo: "Aprovação do Governo Federal",
+    rotuloNegativo: "Reprovação do Governo Federal",
+    legendaPositiva: "Somatório de Ótimo + Bom",
+    legendaNegativa: "Somatório de Ruim + Péssimo",
+  },
+  {
+    papel: "avaliacaoPrefeito",
+    rotuloPositivo: "Aprovação do Prefeito",
+    rotuloNegativo: "Reprovação do Prefeito",
+    legendaPositiva: "Somatório das respostas positivas",
+    legendaNegativa: "Somatório das respostas negativas",
+  },
+];
+
+function renderizarKPIs(series) {
   const container = document.getElementById("grade-kpis");
-  const semDados = (itens) => itens.reduce((s, i) => s + i.pct, 0) === 0;
+  const semDados = (itens) => (itens || []).reduce((s, i) => s + i.pct, 0) === 0;
 
   const blocos = [];
 
-  if (!semDados(q1)) {
+  for (const { papel, rotuloPositivo, rotuloNegativo, legendaPositiva, legendaNegativa } of KPIS_AVALIACAO) {
+    const itens = series[papel];
+    if (!idPara(papel) || semDados(itens)) continue;
     blocos.push(kpiHtml({
-      rotulo: "Aprovação do Governo",
-      valor: `${pct(q1, ["otimo", "bom"])}%`,
-      legenda: "Somatório de Ótimo + Bom",
+      rotulo: rotuloPositivo,
+      valor: `${pct(itens, IDS_POSITIVOS_AVALIACAO)}%`,
+      legenda: legendaPositiva,
       classe: "positivo",
     }));
     blocos.push(kpiHtml({
-      rotulo: "Reprovação do Governo",
-      valor: `${pct(q1, ["ruim", "pessimo"])}%`,
-      legenda: "Somatório de Ruim + Péssimo",
+      rotulo: rotuloNegativo,
+      valor: `${pct(itens, IDS_NEGATIVOS_AVALIACAO)}%`,
+      legenda: legendaNegativa,
       classe: "negativo",
     }));
   }
 
-  if (!semDados(q12)) {
-    blocos.push(kpiHtml({
-      rotulo: "Aprovação do Prefeito",
-      valor: `${pct(q12, ["otima", "boa"])}%`,
-      legenda: "Somatório de Ótima + Boa",
-      classe: "positivo",
-    }));
-    blocos.push(kpiHtml({
-      rotulo: "Reprovação do Prefeito",
-      valor: `${pct(q12, ["ruim", "pessima"])}%`,
-      legenda: "Somatório de Ruim + Péssima",
-      classe: "negativo",
-    }));
-  }
-
-  const liderPresidente = liderDentre(q2);
+  const liderPresidente = liderDentre(series.presidente1Turno);
   if (liderPresidente) {
     blocos.push(kpiHtml({
       rotulo: "Líder — Presidente",
@@ -638,7 +729,7 @@ function renderizarKPIs({ q1, q12, q2, q5 }) {
     }));
   }
 
-  const liderGovernador = liderDentre(q5);
+  const liderGovernador = liderDentre(series.governadorEstimulada);
   if (liderGovernador) {
     blocos.push(kpiHtml({
       rotulo: "Líder — Governador",
@@ -658,27 +749,48 @@ async function carregarTudo() {
   spinner.classList.remove("oculto");
 
   try {
-    const resultados = await Promise.all([
-      carregarGrafico("grafico-q1", "q1", "q1", filtros),
-      carregarGrafico("grafico-q2", "q2", "q2", filtros, { ordenarPorValor: true }),
-      carregarGrafico("grafico-q3", "q3", "q3", filtros, { ordenarPorValor: true }),
-      carregarGraficoAberto("grafico-q4", "q4", filtros),
-      carregarGrafico("grafico-q5", "q5", "q5", filtros, { ordenarPorValor: true }),
-      carregarGrafico("grafico-q6", "q6", "q6", filtros, { ordenarPorValor: true }),
-      carregarGrafico("grafico-q7-1", "q7", "q7_1voto", filtros, { ordenarPorValor: true }),
-      carregarGrafico("grafico-q7-2", "q7", "q7_2voto", filtros, { ordenarPorValor: true }),
-      carregarGraficoAberto("grafico-q8", "q8", filtros),
-      carregarGrafico("grafico-q9", "q9", "q9", filtros, { ordenarPorValor: true }),
-      carregarGraficoAberto("grafico-q10", "q10", filtros),
-      carregarGrafico("grafico-q11", "q11", "q11", filtros, { ordenarPorValor: true }),
-      carregarGrafico("grafico-q12", "q12", "q12", filtros),
+    const [
+      avaliacaoEstadual,
+      avaliacaoPresidente,
+      presidente1Turno,
+      presidente2Turno,
+      governadorAberta,
+      governadorEstimulada,
+      governador2Turno,
+      senado1,
+      senado2,
+      depFederalAberta,
+      depFederalEstimulada,
+      depEstadualAberta,
+      depEstadualEstimulada,
+      avaliacaoPrefeito,
+    ] = await Promise.all([
+      carregarGrafico("grafico-q1", "avaliacaoEstadual", filtros),
+      carregarGrafico("grafico-q1b", "avaliacaoPresidente", filtros),
+      carregarGrafico("grafico-q2", "presidente1Turno", filtros, { ordenarPorValor: true }),
+      carregarGrafico("grafico-q3", "presidente2Turno", filtros, { ordenarPorValor: true }),
+      carregarGraficoAberto("grafico-q4", "governadorAberta", filtros),
+      carregarGrafico("grafico-q5", "governadorEstimulada", filtros, { ordenarPorValor: true }),
+      carregarGrafico("grafico-q6", "governador2Turno", filtros, { ordenarPorValor: true }),
+      carregarGrafico("grafico-q7-1", "senado", filtros, { ordenarPorValor: true }, "_1voto"),
+      carregarGrafico("grafico-q7-2", "senado", filtros, { ordenarPorValor: true }, "_2voto"),
+      carregarGraficoAberto("grafico-q8", "depFederalAberta", filtros),
+      carregarGrafico("grafico-q9", "depFederalEstimulada", filtros, { ordenarPorValor: true }),
+      carregarGraficoAberto("grafico-q10", "depEstadualAberta", filtros),
+      carregarGrafico("grafico-q11", "depEstadualEstimulada", filtros, { ordenarPorValor: true }),
+      carregarGrafico("grafico-q12", "avaliacaoPrefeito", filtros),
     ]);
 
-    const [q1, q2, q3, q4esp, q5, q6, , , q8esp, q9, q10esp, q11, q12] = resultados;
-    renderizarKPIs({ q1, q12, q2, q5 });
+    const series = {
+      avaliacaoEstadual, avaliacaoPresidente, presidente1Turno, presidente2Turno,
+      governadorAberta, governadorEstimulada, governador2Turno, senado1, senado2,
+      depFederalAberta, depFederalEstimulada, depEstadualAberta, depEstadualEstimulada,
+      avaliacaoPrefeito,
+    };
+    renderizarKPIs(series);
 
     try {
-      await carregarAnalisesAvancadas(filtros, { q2, q3, q5, q6, q9, q11, q4esp, q8esp, q10esp });
+      await carregarAnalisesAvancadas(filtros, series);
     } catch (erro) {
       console.error("Falha ao carregar análises avançadas:", erro);
     }

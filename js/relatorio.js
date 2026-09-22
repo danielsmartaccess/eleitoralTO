@@ -16,24 +16,35 @@ function config() {
   return window.encontrarPesquisaPorMunicipio(municipioSelecionado) || window.listarPesquisasDisponiveis()[0];
 }
 
+// "papel" é o id semântico da disputa (ver PERGUNTAS_SEMANTICAS_* em
+// config/pesquisa.js), não o id literal da pergunta — o Tocantins e o
+// Maranhão usam questionários com ordens diferentes (ex.: "Presidente" é
+// q2 no Tocantins e q3 no Maranhão), então o id real é resolvido por
+// município em tempo de render (ver idParaBloco). Blocos cujo papel não
+// existe no questionário do município ativo são omitidos.
 const BLOCOS_FECHADOS = [
-  { titulo: "Avaliação do Governo do Estado (Q1)", questao: "q1" },
-  { titulo: "Presidente (Q2)", questao: "q2" },
-  { titulo: "2º turno Presidente (Q3)", questao: "q3" },
-  { titulo: "Governador (Q5)", questao: "q5" },
-  { titulo: "2º turno Governador (Q6)", questao: "q6" },
-  { titulo: "Senado — 1º voto (Q7)", questao: "q7_1voto" },
-  { titulo: "Senado — 2º voto (Q7)", questao: "q7_2voto" },
-  { titulo: "Deputado Federal (Q9)", questao: "q9" },
-  { titulo: "Deputado Estadual (Q11)", questao: "q11" },
-  { titulo: "Avaliação do Prefeito (Q12)", questao: "q12" },
+  { titulo: "Avaliação do Governo do Estado", papel: "avaliacaoEstadual" },
+  { titulo: "Avaliação do Governo Federal", papel: "avaliacaoPresidente" },
+  { titulo: "Presidente", papel: "presidente1Turno" },
+  { titulo: "2º turno Presidente", papel: "presidente2Turno" },
+  { titulo: "Governador", papel: "governadorEstimulada" },
+  { titulo: "2º turno Governador", papel: "governador2Turno" },
+  { titulo: "Senado — 1º voto", papel: "senado", sufixoDb: "_1voto" },
+  { titulo: "Senado — 2º voto", papel: "senado", sufixoDb: "_2voto" },
+  { titulo: "Deputado Federal", papel: "depFederalEstimulada" },
+  { titulo: "Deputado Estadual", papel: "depEstadualEstimulada" },
+  { titulo: "Avaliação do Prefeito", papel: "avaliacaoPrefeito" },
 ];
 
 const BLOCOS_ABERTOS = [
-  { titulo: "Governador(a) — resposta espontânea (Q4)", questao: "q4", candidatosRef: "governador" },
-  { titulo: "Deputado Federal — resposta espontânea (Q8)", questao: "q8", candidatosRef: "deputadoFederal" },
-  { titulo: "Deputado Estadual — resposta espontânea (Q10)", questao: "q10", candidatosRef: "deputadoEstadual" },
+  { titulo: "Governador(a) — resposta espontânea", papel: "governadorAberta", candidatosRef: "governador" },
+  { titulo: "Deputado Federal — resposta espontânea", papel: "depFederalAberta", candidatosRef: "deputadoFederal" },
+  { titulo: "Deputado Estadual — resposta espontânea", papel: "depEstadualAberta", candidatosRef: "deputadoEstadual" },
 ];
+
+function idParaBloco(papel) {
+  return config().perguntasSemanticas?.[papel];
+}
 
 /** Recebe itens já com percentual calculado (soma exata em 100%, ver
  *  distribuirPercentuais em utils.js) e apenas formata a tabela. */
@@ -68,13 +79,15 @@ async function buscarRespostasPorQuestao(questao) {
 async function renderizarBlocosFechados(alvo) {
   let html = "";
   for (const bloco of BLOCOS_FECHADOS) {
-    const registros = await buscarRespostasPorQuestao(bloco.questao);
+    const questao = idParaBloco(bloco.papel);
+    if (!questao) continue;
+    const registros = await buscarRespostasPorQuestao(questao + (bloco.sufixoDb || ""));
     const contagem = {};
     for (const r of registros) contagem[r.valor || "Não informado"] = (contagem[r.valor || "Não informado"] || 0) + 1;
     const entradas = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
     const percentuais = distribuirPercentuais(entradas.map(([, qtd]) => qtd), registros.length);
     const itens = entradas.map(([label], i) => ({ label, pct: percentuais[i] }));
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}</div>`;
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)} (${questao.toUpperCase()})</h3>${tabelaPercentual(itens)}</div>`;
   }
   alvo.innerHTML += html;
 }
@@ -82,13 +95,15 @@ async function renderizarBlocosFechados(alvo) {
 async function renderizarBlocosAbertos(alvo) {
   let html = "";
   for (const bloco of BLOCOS_ABERTOS) {
-    const registros = await buscarRespostasPorQuestao(bloco.questao);
+    const questao = idParaBloco(bloco.papel);
+    if (!questao) continue;
+    const registros = await buscarRespostasPorQuestao(questao);
     const candidatos = config().candidatos[bloco.candidatosRef] || [];
     const { itens } = agregarTextoLivre(
       registros.map((r) => r.valor),
       { limite: LIMITE_MENCOES_ESPONTANEAS, candidatos }
     );
-    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)}</h3>${tabelaPercentual(itens)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta. "Demais menções (dispersas)" soma as citações fora das ${LIMITE_MENCOES_ESPONTANEAS} mais lembradas; não equivale a "não sabe/não respondeu".</p></div>`;
+    html += `<div class="mb-1"><h3 class="titulo-secao">${escapeHtml(bloco.titulo)} (${questao.toUpperCase()})</h3>${tabelaPercentual(itens)}<p class="texto-suave">Menções mais citadas, em % do total de respostas à pergunta. "Demais menções (dispersas)" soma as citações fora das ${LIMITE_MENCOES_ESPONTANEAS} mais lembradas; não equivale a "não sabe/não respondeu".</p></div>`;
   }
   alvo.innerHTML += html;
 }
