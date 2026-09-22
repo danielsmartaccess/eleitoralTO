@@ -2,3 +2,16 @@
 Thumbs.db
 *.log
 .claude/settings.local.json
+
+# Entregaveis e material comercial da Foccus (relatorios de pesquisa,
+# propostas, arquivos "SEDE - ..."). O repositorio e PUBLICO e serve o app
+# pelo GitHub Pages: dados de pesquisa e material de cliente nao entram aqui
+# - ficam no repositorio privado/Drive do projeto. Ver README.
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.pdf
+
+# Windows
+desktop.ini
