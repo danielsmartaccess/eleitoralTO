@@ -25,7 +25,15 @@ create table public.pesquisas (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
   municipio text not null,
+  -- Coleta aberta para novas entrevistas; espelha ativoParaColeta em
+  -- config/pesquisa.js. Não filtra relatório: as views agregam todo o
+  -- histórico, encerrado ou não.
   ativa boolean not null default true,
+  -- Momento do encerramento (NULL = aberta). A coleta é offline-first, então o
+  -- corte é pela data do fato e não pela data do envio: entrevista com
+  -- coletado_em anterior a esta marca ainda é aceita (backlog do aparelho),
+  -- posterior é recusada por rpc_sync_entrevista.
+  encerrada_em timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -36,7 +44,11 @@ create table public.entrevistas (
   -- da entrevista. Reenviar a mesma entrevista nunca cria duplicata porque a
   -- sincronização faz upsert por session_id.
   session_id text not null unique,
-  pesquisa_id uuid references public.pesquisas(id) on delete set null,
+  -- not null + restrict: entrevista órfã (desligada da pesquisa) é erro, nunca
+  -- estado válido. As views do dashboard agregam por entrevistas.municipio e
+  -- não fazem join com `pesquisas`, então uma órfã continuaria sendo contada
+  -- sem ninguém perceber — por isso o banco a impede na origem.
+  pesquisa_id uuid not null references public.pesquisas(id) on delete restrict,
   pesquisador text not null,
   status text not null default 'em_andamento' check (status in ('em_andamento', 'completo')),
   municipio text,

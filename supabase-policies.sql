@@ -53,6 +53,9 @@ as $$
 declare
   v_id uuid;
   v_pesquisa_id uuid;
+  v_municipio text;
+  v_coletado_em timestamptz;
+  v_encerrada_em timestamptz;
 begin
   if p_payload ->> 'session_id' is null then
     raise exception 'session_id é obrigatório';
@@ -62,16 +65,46 @@ begin
     raise exception 'pesquisador é obrigatório';
   end if;
 
-  -- O app de campo não conhece o uuid da pesquisa (não há mais login que o
-  -- entregue) — resolve pelo município quando pesquisa_id não vier no
-  -- payload.
+  v_municipio := p_payload ->> 'municipio';
+  v_coletado_em := coalesce((p_payload ->> 'coletado_em')::timestamptz, now());
   v_pesquisa_id := (p_payload ->> 'pesquisa_id')::uuid;
+
   if v_pesquisa_id is null then
-    select id into v_pesquisa_id
+    -- O app de campo não conhece o uuid da pesquisa (não há mais login que o
+    -- entregue) — resolve pelo município. Deliberadamente SEM filtrar por
+    -- `ativa`: o aparelho pode estar enviando entrevista legítima de uma coleta
+    -- já encerrada (fila offline). Quem decide se ela entra é o corte por data,
+    -- logo abaixo.
+    select id, encerrada_em
+      into v_pesquisa_id, v_encerrada_em
     from public.pesquisas
-    where municipio = p_payload ->> 'municipio' and ativa = true
-    order by created_at desc
+    where municipio = v_municipio
+    order by ativa desc, created_at desc
     limit 1;
+  else
+    select encerrada_em
+      into v_encerrada_em
+    from public.pesquisas
+    where id = v_pesquisa_id;
+
+    if not found then
+      raise exception 'pesquisa_id % não existe', v_pesquisa_id;
+    end if;
+  end if;
+
+  -- Sem esta checagem a função seguia em frente e gravava a entrevista com
+  -- pesquisa_id NULL: não era rejeição, era órfã silenciosa.
+  if v_pesquisa_id is null then
+    raise exception 'nenhuma pesquisa cadastrada para o municipio %',
+      coalesce(v_municipio, '(nulo)');
+  end if;
+
+  -- Corte pela data do fato, não pela data do envio: backlog offline entra,
+  -- entrevista nova em município encerrado não.
+  if v_encerrada_em is not null and v_coletado_em >= v_encerrada_em then
+    raise exception
+      'coleta de % encerrada em %; entrevista coletada em % foi recusada',
+      v_municipio, v_encerrada_em, v_coletado_em;
   end if;
 
   insert into public.entrevistas (
@@ -82,8 +115,8 @@ begin
     v_pesquisa_id,
     p_payload ->> 'pesquisador',
     coalesce(p_payload ->> 'status', 'em_andamento'),
-    p_payload ->> 'municipio',
-    coalesce((p_payload ->> 'coletado_em')::timestamptz, now()),
+    v_municipio,
+    v_coletado_em,
     (p_payload ->> 'duracao_seg')::integer
   )
   on conflict (session_id) do update set
