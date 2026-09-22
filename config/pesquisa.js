@@ -929,7 +929,10 @@ const PESQUISA_CHAPADINHA_MA = {
     nome: "Pesquisa Eleitoral Chapadinha (MA) 2026",
     municipio: "Chapadinha",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Belezinha",
   NSNO_ID,
   NSNO_TEXTO,
