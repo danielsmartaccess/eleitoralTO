@@ -161,8 +161,16 @@ async function main() {
   iniciarControleFonte();
   iniciarSincronizacaoAutomatica();
 
+  // A seleção salva no aparelho não basta: se a coleta daquele município foi
+  // encerrada depois da última abertura do app (ativoParaColeta: false), o
+  // pesquisador seguiria coletando nele sem nunca rever a tela de escolha —
+  // tirar o município da lista só resolve para quem ainda não escolheu.
   const idPesquisaSelecionada = window.obterIdPesquisaSelecionada();
-  if (!idPesquisaSelecionada) {
+  const aindaAberta = window
+    .listarPesquisasParaColeta()
+    .some((p) => p.id === idPesquisaSelecionada);
+  if (!idPesquisaSelecionada || !aindaAberta) {
+    if (idPesquisaSelecionada) window.limparPesquisaSelecionada();
     mostrarSelecaoPesquisa();
     return;
   }

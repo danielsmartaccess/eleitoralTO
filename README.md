@@ -8,11 +8,12 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Maranhão**
-(**São Bernardo**, **Magalhães de Almeida**, **Araioses**, **Tutóia**,
-**Santa Quitéria do Maranhão** e **Água Doce do Maranhão**); os municípios do Tocantins já
-coletados (**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional** e
-**Paraíso do Tocantins**) seguem só para consulta em dashboard/relatório/admin
-(`ativoParaColeta: false` em `config/pesquisa.js`). O pesquisador escolhe qual
+(**Chapadinha** e **Brejo**); os municípios já coletados do Maranhão (**São Bernardo**,
+**Magalhães de Almeida**, **Araioses**, **Tutóia**, **Santa Quitéria do
+Maranhão** e **Água Doce do Maranhão**) e do Tocantins (**Araguaína**,
+**Palmas**, **Gurupi**, **Porto Nacional** e **Paraíso do Tocantins**) seguem
+só para consulta em dashboard/relatório/admin (`ativoParaColeta: false` em
+`config/pesquisa.js`). O pesquisador escolhe qual
 pesquisa vai coletar na tela inicial, e a escolha fica salva no aparelho.
 
 ## Arquitetura

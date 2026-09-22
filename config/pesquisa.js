@@ -194,6 +194,28 @@ function criarPerguntasPadrao() {
 }
 
 // --------------------------------------------------------------------
+// Mapa semântico do questionário padrão (Tocantins) — usado pelo
+// dashboard/relatório para saber qual id de pergunta representa cada
+// disputa, em vez de assumir "q2 é sempre Presidente" etc. Necessário
+// porque o questionário do Maranhão (ver PERGUNTAS_SEMANTICAS_MARANHAO)
+// usa uma ordem diferente de perguntas para as mesmas disputas.
+// --------------------------------------------------------------------
+const PERGUNTAS_SEMANTICAS_PADRAO = {
+  avaliacaoEstadual: "q1",
+  presidente1Turno: "q2",
+  presidente2Turno: "q3",
+  governadorAberta: "q4",
+  governadorEstimulada: "q5",
+  governador2Turno: "q6",
+  senado: "q7",
+  depFederalAberta: "q8",
+  depFederalEstimulada: "q9",
+  depEstadualAberta: "q10",
+  depEstadualEstimulada: "q11",
+  avaliacaoPrefeito: "q12",
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: Araguaína 2026
 // --------------------------------------------------------------------
 const PESQUISA_ARAGUAINA = {
@@ -246,6 +268,7 @@ const PESQUISA_ARAGUAINA = {
     ],
   },
   perguntas: criarPerguntasPadrao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PADRAO,
 };
 
 // --------------------------------------------------------------------
@@ -301,6 +324,7 @@ const PESQUISA_PALMAS = {
     ],
   },
   perguntas: criarPerguntasPadrao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PADRAO,
 };
 
 // --------------------------------------------------------------------
@@ -347,6 +371,7 @@ const PESQUISA_GURUPI = {
     ],
   },
   perguntas: criarPerguntasPadrao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PADRAO,
 };
 
 // --------------------------------------------------------------------
@@ -397,6 +422,7 @@ const PESQUISA_PORTO_NACIONAL = {
     ],
   },
   perguntas: criarPerguntasPadrao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PADRAO,
 };
 
 // --------------------------------------------------------------------
@@ -450,6 +476,7 @@ const PESQUISA_PARAISO = {
     ],
   },
   perguntas: criarPerguntasPadrao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PADRAO,
 };
 
 // --------------------------------------------------------------------
@@ -616,6 +643,27 @@ function criarPerguntasPadraoMaranhao() {
 }
 
 // --------------------------------------------------------------------
+// Mapa semântico do questionário padrão do Maranhão — mesma finalidade de
+// PERGUNTAS_SEMANTICAS_PADRAO, mas seguindo a ordem própria do MA: inclui
+// "avaliacaoPresidente" (exclusiva do MA) e não tem "governador2Turno"
+// (o MA não pergunta 2º turno para Governador).
+// --------------------------------------------------------------------
+const PERGUNTAS_SEMANTICAS_MARANHAO = {
+  avaliacaoPresidente: "q1",
+  avaliacaoEstadual: "q2",
+  presidente1Turno: "q3",
+  presidente2Turno: "q4",
+  governadorAberta: "q5",
+  governadorEstimulada: "q6",
+  senado: "q7",
+  depFederalAberta: "q8",
+  depFederalEstimulada: "q9",
+  depEstadualAberta: "q10",
+  depEstadualEstimulada: "q11",
+  avaliacaoPrefeito: "q12",
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: São Bernardo (MA) 2026
 // --------------------------------------------------------------------
 const PESQUISA_SAO_BERNARDO_MA = {
@@ -624,7 +672,10 @@ const PESQUISA_SAO_BERNARDO_MA = {
     nome: "Pesquisa Eleitoral São Bernardo (MA) 2026",
     municipio: "São Bernardo",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Chico Carvalho",
   NSNO_ID,
   NSNO_TEXTO,
@@ -646,6 +697,7 @@ const PESQUISA_SAO_BERNARDO_MA = {
     ],
   },
   perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
@@ -657,7 +709,10 @@ const PESQUISA_MAGALHAES_ALMEIDA_MA = {
     nome: "Pesquisa Eleitoral Magalhães de Almeida (MA) 2026",
     municipio: "Magalhães de Almeida",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Nonato Carvalho",
   NSNO_ID,
   NSNO_TEXTO,
@@ -694,6 +749,7 @@ const PESQUISA_MAGALHAES_ALMEIDA_MA = {
       atalhos: ["Não sabe", "Não opinou", "Nenhum"],
     },
   ],
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
@@ -705,7 +761,10 @@ const PESQUISA_ARAIOSES_MA = {
     nome: "Pesquisa Eleitoral Araioses (MA) 2026",
     municipio: "Araioses",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Neto Carvalho",
   NSNO_ID,
   NSNO_TEXTO,
@@ -726,6 +785,7 @@ const PESQUISA_ARAIOSES_MA = {
     ],
   },
   perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
@@ -737,7 +797,10 @@ const PESQUISA_TUTOIA_MA = {
     nome: "Pesquisa Eleitoral Tutóia (MA) 2026",
     municipio: "Tutóia",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Viriato Cardoso",
   NSNO_ID,
   NSNO_TEXTO,
@@ -762,6 +825,7 @@ const PESQUISA_TUTOIA_MA = {
     ],
   },
   perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
@@ -773,7 +837,10 @@ const PESQUISA_SANTA_QUITERIA_MA = {
     nome: "Pesquisa Eleitoral Santa Quitéria do Maranhão (MA) 2026",
     municipio: "Santa Quitéria do Maranhão",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Sâmia Moreira",
   NSNO_ID,
   NSNO_TEXTO,
@@ -805,6 +872,7 @@ const PESQUISA_SANTA_QUITERIA_MA = {
       atalhos: ["Não sabe", "Não opinou", "Nenhum"],
     },
   ],
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
@@ -816,7 +884,10 @@ const PESQUISA_AGUA_DOCE_DO_MARANHAO_MA = {
     nome: "Pesquisa Eleitoral Água Doce do Maranhão (MA) 2026",
     municipio: "Água Doce do Maranhão",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Eliane Dias",
   NSNO_ID,
   NSNO_TEXTO,
@@ -846,12 +917,112 @@ const PESQUISA_AGUA_DOCE_DO_MARANHAO_MA = {
     ],
   },
   perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Chapadinha (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_CHAPADINHA_MA = {
+  id: "chapadinha_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Chapadinha (MA) 2026",
+    municipio: "Chapadinha",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Belezinha",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "fabiana_vilar", texto: "Fabiana Vilar" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+      { id: "larissa_dp", texto: "Larissa DP" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "dra_gisele_bezerra", texto: "Dra. Gisele Bezerra" },
+      { id: "wandrian", texto: "Wandrian" },
+      { id: "garreto", texto: "Garreto" },
+    ],
+    deputadoEstadual: [
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "catule", texto: "Catulé" },
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "kaio_hortegal", texto: "Kaio Hortegal" },
+      { id: "bruna_pessoa", texto: "Bruna Pessoa" },
+      { id: "claudio_cunha", texto: "Cláudio Cunha" },
+    ],
+  },
+  // q13 é exclusiva de Chapadinha (não faz parte do questionário padrão do
+  // Maranhão), no mesmo formato já usado em Magalhães de Almeida e Santa
+  // Quitéria do Maranhão.
+  perguntas: [
+    ...criarPerguntasPadraoMaranhao(),
+    {
+      id: "q13",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Chapadinha?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ],
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Brejo (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_BREJO_MA = {
+  id: "brejo_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Brejo (MA) 2026",
+    municipio: "Brejo",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Thâmara Castro",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "rubens_junior", texto: "Rubens Júnior" },
+      { id: "junior_moraes", texto: "Júnior Moraes" },
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+      { id: "larissa_dp", texto: "Larissa DP" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "dra_gisele_bezerra", texto: "Dra. Gisele Bezerra" },
+    ],
+    deputadoEstadual: [
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "ze_farias", texto: "Zé Farias" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "catule", texto: "Catulé" },
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "kaio_hortegal", texto: "Kaio Hortegal" },
+      { id: "bruna_pessoa", texto: "Bruna Pessoa" },
+    ],
+  },
+  // Sem pergunta municipal de 2028: o instrumento de Brejo termina na q12
+  // (aprovação da prefeita), como em São Bernardo, Araioses e Tutóia.
+  perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
 };
 
 // --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
+  chapadinha_ma: PESQUISA_CHAPADINHA_MA,
+  brejo_ma: PESQUISA_BREJO_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
