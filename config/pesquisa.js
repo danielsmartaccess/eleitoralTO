@@ -1021,11 +1021,67 @@ const PESQUISA_BREJO_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Mata Roma (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_MATA_ROMA_MA = {
+  id: "mata_roma_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Mata Roma (MA) 2026",
+    municipio: "Mata Roma",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Besaliel",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "rubens_junior", texto: "Rubens Júnior" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+      { id: "larissa_dp", texto: "Larissa DP" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "dra_gisele_bezerra", texto: "Dra. Gisele Bezerra" },
+    ],
+    deputadoEstadual: [
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "ze_farias", texto: "Zé Farias" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "catule", texto: "Catulé" },
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "kaio_hortegal", texto: "Kaio Hortegal" },
+      { id: "bruna_pessoa", texto: "Bruna Pessoa" },
+      { id: "glinoel_garreto", texto: "Glinoel Garreto" },
+    ],
+  },
+  // q13 é exclusiva de Mata Roma (não faz parte do questionário padrão do
+  // Maranhão), no mesmo formato já usado em Magalhães de Almeida, Santa
+  // Quitéria do Maranhão e Chapadinha.
+  perguntas: [
+    ...criarPerguntasPadraoMaranhao(),
+    {
+      id: "q13",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Mata Roma-MA?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ],
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
   chapadinha_ma: PESQUISA_CHAPADINHA_MA,
   brejo_ma: PESQUISA_BREJO_MA,
+  mata_roma_ma: PESQUISA_MATA_ROMA_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
