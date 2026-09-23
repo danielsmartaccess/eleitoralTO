@@ -987,7 +987,10 @@ const PESQUISA_BREJO_MA = {
     nome: "Pesquisa Eleitoral Brejo (MA) 2026",
     municipio: "Brejo",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Thâmara Castro",
   NSNO_ID,
   NSNO_TEXTO,
@@ -1029,7 +1032,10 @@ const PESQUISA_MATA_ROMA_MA = {
     nome: "Pesquisa Eleitoral Mata Roma (MA) 2026",
     municipio: "Mata Roma",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Besaliel",
   NSNO_ID,
   NSNO_TEXTO,
@@ -1076,12 +1082,58 @@ const PESQUISA_MATA_ROMA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Vargem Grande (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_VARGEM_GRANDE_MA = {
+  id: "vargem_grande_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Vargem Grande (MA) 2026",
+    municipio: "Vargem Grande",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Preto",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "juliana", texto: "Juliana" },
+      { id: "otelino_neto", texto: "Otelino Neto" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "fabiana_vilar", texto: "Fabiana Vilar" },
+      { id: "erlanio_xavier", texto: "Erlânio Xavier" },
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+      { id: "larissa_dp", texto: "Larissa DP" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "dra_gisele_bezerra", texto: "Dra. Gisele Bezerra" },
+    ],
+    deputadoEstadual: [
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "ze_farias", texto: "Zé Farias" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "catule", texto: "Catulé" },
+      { id: "antonio_pereira", texto: "Antônio Pereira" },
+      { id: "joao_igor", texto: "João Igor" },
+      { id: "kaio_hortegal", texto: "Kaio Hortegal" },
+      { id: "bruna_pessoa", texto: "Bruna Pessoa" },
+      { id: "glinoel_garreto", texto: "Glinoel Garreto" },
+    ],
+  },
+  perguntas: criarPerguntasPadraoMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
   chapadinha_ma: PESQUISA_CHAPADINHA_MA,
   brejo_ma: PESQUISA_BREJO_MA,
   mata_roma_ma: PESQUISA_MATA_ROMA_MA,
+  vargem_grande_ma: PESQUISA_VARGEM_GRANDE_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
