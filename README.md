@@ -8,7 +8,7 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Maranhão**
-(**Vargem Grande**); os municípios já coletados do Maranhão (**São
+(**Vargem Grande** e **Itapecuru Mirim**); os municípios já coletados do Maranhão (**São
 Bernardo**, **Magalhães de Almeida**, **Araioses**, **Tutóia**, **Santa
 Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**, **Brejo**
 e **Mata Roma**) e do Tocantins (**Araguaína**,

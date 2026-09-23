@@ -1127,6 +1127,66 @@ const PESQUISA_VARGEM_GRANDE_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Itapecuru Mirim (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_ITAPECURU_MIRIM_MA = {
+  id: "itapecuru_mirim_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Itapecuru Mirim (MA) 2026",
+    municipio: "Itapecuru Mirim",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Filipe Marreca",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_MARANHAO,
+    deputadoFederal: [
+      { id: "hildo_rocha", texto: "Hildo Rocha" },
+      { id: "marreca", texto: "Marreca" },
+      { id: "coroba", texto: "Coroba" },
+      { id: "junior_lourenco", texto: "Júnior Lourenço" },
+      { id: "bira_do_pindare", texto: "Bira do Pindaré" },
+      { id: "dra_gisele_bezerra", texto: "Dra. Gisele Bezerra" },
+      { id: "iracema_vale", texto: "Iracema Vale" },
+      { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+      { id: "cleber_verde", texto: "Cléber Verde" },
+      { id: "aldir_junior", texto: "Aldir Júnior" },
+      { id: "fabiana_vilar", texto: "Fabiana Vilar" },
+    ],
+    deputadoEstadual: [
+      { id: "neto_evangelista", texto: "Neto Evangelista" },
+      { id: "vanessa_marreca", texto: "Vanessa Marreca" },
+      { id: "aluisio_santos", texto: "Aluísio Santos" },
+      { id: "tiago_fernandes", texto: "Tiago Fernandes" },
+      { id: "dino_aldenora_belo", texto: "Dino do Aldenora Belo" },
+      { id: "marcos_caldas", texto: "Marcos Caldas" },
+      { id: "gleydson_resende", texto: "Gleydson Resende" },
+      { id: "ana_do_gas", texto: "Ana do Gás" },
+      { id: "junior_viana", texto: "Júnior Viana" },
+      { id: "rui_jorge", texto: "Rui Jorge" },
+    ],
+  },
+  // q13 é exclusiva de Itapecuru Mirim (não faz parte do questionário padrão
+  // do Maranhão). O instrumento enviado pelo cliente citava "Mata Roma-MA"
+  // no texto da Q13 (colado do questionário anterior) — corrigido aqui para
+  // o município correto; conferir com o cliente antes de liberar o campo.
+  perguntas: [
+    ...criarPerguntasPadraoMaranhao(),
+    {
+      id: "q13",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Itapecuru Mirim-MA?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ],
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
@@ -1134,6 +1194,7 @@ const PESQUISAS_CONFIG = {
   brejo_ma: PESQUISA_BREJO_MA,
   mata_roma_ma: PESQUISA_MATA_ROMA_MA,
   vargem_grande_ma: PESQUISA_VARGEM_GRANDE_MA,
+  itapecuru_mirim_ma: PESQUISA_ITAPECURU_MIRIM_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
