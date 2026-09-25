@@ -480,6 +480,167 @@ const PESQUISA_PARAISO = {
 };
 
 // --------------------------------------------------------------------
+// Questionário — Piraquê (TO). Instrumento próprio enviado pelo cliente:
+// diferente do padrão do Tocantins (criarPerguntasPadrao()), não tem
+// avaliação do governo estadual (q1 do padrão) nem pergunta aberta para
+// Governador antes da estimulada; tem 2º turno para Governador (que o
+// padrão TO também tem) e usa aprovação BINÁRIA de prefeito (estilo
+// Maranhão/Itinga do Maranhão), não a escala de 5 pontos do padrão TO.
+// Termina com espontânea sobre o(a) próximo(a) prefeito(a) em 2028, igual
+// ao padrão usado em vários municípios do MA (Magalhães de Almeida, Santa
+// Quitéria do Maranhão, Chapadinha, Mata Roma).
+// --------------------------------------------------------------------
+function criarPerguntasPiraqueTO() {
+  return [
+    {
+      id: "q1",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você vai votar para Presidente da República?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "presidente",
+    },
+    {
+      id: "q2",
+      tipo: "single_choice",
+      texto:
+        "Pensando no segundo turno, entre Lula e Flávio Bolsonaro, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "presidente2Turno",
+    },
+    {
+      id: "q3",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você vai votar para Governador(a) do Estado do Tocantins?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "governador",
+    },
+    {
+      id: "q4",
+      tipo: "single_choice",
+      texto:
+        "Pensando no segundo turno, entre Professora Dorinha e Vicentinho Júnior, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "governador2Turno",
+    },
+    {
+      id: "q5",
+      tipo: "two_votes",
+      texto:
+        "Considerando que neste ano você terá a opção de escolher dois candidatos para o Senador do Estado do Tocantins, qual seria seu primeiro e segundo voto se a eleição ocorresse hoje?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "senado",
+      regraVotoDuplicado: "proibirMesmoCandidatoRealNosDoisVotos",
+    },
+    {
+      id: "q6",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado Federal do Estado do Tocantins?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q7",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Federal do Estado do Tocantins?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoFederal",
+    },
+    {
+      id: "q8",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Estadual do Estado do Tocantins?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q9",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Estadual do Estado do Tocantins?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoEstadual",
+    },
+    {
+      id: "q10",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova a administração do atual prefeito {{prefeito}}?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+    {
+      id: "q11",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Piraquê-TO?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ];
+}
+
+const PERGUNTAS_SEMANTICAS_PIRAQUE_TO = {
+  presidente1Turno: "q1",
+  presidente2Turno: "q2",
+  governadorEstimulada: "q3",
+  governador2Turno: "q4",
+  senado: "q5",
+  depFederalAberta: "q6",
+  depFederalEstimulada: "q7",
+  depEstadualAberta: "q8",
+  depEstadualEstimulada: "q9",
+  avaliacaoPrefeito: "q10",
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Piraquê (TO) 2026
+// --------------------------------------------------------------------
+const PESQUISA_PIRAQUE_TO = {
+  id: "piraque_to",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Piraquê (TO) 2026",
+    municipio: "Piraquê",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Neto S.O.S",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_TOCANTINS,
+    deputadoFederal: [
+      { id: "jair_farias", texto: "Jair Farias" },
+      { id: "lucas_campelo", texto: "Lucas Campelo" },
+      { id: "tiago_dimas", texto: "Tiago Dimas" },
+      { id: "sandoval_cardoso", texto: "Sandoval Cardoso" },
+      { id: "henrique_martins", texto: "Henrique Martins" },
+      { id: "felipe_martins", texto: "Felipe Martins" },
+    ],
+    deputadoEstadual: [
+      { id: "gipao", texto: "Gipão" },
+      { id: "marcus_marcelo", texto: "Marcus Marcelo" },
+      { id: "alessandro_borges", texto: "Alessandro Borges" },
+      { id: "eduardo_madruga", texto: "Eduardo Madruga" },
+      { id: "wiston_gomes", texto: "Wiston Gomes" },
+    ],
+  },
+  perguntas: criarPerguntasPiraqueTO(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PIRAQUE_TO,
+};
+
+// --------------------------------------------------------------------
 // Disputas estaduais/nacionais — Maranhão. Compartilhadas entre todas as
 // pesquisas municipais do MA, igual ao padrão do Tocantins acima.
 // --------------------------------------------------------------------
@@ -1411,6 +1572,7 @@ const PESQUISAS_CONFIG = {
   gurupi: PESQUISA_GURUPI,
   porto_nacional: PESQUISA_PORTO_NACIONAL,
   paraiso: PESQUISA_PARAISO,
+  piraque_to: PESQUISA_PIRAQUE_TO,
 };
 
 const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";
