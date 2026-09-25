@@ -1402,7 +1402,10 @@ const PESQUISA_VARGEM_GRANDE_MA = {
     nome: "Pesquisa Eleitoral Vargem Grande (MA) 2026",
     municipio: "Vargem Grande",
   },
-  ativoParaColeta: true,
+  // Coleta já encerrada neste município — some da tela de escolha de pesquisa
+  // (js/inicio.js), mas segue disponível em dashboard/relatório para
+  // consultar os dados já coletados (ver listarPesquisasParaColeta abaixo).
+  ativoParaColeta: false,
   prefeitoAtual: "Preto",
   NSNO_ID,
   NSNO_TEXTO,
