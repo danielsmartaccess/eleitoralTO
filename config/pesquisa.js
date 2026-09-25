@@ -664,6 +664,157 @@ const PERGUNTAS_SEMANTICAS_MARANHAO = {
 };
 
 // --------------------------------------------------------------------
+// Questionário — Itinga do Maranhão (MA) e seus povoados (Paulistão,
+// Cajuapará). Instrumento próprio enviado pelo cliente para este
+// município: diferente do padrão MA acima, NÃO pergunta avaliação do
+// governo Lula/estadual, mas pergunta 2º turno para Governador (que o
+// padrão MA não tem); prefeito(a) segue binário (aprova/desaprova), igual
+// ao padrão MA. Compartilhado pelos 3 (sede + 2 povoados) porque é o mesmo
+// instrumento de coleta, só que aplicado em coletas/locais separados.
+// --------------------------------------------------------------------
+function criarPerguntasItingaMaranhao() {
+  return [
+    {
+      id: "q1",
+      tipo: "single_choice",
+      texto: "Se a eleição para Presidente da República fosse hoje, em qual destes candidatos você votaria?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "presidente",
+    },
+    {
+      id: "q2",
+      tipo: "single_choice",
+      texto: "Pensando no segundo turno, entre Lula e Flávio Bolsonaro, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "presidente2Turno",
+    },
+    {
+      id: "q3",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Governador do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q4",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Governador do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "governador",
+    },
+    {
+      id: "q5",
+      tipo: "single_choice",
+      texto: "Pensando no segundo turno, entre Orleans Brandão e Eduardo Braide, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "governador2Turno",
+    },
+    {
+      id: "q6",
+      tipo: "two_votes",
+      texto:
+        "Considerando que neste ano você terá a opção de escolher dois candidatos para o Senador do Estado do Maranhão, qual seria seu primeiro e segundo voto se a eleição ocorresse hoje?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "senado",
+      regraVotoDuplicado: "proibirMesmoCandidatoRealNosDoisVotos",
+    },
+    {
+      id: "q7",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q8",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoFederal",
+    },
+    {
+      id: "q9",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q10",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoEstadual",
+    },
+    {
+      id: "q11",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova a administração da atual prefeita {{prefeito}}?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+  ];
+}
+
+const PERGUNTAS_SEMANTICAS_ITINGA_MARANHAO = {
+  presidente1Turno: "q1",
+  presidente2Turno: "q2",
+  governadorAberta: "q3",
+  governadorEstimulada: "q4",
+  governador2Turno: "q5",
+  senado: "q6",
+  depFederalAberta: "q7",
+  depFederalEstimulada: "q8",
+  depEstadualAberta: "q9",
+  depEstadualEstimulada: "q10",
+  avaliacaoPrefeito: "q11",
+};
+
+// Candidatos estaduais/nacionais para Itinga do Maranhão e seus povoados —
+// igual à base do MA, mas adiciona governador2Turno (Orleans Brandão x
+// Eduardo Braide), que os demais municípios do MA não perguntam.
+const CANDIDATOS_ITINGA_MARANHAO = {
+  ...CANDIDATOS_ESTADUAIS_MARANHAO,
+  governador2Turno: [
+    { id: "orleans_brandao", texto: "Orleans Brandão" },
+    { id: "eduardo_braide", texto: "Eduardo Braide" },
+  ],
+  deputadoFederal: [
+    { id: "larissa_dp", texto: "Larissa DP" },
+    { id: "josivaldo_jp", texto: "Josivaldo JP" },
+    { id: "amanda_gentil", texto: "Amanda Gentil" },
+    { id: "mariana_carvalho", texto: "Mariana Carvalho" },
+    { id: "ze_carlos_do_pt", texto: "Zé Carlos do PT" },
+    { id: "marreca_filho", texto: "Marreca Filho" },
+    { id: "pedro_lucas", texto: "Pedro Lucas" },
+    { id: "bira_do_pindare", texto: "Bira do Pindaré" },
+    { id: "iracema_vale", texto: "Iracema Vale" },
+  ],
+  deputadoEstadual: [
+    { id: "ricardo_arruda", texto: "Ricardo Arruda" },
+    { id: "ulisses_goncalves", texto: "Ulisses Gonçalves" },
+    { id: "ze_inacio_do_pt", texto: "Zé Inácio do PT" },
+    { id: "vanessa_marreca", texto: "Vanessa Marreca" },
+    { id: "segundo", texto: "Segundo" },
+  ],
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: São Bernardo (MA) 2026
 // --------------------------------------------------------------------
 const PESQUISA_SAO_BERNARDO_MA = {
@@ -1187,6 +1338,57 @@ const PESQUISA_ITAPECURU_MIRIM_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Itinga do Maranhão (MA) 2026 — sede + povoados Paulistão e
+// Cajuapará. Mesmo instrumento de coleta (perguntas e candidatos) nos 3,
+// mas cada um é uma coleta/pesquisa própria (municipio distinto), para que
+// dashboard/relatório/admin tratem cada localidade separadamente.
+// --------------------------------------------------------------------
+const PESQUISA_ITINGA_MARANHAO_MA = {
+  id: "itinga_maranhao_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Itinga do Maranhão (MA) 2026",
+    municipio: "Itinga do Maranhão",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Paula do Quininha",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_ITINGA_MARANHAO },
+  perguntas: criarPerguntasItingaMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_ITINGA_MARANHAO,
+};
+
+const PESQUISA_ITINGA_MARANHAO_PAULISTAO_MA = {
+  id: "itinga_maranhao_paulistao_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Itinga do Maranhão - Povoado Paulistão (MA) 2026",
+    municipio: "Itinga do Maranhão - Povoado Paulistão",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Paula do Quininha",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_ITINGA_MARANHAO },
+  perguntas: criarPerguntasItingaMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_ITINGA_MARANHAO,
+};
+
+const PESQUISA_ITINGA_MARANHAO_CAJUAPARA_MA = {
+  id: "itinga_maranhao_cajuapara_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Itinga do Maranhão - Povoado Cajuapará (MA) 2026",
+    municipio: "Itinga do Maranhão - Povoado Cajuapará",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Paula do Quininha",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_ITINGA_MARANHAO },
+  perguntas: criarPerguntasItingaMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_ITINGA_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
@@ -1195,6 +1397,9 @@ const PESQUISAS_CONFIG = {
   mata_roma_ma: PESQUISA_MATA_ROMA_MA,
   vargem_grande_ma: PESQUISA_VARGEM_GRANDE_MA,
   itapecuru_mirim_ma: PESQUISA_ITAPECURU_MIRIM_MA,
+  itinga_maranhao_ma: PESQUISA_ITINGA_MARANHAO_MA,
+  itinga_maranhao_paulistao_ma: PESQUISA_ITINGA_MARANHAO_PAULISTAO_MA,
+  itinga_maranhao_cajuapara_ma: PESQUISA_ITINGA_MARANHAO_CAJUAPARA_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
