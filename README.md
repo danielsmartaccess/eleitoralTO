@@ -8,16 +8,17 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Maranhão**
-(**Itapecuru Mirim** e **Itinga do Maranhão** — sede e os povoados
-**Paulistão** e **Cajuapará**, cada um como coleta própria mas com o mesmo
-instrumento) e no **Tocantins** (**Piraquê**); os municípios já coletados do
-Maranhão (**São Bernardo**, **Magalhães de Almeida**, **Araioses**,
-**Tutóia**, **Santa Quitéria do Maranhão**, **Água Doce do Maranhão**,
-**Chapadinha**, **Brejo**, **Mata Roma** e **Vargem Grande**) e do Tocantins
-(**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional** e **Paraíso do
-Tocantins**) seguem só para consulta em dashboard/relatório/admin
-(`ativoParaColeta: false` em `config/pesquisa.js`). O pesquisador escolhe qual
-pesquisa vai coletar na tela inicial, e a escolha fica salva no aparelho.
+(**Itinga do Maranhão** — só os povoados **Paulistão** e **Cajuapará**, a
+sede já encerrada — cada um como coleta própria mas com o mesmo instrumento)
+e no **Tocantins** (**Piraquê**); os municípios já coletados do Maranhão
+(**São Bernardo**, **Magalhães de Almeida**, **Araioses**, **Tutóia**,
+**Santa Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**,
+**Brejo**, **Mata Roma**, **Vargem Grande**, **Itapecuru Mirim** e
+**Itinga do Maranhão** — sede) e do Tocantins (**Araguaína**, **Palmas**,
+**Gurupi**, **Porto Nacional** e **Paraíso do Tocantins**) seguem só para
+consulta em dashboard/relatório/admin (`ativoParaColeta: false` em
+`config/pesquisa.js`). O pesquisador escolhe qual pesquisa vai coletar na
+tela inicial, e a escolha fica salva no aparelho.
 
 ## Arquitetura
 
