@@ -976,6 +976,167 @@ const CANDIDATOS_ITINGA_MARANHAO = {
 };
 
 // --------------------------------------------------------------------
+// Questionário — Campestre do Maranhão (MA) e seus povoados (Cabeceira
+// Grande, Cachimbeiro, Vila Nova). Instrumento próprio enviado pelo
+// cliente: em vez da avaliação separada Lula/governo estadual do padrão
+// MA, tem só UMA avaliação no topo ("gestão municipal", escala de 5
+// pontos) e NÃO tem pergunta de aprovação binária do prefeito no fim —
+// substituída por uma pergunta espontânea sobre o(a) próximo(a)
+// prefeito(a) em 2028 (papel que outros municípios do MA tratam como
+// "q13" extra, aqui é a própria q11). Também tem espontânea de
+// Presidente antes da estimulada, que o padrão MA não tem. Compartilhado
+// pelos 4 (sede + 3 povoados) porque é o mesmo instrumento de coleta, só
+// que aplicado em coletas/locais separados — ver
+// [[workflow-novo-municipio]] no padrão de Itinga do Maranhão acima.
+// --------------------------------------------------------------------
+function criarPerguntasCampestreMaranhao() {
+  return [
+    {
+      id: "q1",
+      tipo: "single_choice",
+      texto: "Como você avalia a atual gestão municipal?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "otima", texto: "Ótima", valorNum: 5 },
+        { id: "boa", texto: "Boa", valorNum: 4 },
+        { id: "regular", texto: "Regular", valorNum: 3 },
+        { id: "ruim", texto: "Ruim", valorNum: 2 },
+        { id: "pessima", texto: "Péssima", valorNum: 1 },
+      ],
+    },
+    {
+      id: "q2",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Presidente da República?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q3",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Presidente da República?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "presidente",
+    },
+    {
+      id: "q4",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Governador(a) do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q5",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Governador(a) do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "governador",
+    },
+    {
+      id: "q6",
+      tipo: "two_votes",
+      texto:
+        "Considerando que neste ano você terá a opção de escolher dois candidatos para o Senador(a) do Estado do Maranhão, qual seria seu primeiro e segundo voto se a eleição ocorresse hoje?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "senado",
+      regraVotoDuplicado: "proibirMesmoCandidatoRealNosDoisVotos",
+    },
+    {
+      id: "q7",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Federal?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q8",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Federal?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoFederal",
+    },
+    {
+      id: "q9",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Estadual?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q10",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Estadual?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoEstadual",
+    },
+    {
+      id: "q11",
+      tipo: "open_text",
+      texto:
+        "Em relação às eleições municipais de 2028, quem você votaria para prefeito(a) de Campestre do Maranhão-MA?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+  ];
+}
+
+// Mapa semântico de Campestre do Maranhão: só "avaliacaoPrefeito" entre as
+// avaliações (não há avaliação separada de governo federal/estadual aqui),
+// sem presidente2Turno/governador2Turno (não perguntados). q2 (presidente
+// espontânea) e q11 (próximo prefeito 2028) ficam de fora do mapa — mesmo
+// padrão de q13 extra nos demais municípios do MA: coletado, mas sem
+// papel semântico exibido em dashboard/relatório.
+const PERGUNTAS_SEMANTICAS_CAMPESTRE_MARANHAO = {
+  avaliacaoPrefeito: "q1",
+  presidente1Turno: "q3",
+  governadorAberta: "q4",
+  governadorEstimulada: "q5",
+  senado: "q6",
+  depFederalAberta: "q7",
+  depFederalEstimulada: "q8",
+  depEstadualAberta: "q9",
+  depEstadualEstimulada: "q10",
+};
+
+// Candidatos estaduais/nacionais para Campestre do Maranhão e seus povoados
+// — mesma base do MA (presidente/governador/senado batem com
+// CANDIDATOS_ESTADUAIS_MARANHAO), com deputado federal/estadual próprios
+// do instrumento enviado pelo cliente.
+const CANDIDATOS_CAMPESTRE_MARANHAO = {
+  ...CANDIDATOS_ESTADUAIS_MARANHAO,
+  deputadoFederal: [
+    { id: "amanda_gentil", texto: "Amanda Gentil" },
+    { id: "fabio_macedo", texto: "Fábio Macedo" },
+    { id: "hildo_rocha", texto: "Hildo Rocha" },
+    { id: "josivaldo_jp", texto: "Josivaldo JP" },
+    { id: "larissa_dp", texto: "Larissa DP" },
+    { id: "pedro_lucas", texto: "Pedro Lucas" },
+    { id: "vinicius_ferro", texto: "Vinícius Ferro" },
+  ],
+  deputadoEstadual: [
+    { id: "antonio_pereira", texto: "Antônio Pereira" },
+    { id: "sebastiao_madeira", texto: "Sebastião Madeira" },
+    { id: "maria_clara_macedo", texto: "Maria Clara Macedo" },
+    { id: "ricardo_sedel", texto: "Ricardo Sedel" },
+    { id: "ricardo_arruda", texto: "Ricardo Arruda" },
+    { id: "claudio_cunha", texto: "Cláudio Cunha" },
+    { id: "machinha", texto: "Machinha" },
+    { id: "paulo_case", texto: "Paulo Casé" },
+  ],
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: São Bernardo (MA) 2026
 // --------------------------------------------------------------------
 const PESQUISA_SAO_BERNARDO_MA = {
@@ -1553,6 +1714,69 @@ const PESQUISA_ITINGA_MARANHAO_CAJUAPARA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Campestre do Maranhão (MA) 2026 — sede + povoados Cabeceira
+// Grande, Cachimbeiro e Vila Nova. Mesmo instrumento de coleta (perguntas e
+// candidatos) nos 4, mas cada um é uma coleta/pesquisa própria (municipio
+// distinto), para que dashboard/relatório/admin tratem cada localidade
+// separadamente.
+// --------------------------------------------------------------------
+const PESQUISA_CAMPESTRE_MARANHAO_MA = {
+  id: "campestre_maranhao_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Campestre do Maranhão (MA) 2026",
+    municipio: "Campestre do Maranhão",
+  },
+  ativoParaColeta: true,
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
+  perguntas: criarPerguntasCampestreMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_CAMPESTRE_MARANHAO,
+};
+
+const PESQUISA_CAMPESTRE_MARANHAO_CABECEIRA_GRANDE_MA = {
+  id: "campestre_maranhao_cabeceira_grande_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Cabeceira Grande (MA) 2026",
+    municipio: "Campestre do Maranhão - Povoado Cabeceira Grande",
+  },
+  ativoParaColeta: true,
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
+  perguntas: criarPerguntasCampestreMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_CAMPESTRE_MARANHAO,
+};
+
+const PESQUISA_CAMPESTRE_MARANHAO_CACHIMBEIRO_MA = {
+  id: "campestre_maranhao_cachimbeiro_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Cachimbeiro (MA) 2026",
+    municipio: "Campestre do Maranhão - Povoado Cachimbeiro",
+  },
+  ativoParaColeta: true,
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
+  perguntas: criarPerguntasCampestreMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_CAMPESTRE_MARANHAO,
+};
+
+const PESQUISA_CAMPESTRE_MARANHAO_VILA_NOVA_MA = {
+  id: "campestre_maranhao_vila_nova_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Vila Nova (MA) 2026",
+    municipio: "Campestre do Maranhão - Povoado Vila Nova",
+  },
+  ativoParaColeta: true,
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
+  perguntas: criarPerguntasCampestreMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_CAMPESTRE_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
@@ -1564,6 +1788,10 @@ const PESQUISAS_CONFIG = {
   itinga_maranhao_ma: PESQUISA_ITINGA_MARANHAO_MA,
   itinga_maranhao_paulistao_ma: PESQUISA_ITINGA_MARANHAO_PAULISTAO_MA,
   itinga_maranhao_cajuapara_ma: PESQUISA_ITINGA_MARANHAO_CAJUAPARA_MA,
+  campestre_maranhao_ma: PESQUISA_CAMPESTRE_MARANHAO_MA,
+  campestre_maranhao_cabeceira_grande_ma: PESQUISA_CAMPESTRE_MARANHAO_CABECEIRA_GRANDE_MA,
+  campestre_maranhao_cachimbeiro_ma: PESQUISA_CAMPESTRE_MARANHAO_CACHIMBEIRO_MA,
+  campestre_maranhao_vila_nova_ma: PESQUISA_CAMPESTRE_MARANHAO_VILA_NOVA_MA,
   sao_bernardo_ma: PESQUISA_SAO_BERNARDO_MA,
   magalhaes_almeida_ma: PESQUISA_MAGALHAES_ALMEIDA_MA,
   araioses_ma: PESQUISA_ARAIOSES_MA,
