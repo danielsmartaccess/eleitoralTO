@@ -236,8 +236,14 @@ filtros de pesquisador/período:
 
 ### Ainda não coberto (depende do instrumento, não do código)
 
-- Recortes sociodemográficos (sexo, idade, escolaridade, renda, região) — o
-  questionário não coleta perfil do entrevistado.
+- Recortes sociodemográficos (sexo, idade, escolaridade, renda, região) — a
+  maioria dos questionários não coleta perfil do entrevistado. Exceção:
+  Campestre do Maranhão (sede e povoados) tem `perfil_sexo`, `perfil_bairro`
+  e `perfil_faixa_etaria` no instrumento (`criarPerguntasCampestreMaranhao()`
+  em `config/pesquisa.js`), gravados como qualquer outra pergunta EAV em
+  `public.respostas` — coletados, mas ainda sem painel/cruzamento dedicado em
+  dashboard/relatório (que só resolve perguntas por papel semântico em
+  `perguntasSemanticas`).
 - Rejeição explícita ("em quem não votaria de jeito nenhum").
 - Série histórica entre ondas de campo.
 

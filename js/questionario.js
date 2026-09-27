@@ -9,7 +9,7 @@
 // Tipos suportados: single_choice, open_text, two_votes.
 // ============================================================================
 
-import { montarOpcoesComNSNO } from "./utils.js";
+import { montarOpcoesComNSNO, embaralhar } from "./utils.js";
 
 function resolverOpcoesReais(pergunta, config) {
   if (pergunta.opcoesRef) return config.candidatos[pergunta.opcoesRef] || [];
@@ -34,16 +34,31 @@ export function getPassos(config) {
 }
 
 /**
- * Retorna a lista de opções já ordenada para exibição (com NSNO por último),
- * calculando-a uma única vez por entrevista e reutilizando em telas
- * seguintes/retomadas. Muta `entrevista.ordem_opcoes` e devolve o array
- * pronto para renderizar — quem chama é responsável por persistir a
- * entrevista depois (mesma disciplina do salvamento progressivo).
+ * Retorna a lista de opções já ordenada para exibição (com NSNO por último,
+ * salvo em perguntas `semNSNO` — ver abaixo), calculando-a uma única vez por
+ * entrevista e reutilizando em telas seguintes/retomadas. Muta
+ * `entrevista.ordem_opcoes` e devolve o array pronto para renderizar — quem
+ * chama é responsável por persistir a entrevista depois (mesma disciplina do
+ * salvamento progressivo).
  */
 export function obterOpcoesOrdenadas(passo, entrevista, config) {
   if (!passo.opcoesReais) return [];
 
   entrevista.ordem_opcoes = entrevista.ordem_opcoes || {};
+
+  // Perguntas de perfil do entrevistado (sexo, bairro, faixa etária) não
+  // levam "Não sabe/Não opinou" — o pesquisador sempre sabe/observa essas
+  // respostas, então oferecer NS/NO ali só confundiria a coleta.
+  if (passo.semNSNO) {
+    if (entrevista.ordem_opcoes[passo.id]) {
+      const idsSalvos = entrevista.ordem_opcoes[passo.id];
+      const porId = new Map(passo.opcoesReais.map((o) => [o.id, o]));
+      return idsSalvos.map((id) => porId.get(id)).filter(Boolean);
+    }
+    const ordenadas = passo.randomize ? embaralhar(passo.opcoesReais) : [...passo.opcoesReais];
+    entrevista.ordem_opcoes[passo.id] = ordenadas.map((o) => o.id);
+    return ordenadas;
+  }
 
   if (entrevista.ordem_opcoes[passo.id]) {
     const idsSalvos = entrevista.ordem_opcoes[passo.id];

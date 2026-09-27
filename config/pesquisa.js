@@ -988,9 +988,66 @@ const CANDIDATOS_ITINGA_MARANHAO = {
 // pelos 4 (sede + 3 povoados) porque é o mesmo instrumento de coleta, só
 // que aplicado em coletas/locais separados — ver
 // [[workflow-novo-municipio]] no padrão de Itinga do Maranhão acima.
+//
+// Único instrumento do app que coleta "PERFIL DO ENTREVISTADO" (sexo,
+// bairro, faixa etária) — os demais municípios não pedem esse recorte
+// (ver README, seção "Ainda não coberto"). Os 3 campos de perfil ficam
+// com ids próprios (fora da numeração q1..q11 do cliente, que só começa
+// na pergunta de avaliação) e `semNSNO: true`, porque o pesquisador
+// sempre sabe/observa essas respostas — oferecer "Não sabe/Não opinou"
+// nelas não faz sentido. Não têm papel em `perguntasSemanticas`: ficam
+// gravadas em `public.respostas` como qualquer outra pergunta, prontas
+// para cruzamento manual, mas sem painel dedicado em dashboard/relatório
+// (que só resolve perguntas por papel semântico) até que isso seja pedido.
 // --------------------------------------------------------------------
 function criarPerguntasCampestreMaranhao() {
   return [
+    {
+      id: "perfil_sexo",
+      tipo: "single_choice",
+      texto: "Sexo do(a) entrevistado(a)",
+      obrigatoria: true,
+      randomize: false,
+      semNSNO: true,
+      opcoes: [
+        { id: "masculino", texto: "Masculino" },
+        { id: "feminino", texto: "Feminino" },
+      ],
+    },
+    {
+      id: "perfil_bairro",
+      tipo: "single_choice",
+      texto: "Bairro do(a) entrevistado(a)",
+      obrigatoria: true,
+      randomize: false,
+      semNSNO: true,
+      opcoes: [
+        { id: "centro", texto: "Centro" },
+        { id: "torre", texto: "Torre" },
+        { id: "alto_da_bela_vista", texto: "Alto da Bela Vista" },
+        { id: "alfredo_santos", texto: "Alfredo Santos" },
+        { id: "santa_monica", texto: "Santa Mônica" },
+        { id: "sao_raimundo", texto: "São Raimundo" },
+        { id: "cabeceira_verde", texto: "Cabeceira Verde" },
+        { id: "primavera", texto: "Primavera" },
+        { id: "vila_macedo", texto: "Vila Macedo" },
+      ],
+    },
+    {
+      id: "perfil_faixa_etaria",
+      tipo: "single_choice",
+      texto: "Faixa etária do(a) entrevistado(a)",
+      obrigatoria: true,
+      randomize: false,
+      semNSNO: true,
+      opcoes: [
+        { id: "16_a_24", texto: "16 a 24 anos" },
+        { id: "25_a_39", texto: "25 a 39 anos" },
+        { id: "40_a_50", texto: "40 a 50 anos" },
+        { id: "51_a_60", texto: "51 a 60 anos" },
+        { id: "acima_de_60", texto: "Acima de 60 anos" },
+      ],
+    },
     {
       id: "q1",
       tipo: "single_choice",
