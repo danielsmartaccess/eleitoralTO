@@ -9,11 +9,12 @@ pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Tocantins**
 (**Piraquê**) e no **Maranhão** (**Campestre do Maranhão** — sede, Cabeceira
-Grande, Cachimbeiro e Vila Nova); os demais municípios já coletados do
-Maranhão (**São Bernardo**, **Magalhães de Almeida**, **Araioses**,
-**Tutóia**, **Santa Quitéria do Maranhão**, **Água Doce do Maranhão**,
-**Chapadinha**, **Brejo**, **Mata Roma**, **Vargem Grande**,
-**Itapecuru Mirim** e **Itinga do Maranhão** — sede, Paulistão e Cajuapará)
+Grande e Vila Nova); os demais municípios já coletados do Maranhão
+(**São Bernardo**, **Magalhães de Almeida**, **Araioses**, **Tutóia**,
+**Santa Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**,
+**Brejo**, **Mata Roma**, **Vargem Grande**, **Itapecuru Mirim**,
+**Itinga do Maranhão** — sede, Paulistão e Cajuapará — e o povoado
+**Cachimbeiro** de Campestre do Maranhão)
 e do Tocantins (**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional** e
 **Paraíso do Tocantins**) seguem só para consulta em dashboard/relatório/
 admin (`ativoParaColeta: false` em `config/pesquisa.js`). O pesquisador
