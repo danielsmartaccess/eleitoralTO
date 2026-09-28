@@ -1811,7 +1811,7 @@ const PESQUISA_CAMPESTRE_MARANHAO_CACHIMBEIRO_MA = {
     nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Cachimbeiro (MA) 2026",
     municipio: "Campestre do Maranhão - Povoado Cachimbeiro",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   NSNO_ID,
   NSNO_TEXTO,
   candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
