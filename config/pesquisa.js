@@ -1843,7 +1843,7 @@ const PESQUISA_CAMPESTRE_MARANHAO_MA = {
     nome: "Pesquisa Eleitoral Campestre do Maranhão (MA) 2026",
     municipio: "Campestre do Maranhão",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   NSNO_ID,
   NSNO_TEXTO,
   candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
