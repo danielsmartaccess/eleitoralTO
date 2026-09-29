@@ -614,7 +614,7 @@ const PESQUISA_PIRAQUE_TO = {
     nome: "Pesquisa Eleitoral Piraquê (TO) 2026",
     municipio: "Piraquê",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   prefeitoAtual: "Neto S.O.S",
   NSNO_ID,
   NSNO_TEXTO,
@@ -637,6 +637,66 @@ const PESQUISA_PIRAQUE_TO = {
     ],
   },
   perguntas: criarPerguntasPiraqueTO(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PIRAQUE_TO,
+};
+
+// --------------------------------------------------------------------
+// Pesquisa: Araguatins (TO) 2026
+//
+// Instrumento próprio enviado pelo cliente: mesma estrutura/ordem de
+// perguntas de Piraquê (TO) — ver criarPerguntasPiraqueTO() acima — então
+// reaproveita a função em vez de duplicar o array, só sobrescrevendo a q11
+// (espontânea final), cujo texto cita o município por extenso ("Araguatins-TO")
+// em vez de usar {{prefeito}}. Reaproveita também o mapa semântico
+// PERGUNTAS_SEMANTICAS_PIRAQUE_TO, já que os papéis (q1..q11) são idênticos.
+// --------------------------------------------------------------------
+function criarPerguntasAraguatinsTO() {
+  const perguntas = criarPerguntasPiraqueTO();
+  const q11 = perguntas.find((p) => p.id === "q11");
+  q11.texto =
+    "Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para ser o(a) próximo(a) prefeito(a) de Araguatins-TO?";
+  return perguntas;
+}
+const PESQUISA_ARAGUATINS_TO = {
+  id: "araguatins_to",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Araguatins (TO) 2026",
+    municipio: "Araguatins",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Aquiles da Areia",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_TOCANTINS,
+    deputadoFederal: [
+      { id: "tiago_dimas", texto: "Tiago Dimas" },
+      { id: "jair_farias", texto: "Jair Farias" },
+      { id: "irata_abreu", texto: "Iratã Abreu" },
+      { id: "alfredo_junior", texto: "Alfredo Júnior" },
+      { id: "osires_damaso", texto: "Osires Damaso" },
+      { id: "janad_valcari", texto: "Janad Valcari" },
+      { id: "lucas_campelo", texto: "Lucas Campelo" },
+      { id: "felipe_martins", texto: "Felipe Martins" },
+      { id: "sandoval_cardoso", texto: "Sandoval Cardoso" },
+      { id: "celio_moura", texto: "Célio Moura" },
+      { id: "fabio_vaz", texto: "Fábio Vaz" },
+    ],
+    deputadoEstadual: [
+      { id: "wesla_do_aquiles", texto: "Wesla do Aquiles" },
+      { id: "wiston_gomes", texto: "Wiston Gomes" },
+      { id: "wanderley_milhomem", texto: "Wanderley Milhomem" },
+      { id: "paulinho_do_bonifacio", texto: "Paulinho do Bonifácio" },
+      { id: "prof_adriano", texto: "Prof. Adriano" },
+      { id: "ho_che_min", texto: "Ho Che Min" },
+      { id: "katia_chaves", texto: "Kátia Chaves" },
+      { id: "eduardo_dertins", texto: "Eduardo Dertins" },
+      { id: "moisemar_marinho", texto: "Moisemar Marinho" },
+      { id: "jorge_frederico", texto: "Jorge Frederico" },
+      { id: "marcus_marcelo", texto: "Marcus Marcelo" },
+    ],
+  },
+  perguntas: criarPerguntasAraguatinsTO(),
   perguntasSemanticas: PERGUNTAS_SEMANTICAS_PIRAQUE_TO,
 };
 
@@ -1861,6 +1921,7 @@ const PESQUISAS_CONFIG = {
   porto_nacional: PESQUISA_PORTO_NACIONAL,
   paraiso: PESQUISA_PARAISO,
   piraque_to: PESQUISA_PIRAQUE_TO,
+  araguatins_to: PESQUISA_ARAGUATINS_TO,
 };
 
 const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";
