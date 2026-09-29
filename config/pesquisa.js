@@ -1857,7 +1857,7 @@ const PESQUISA_CAMPESTRE_MARANHAO_CABECEIRA_GRANDE_MA = {
     nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Cabeceira Grande (MA) 2026",
     municipio: "Campestre do Maranhão - Povoado Cabeceira Grande",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   NSNO_ID,
   NSNO_TEXTO,
   candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
