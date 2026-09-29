@@ -701,6 +701,58 @@ const PESQUISA_ARAGUATINS_TO = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: Xambioá (TO) 2026
+//
+// Instrumento próprio enviado pelo cliente: mesma estrutura/ordem de
+// perguntas de Piraquê/Araguatins (q1..q10) — ver criarPerguntasPiraqueTO()
+// acima — porém SEM a q11 (espontânea sobre o próximo prefeito em 2028): o
+// questionário de Xambioá termina na aprovação binária do prefeito (q10).
+// Reaproveita a função e descarta a q11, e reaproveita também o mapa
+// semântico PERGUNTAS_SEMANTICAS_PIRAQUE_TO (que já não mapeia a q11).
+// --------------------------------------------------------------------
+function criarPerguntasXambioaTO() {
+  return criarPerguntasPiraqueTO().filter((p) => p.id !== "q11");
+}
+const PESQUISA_XAMBIOA_TO = {
+  id: "xambioa_to",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral Xambioá (TO) 2026",
+    municipio: "Xambioá",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Dr. Mayck Câmara",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: {
+    ...CANDIDATOS_ESTADUAIS_TOCANTINS,
+    deputadoFederal: [
+      { id: "alfredo_junior", texto: "Alfredo Júnior" },
+      { id: "tiago_dimas", texto: "Tiago Dimas" },
+      { id: "janad_valcari", texto: "Janad Valcari" },
+      { id: "jair_farias", texto: "Jair Farias" },
+      { id: "lucas_campelo", texto: "Lucas Campelo" },
+      { id: "sandoval_cardoso", texto: "Sandoval Cardoso" },
+    ],
+    deputadoEstadual: [
+      { id: "junior_diamantino", texto: "Júnior Diamantino" },
+      { id: "raul_cayres", texto: "Raul Cayres" },
+      { id: "gipao", texto: "Gipão" },
+      { id: "jorge_frederico", texto: "Jorge Frederico" },
+      { id: "marcus_marcelo", texto: "Marcus Marcelo" },
+      { id: "paulinho_do_bonifacio", texto: "Paulinho do Bonifácio" },
+      { id: "eduardo_dertins", texto: "Eduardo Dertins" },
+      { id: "terciliano_gomes", texto: "Terciliano Gomes" },
+      { id: "van_van_milhomem", texto: "Van Van Milhomem" },
+      { id: "vanda_monteiro", texto: "Vanda Monteiro" },
+      { id: "katia_chaves", texto: "Kátia Chaves" },
+      { id: "marcos_junior", texto: "Marcos Júnior" },
+    ],
+  },
+  perguntas: criarPerguntasXambioaTO(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_PIRAQUE_TO,
+};
+
+// --------------------------------------------------------------------
 // Disputas estaduais/nacionais — Maranhão. Compartilhadas entre todas as
 // pesquisas municipais do MA, igual ao padrão do Tocantins acima.
 // --------------------------------------------------------------------
@@ -1922,6 +1974,7 @@ const PESQUISAS_CONFIG = {
   paraiso: PESQUISA_PARAISO,
   piraque_to: PESQUISA_PIRAQUE_TO,
   araguatins_to: PESQUISA_ARAGUATINS_TO,
+  xambioa_to: PESQUISA_XAMBIOA_TO,
 };
 
 const CHAVE_PESQUISA_SELECIONADA = "eleitoral_to_pesquisa_selecionada";

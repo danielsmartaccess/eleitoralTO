@@ -8,8 +8,9 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta no **Tocantins**
-(**Araguatins**) e no **Maranhão** (**Campestre do Maranhão** — sede,
-Cabeceira Grande e Vila Nova; o povoado Cachimbeiro já foi encerrado); os
+(**Araguatins** e **Xambioá**) e no **Maranhão** (**Campestre do Maranhão** —
+povoados Cabeceira Grande e Vila Nova; a sede e o povoado Cachimbeiro já foram
+encerrados); os
 demais municípios já coletados do Maranhão (**São Bernardo**,
 **Magalhães de Almeida**, **Araioses**, **Tutóia**,
 **Santa Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**,
