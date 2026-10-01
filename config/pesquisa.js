@@ -1306,6 +1306,155 @@ const CANDIDATOS_CAMPESTRE_MARANHAO = {
 };
 
 // --------------------------------------------------------------------
+// Questionário — João Lisboa (MA). Instrumento próprio enviado pelo
+// cliente: sem avaliação de governo Lula/estadual, sem espontânea de
+// Presidente/Governador/Senado (só estimuladas), mas com 2º turno de
+// Presidente e de Governador; espontâneas apenas para Deputado Federal e
+// Estadual; fecha com aprovação binária do prefeito. O instrumento do
+// cliente pula o número 6 (vai de 5 para 7) — aqui os ids são sequenciais,
+// q1..q10; a correspondência é feita por papel em `perguntasSemanticas`.
+// --------------------------------------------------------------------
+function criarPerguntasJoaoLisboaMaranhao() {
+  return [
+    {
+      id: "q1",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Presidente da República?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "presidente",
+    },
+    {
+      id: "q2",
+      tipo: "single_choice",
+      texto: "Pensando no segundo turno, entre Lula e Flávio Bolsonaro, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "presidente2Turno",
+    },
+    {
+      id: "q3",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Governador do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "governador",
+    },
+    {
+      id: "q4",
+      tipo: "single_choice",
+      texto:
+        "Pensando no segundo turno, entre Orleans Brandão e Eduardo Braide, em quem você votaria para Governador do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "governador2Turno",
+    },
+    {
+      id: "q5",
+      tipo: "two_votes",
+      texto:
+        "Considerando que neste ano você terá a opção de escolher dois candidatos para o Senador do Estado do Maranhão, qual seria seu primeiro e segundo voto se a eleição ocorresse hoje?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "senado",
+      regraVotoDuplicado: "proibirMesmoCandidatoRealNosDoisVotos",
+    },
+    {
+      id: "q6",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q7",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Federal do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoFederal",
+    },
+    {
+      id: "q8",
+      tipo: "open_text",
+      texto: "Se a eleição fosse hoje, em quem você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      id: "q9",
+      tipo: "single_choice",
+      texto: "Em qual destes candidatos você votaria para Deputado(a) Estadual do Estado do Maranhão?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "deputadoEstadual",
+    },
+    {
+      id: "q10",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova a administração do atual prefeito {{prefeito}}?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+  ];
+}
+
+const PERGUNTAS_SEMANTICAS_JOAO_LISBOA_MARANHAO = {
+  presidente1Turno: "q1",
+  presidente2Turno: "q2",
+  governadorEstimulada: "q3",
+  governador2Turno: "q4",
+  senado: "q5",
+  depFederalAberta: "q6",
+  depFederalEstimulada: "q7",
+  depEstadualAberta: "q8",
+  depEstadualEstimulada: "q9",
+  avaliacaoPrefeito: "q10",
+};
+
+// Presidente/Governador/Senado batem 1:1 com CANDIDATOS_ESTADUAIS_MARANHAO
+// (ordem diferente, irrelevante porque as estimuladas são randomize: true);
+// governador2Turno (Orleans Brandão x Eduardo Braide) e deputados são
+// próprios do instrumento enviado pelo cliente.
+const CANDIDATOS_JOAO_LISBOA_MARANHAO = {
+  ...CANDIDATOS_ESTADUAIS_MARANHAO,
+  governador2Turno: [
+    { id: "orleans_brandao", texto: "Orleans Brandão" },
+    { id: "eduardo_braide", texto: "Eduardo Braide" },
+  ],
+  deputadoFederal: [
+    { id: "rubens_junior", texto: "Rubens Júnior" },
+    { id: "josivaldo_jp", texto: "Josivaldo JP" },
+    { id: "larissa_dp", texto: "Larissa DP" },
+    { id: "pedro_lucas", texto: "Pedro Lucas" },
+    { id: "mariana_carvalho", texto: "Mariana Carvalho" },
+    { id: "hildo_rocha", texto: "Hildo Rocha" },
+    { id: "nilson_takashi", texto: "Nilson Takashi" },
+    { id: "cleber_verde", texto: "Cléber Verde" },
+  ],
+  deputadoEstadual: [
+    { id: "sebastiao_madeira", texto: "Sebastião Madeira" },
+    { id: "antonio_pereira", texto: "Antônio Pereira" },
+    { id: "tiago_fernandes", texto: "Tiago Fernandes" },
+    { id: "janaina_ramos", texto: "Janaína Ramos" },
+    { id: "franca_do_macaquinho", texto: "França do Macaquinho" },
+    { id: "manchinha", texto: "Manchinha" },
+    { id: "maria_clara_macedo", texto: "Maria Clara Macedo" },
+    { id: "claudio_cunha", texto: "Cláudio Cunha" },
+    { id: "keke_teixeira", texto: "Kekê Teixeira" },
+    { id: "assis_ramos", texto: "Assis Ramos" },
+    { id: "paulo_case", texto: "Paulo Casé" },
+  ],
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: São Bernardo (MA) 2026
 // --------------------------------------------------------------------
 const PESQUISA_SAO_BERNARDO_MA = {
@@ -1946,9 +2095,28 @@ const PESQUISA_CAMPESTRE_MARANHAO_VILA_NOVA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: João Lisboa (MA) 2026
+// --------------------------------------------------------------------
+const PESQUISA_JOAO_LISBOA_MA = {
+  id: "joao_lisboa_ma",
+  pesquisa: {
+    nome: "Pesquisa Eleitoral João Lisboa (MA) 2026",
+    municipio: "João Lisboa",
+  },
+  ativoParaColeta: true,
+  prefeitoAtual: "Dr. Fábio Holanda",
+  NSNO_ID,
+  NSNO_TEXTO,
+  candidatos: { ...CANDIDATOS_JOAO_LISBOA_MARANHAO },
+  perguntas: criarPerguntasJoaoLisboaMaranhao(),
+  perguntasSemanticas: PERGUNTAS_SEMANTICAS_JOAO_LISBOA_MARANHAO,
+};
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
+  joao_lisboa_ma: PESQUISA_JOAO_LISBOA_MA,
   chapadinha_ma: PESQUISA_CHAPADINHA_MA,
   brejo_ma: PESQUISA_BREJO_MA,
   mata_roma_ma: PESQUISA_MATA_ROMA_MA,
