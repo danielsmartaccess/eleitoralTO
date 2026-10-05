@@ -1,0 +1,439 @@
+/* ============================================================================
+   css/desempenho.css — página "Pesquisa × Urna" (desempenho.html).
+   Reaproveita tokens de app.css e blocos de dashboard.css (KPIs, títulos de
+   bloco, cartões). Cores de gráfico em papéis (custom properties) para que
+   os gráficos sejam escritos contra o papel, não contra o hex.
+   Paleta validada (CVD/contraste) com o validador da skill de dataviz:
+   pesquisa × urna = mesma matiz em dois tons + forma (anel × ponto cheio);
+   viés = divergente azul ↔ vermelho com zero neutro; UF = categórica 1–2.
+   ============================================================================ */
+
+.pagina-desempenho {
+  --serie-pesquisa: #6da7ec;
+  --serie-urna: #0d366b;
+  --vies-acima: #2a78d6;
+  --vies-abaixo: #e34948;
+  --uf-to: #2a78d6;
+  --uf-ma: #eb6834;
+  --ponto-municipio: #898781;
+  --grade: #e1e0d9;
+  --eixo: #c3c2b7;
+  --tinta: #1a1a1a;
+  --tinta-suave: #52514e;
+  --tinta-muda: #6f6d68;
+  --status-ok: #0ca30c;
+  --status-erro: #d03b3b;
+  --status-empate: #b8790a;
+  --superficie: #ffffff;
+}
+
+/* -------------------------------------------------------------------------
+   Abertura e controles
+   ------------------------------------------------------------------------- */
+.abertura { margin: 0.5rem 0 1.25rem; }
+.abertura h1 {
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem);
+  line-height: 1.15;
+  color: var(--cor-primaria-escura);
+  margin: 0.2rem 0 0.5rem;
+}
+.sobretitulo {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cor-acento);
+}
+.abertura-texto { max-width: 68ch; margin: 0; line-height: 1.55; }
+
+.barra-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.barra-controles .mono { margin-left: auto; font-size: 0.78rem; }
+
+.segmentado {
+  display: inline-flex;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  background: var(--cor-branco);
+  padding: 3px;
+  gap: 2px;
+}
+.segmentado button {
+  border: 0;
+  background: transparent;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  min-height: 38px;
+  cursor: pointer;
+}
+.segmentado button:hover { background: var(--cor-primaria-clara); }
+.segmentado button.ativo { background: var(--cor-primaria); color: var(--cor-branco); }
+
+.estado-carregando, .estado-erro {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--cor-texto-suave);
+}
+.estado-erro { color: var(--cor-erro); }
+.spinner-escuro { border-color: rgba(26, 58, 110, 0.2); border-top-color: var(--cor-primaria); }
+
+/* -------------------------------------------------------------------------
+   KPIs — placar por disputa (valor proporcional, nunca N de entrevistas)
+   ------------------------------------------------------------------------- */
+.grade-kpis-desempenho { grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.9rem; margin-bottom: 1.5rem; }
+.grade-kpis-desempenho .kpi { padding: 1rem 1rem 1.05rem; }
+.grade-kpis-desempenho .kpi-rotulo { font-size: 0.7rem; }
+.grade-kpis-desempenho .kpi-valor { font-size: 2.1rem; }
+.kpi-valor small { font-size: 1rem; font-weight: 700; color: var(--cor-texto-suave); margin-left: 0.25rem; }
+.kpi-detalhe {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+.kpi.neutro { border-left-color: var(--cor-alerta); }
+
+/* -------------------------------------------------------------------------
+   Leitura executiva / plano — cartões de texto
+   ------------------------------------------------------------------------- */
+.grade-leitura {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.cartao-leitura { margin: 0; padding: 1.2rem 1.3rem; }
+.cartao-leitura h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  color: var(--cor-primaria-escura);
+}
+.cartao-leitura ul { margin: 0; padding-left: 1.1rem; }
+.cartao-leitura li { margin-bottom: 0.5rem; line-height: 1.5; font-size: 0.92rem; }
+.cartao-leitura li:last-child { margin-bottom: 0; }
+.cartao-leitura .destaque { font-weight: 700; color: var(--cor-primaria-escura); }
+.cartao-leitura.forca { border-top: 4px solid var(--cor-sucesso); }
+.cartao-leitura.atencao { border-top: 4px solid var(--cor-alerta); }
+.cartao-leitura.acao { border-top: 4px solid var(--cor-primaria); }
+
+/* -------------------------------------------------------------------------
+   Tabelas (placar por município e régua de mercado)
+   ------------------------------------------------------------------------- */
+.cartao-tabela { padding: 0.4rem; }
+/* Bloco de referência para os rótulos .sr (position: absolute) das células:
+   sem isso eles escapam do recorte da rolagem e alargam a página no celular. */
+.cartao-tabela .tabela-scroll { position: relative; }
+.tabela-placar, .tabela-mercado {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.tabela-placar th, .tabela-placar td,
+.tabela-mercado th, .tabela-mercado td {
+  padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid var(--grade);
+  text-align: center;
+  white-space: nowrap;
+}
+.tabela-placar thead th, .tabela-mercado thead th {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--cor-primaria-escura);
+  background: var(--cor-primaria-clara);
+  border-bottom: 0;
+}
+.tabela-placar th:first-child, .tabela-placar td:first-child,
+.tabela-mercado th:first-child, .tabela-mercado td:first-child { text-align: left; }
+.tabela-placar tbody th {
+  text-align: left;
+  font-weight: 700;
+  position: sticky;
+  left: 0;
+  background: var(--cor-branco);
+}
+.tabela-placar tbody tr { cursor: pointer; }
+.tabela-placar tbody tr:hover th, .tabela-placar tbody tr:hover td { background: #f6f8fc; }
+.tabela-placar tbody tr.selecionada th, .tabela-placar tbody tr.selecionada td { background: var(--cor-primaria-clara); }
+.tabela-placar .uf { font-size: 0.72rem; font-weight: 700; color: var(--tinta-muda); margin-left: 0.3rem; }
+.tabela-placar .sub, .tabela-mercado .sub { display: block; font-size: 0.74rem; color: var(--tinta-muda); font-weight: 500; }
+.tabela-mercado tr.linha-foccus td { background: #f6f8fc; font-weight: 700; }
+.tabela-mercado a { font-size: 0.75rem; }
+
+.sinal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
+  vertical-align: middle;
+}
+.sinal-ok { background: var(--status-ok); }
+.sinal-erro { background: var(--status-erro); }
+.sinal-empate { background: var(--status-empate); }
+.sinal-texto { font-weight: 700; color: var(--tinta); margin-left: 0.3rem; }
+.sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Detalhe por município — gráfico "haltere" (pesquisa × urna)
+   ------------------------------------------------------------------------- */
+.detalhe-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.detalhe-cabecalho select {
+  min-height: 44px;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-branco);
+  max-width: 100%;
+}
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  list-style: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--tinta-suave);
+}
+.legenda li { display: inline-flex; align-items: center; gap: 0.4rem; }
+.chave { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+.chave-pesquisa { border: 3px solid var(--serie-pesquisa); background: var(--superficie); }
+.chave-urna { background: var(--serie-urna); }
+.chave-to { background: var(--uf-to); }
+.chave-ma { background: var(--uf-ma); }
+
+.grade-detalhe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 1.5rem 2rem;
+}
+.painel-disputa h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  color: var(--cor-primaria-escura);
+}
+.painel-disputa .nota-painel { margin: 0 0 0.7rem; font-size: 0.78rem; color: var(--tinta-muda); }
+
+.halter { display: grid; gap: 0.15rem; }
+.halter-linha {
+  display: grid;
+  grid-template-columns: minmax(96px, 9.5rem) 1fr 7rem;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 38px;
+  padding: 2px 0;
+  border-radius: 6px;
+}
+.halter-linha:hover, .halter-linha:focus-visible { background: #f6f8fc; }
+.halter-nome { font-size: 0.82rem; font-weight: 600; color: var(--tinta); overflow-wrap: anywhere; line-height: 1.2; }
+.halter-trilha { position: relative; height: 26px; }
+.halter-trilha::before { /* baseline do zero */
+  content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1px; background: var(--eixo);
+}
+.halter-grade { position: absolute; top: 4px; bottom: 4px; width: 1px; background: var(--grade); }
+.halter-elo { position: absolute; top: 12px; height: 2px; background: var(--eixo); }
+.marcador {
+  position: absolute;
+  top: 7px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+}
+.marcador-pesquisa { border: 3px solid var(--serie-pesquisa); background: var(--superficie); box-shadow: 0 0 0 2px var(--superficie); }
+.marcador-urna { background: var(--serie-urna); box-shadow: 0 0 0 2px var(--superficie); }
+.halter-valores {
+  font-size: 0.78rem;
+  color: var(--tinta-suave);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+.halter-valores strong { color: var(--tinta); }
+.halter-eixo {
+  display: grid;
+  grid-template-columns: minmax(96px, 9.5rem) 1fr 7rem;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  color: var(--tinta-muda);
+  font-variant-numeric: tabular-nums;
+}
+.halter-eixo .ticks { position: relative; height: 1rem; }
+.halter-eixo .ticks span { position: absolute; transform: translateX(-50%); }
+.halter-eixo .ticks span:first-child { transform: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+.chip strong { color: var(--tinta); }
+.chip .sinal { width: 1rem; height: 1rem; font-size: 0.62rem; }
+
+.painel-restrito {
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 0.9rem 1rem;
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+  background: #fafbfc;
+}
+
+/* -------------------------------------------------------------------------
+   Diagnóstico de viés — barras divergentes + pontos por município
+   ------------------------------------------------------------------------- */
+.grade-diagnostico {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.1rem;
+}
+.grade-diagnostico .cartao { margin: 0; }
+.vies-grupo + .vies-grupo { margin-top: 1rem; }
+.vies-grupo h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tinta-muda);
+}
+.vies-linha {
+  display: grid;
+  grid-template-columns: minmax(92px, 9rem) 1fr 3.4rem;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 28px;
+  border-radius: 6px;
+}
+.vies-linha:hover, .vies-linha:focus-visible { background: #f6f8fc; }
+.vies-nome { font-size: 0.8rem; font-weight: 600; overflow-wrap: anywhere; line-height: 1.2; }
+.vies-trilha { position: relative; height: 24px; }
+.vies-zero { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--eixo); }
+.vies-barra { position: absolute; top: 7px; height: 10px; }
+.vies-barra.acima { background: var(--vies-acima); border-radius: 0 4px 4px 0; }
+.vies-barra.abaixo { background: var(--vies-abaixo); border-radius: 4px 0 0 4px; }
+.vies-ponto {
+  position: absolute;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--ponto-municipio);
+  box-shadow: 0 0 0 2px var(--superficie);
+  opacity: 0.85;
+}
+.vies-valor { font-size: 0.8rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.vies-eixo {
+  display: grid;
+  grid-template-columns: minmax(92px, 9rem) 1fr 3.4rem;
+  gap: 0.55rem;
+  font-size: 0.7rem;
+  color: var(--tinta-muda);
+}
+.vies-eixo .ticks { position: relative; height: 1rem; }
+.vies-eixo .ticks span { position: absolute; transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+.legenda-vies { margin: 0.8rem 0 0; }
+.chave-barra { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.chave-acima { background: var(--vies-acima); }
+.chave-abaixo { background: var(--vies-abaixo); }
+.chave-ponto { width: 8px; height: 8px; background: var(--ponto-municipio); }
+
+/* -------------------------------------------------------------------------
+   Dispersão erro × distância
+   ------------------------------------------------------------------------- */
+.nota-grafico { margin: -0.4rem 0 0.8rem; max-width: 75ch; }
+.grafico-dispersao svg { width: 100%; height: auto; display: block; overflow: visible; }
+.grafico-dispersao .grade-linha { stroke: var(--grade); stroke-width: 1; }
+.grafico-dispersao .eixo-linha { stroke: var(--eixo); stroke-width: 1; }
+.grafico-dispersao text { font-size: 11px; fill: var(--tinta-muda); font-family: var(--fonte); }
+.grafico-dispersao .rotulo-eixo { fill: var(--tinta-suave); font-weight: 600; }
+.grafico-dispersao .ponto { stroke: var(--superficie); stroke-width: 2; }
+.grafico-dispersao .ponto-to { fill: var(--uf-to); }
+.grafico-dispersao .ponto-ma { fill: var(--uf-ma); }
+.grafico-dispersao .alvo { fill: transparent; cursor: pointer; }
+.grafico-dispersao .alvo:hover + .ponto, .grafico-dispersao .alvo:focus + .ponto { stroke: var(--tinta); }
+.grafico-dispersao .faixa-reta-final { fill: #eaf0fb; }
+
+/* -------------------------------------------------------------------------
+   Metodologia
+   ------------------------------------------------------------------------- */
+.metodologia { font-size: 0.88rem; line-height: 1.6; }
+.metodologia h4 { margin: 1rem 0 0.3rem; font-size: 0.9rem; color: var(--cor-primaria-escura); }
+.metodologia h4:first-child { margin-top: 0; }
+.metodologia ul { margin: 0.2rem 0 0.4rem; padding-left: 1.1rem; }
+.metodologia p { margin: 0.2rem 0 0.5rem; }
+
+/* -------------------------------------------------------------------------
+   Tooltip compartilhado
+   ------------------------------------------------------------------------- */
+.dica {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 260px;
+  background: var(--cor-branco);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16, 38, 71, 0.16);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+}
+.dica .dica-titulo { font-weight: 700; color: var(--cor-texto); margin-bottom: 0.3rem; }
+.dica .dica-linha { display: flex; align-items: center; gap: 0.45rem; font-variant-numeric: tabular-nums; }
+.dica .dica-linha strong { color: var(--cor-texto); }
+.dica .dica-chave { width: 12px; height: 3px; border-radius: 2px; flex: none; }
+
+/* -------------------------------------------------------------------------
+   Celular
+   ------------------------------------------------------------------------- */
+@media (max-width: 560px) {
+  .barra-controles .mono { margin-left: 0; width: 100%; }
+  .legenda { margin-left: 0; }
+  .halter-linha, .halter-eixo { grid-template-columns: 1fr auto; }
+  .halter-trilha, .halter-eixo .ticks { grid-column: 1 / -1; grid-row: 2; }
+  .halter-eixo > span:first-child, .halter-eixo > span:last-child { display: none; }
+  .vies-linha, .vies-eixo { grid-template-columns: 6.5rem 1fr 3rem; }
+}
+
+@media print {
+  .barra-controles, nav.abas, .dica { display: none !important; }
+  .cartao { box-shadow: none; break-inside: avoid; }
+}

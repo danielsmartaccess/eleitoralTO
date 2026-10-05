@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <title>Pesquisa × Urna 2026 — Foccus Pesquisas</title>
+  <meta name="description" content="Auditoria pública das pesquisas eleitorais da Foccus Pesquisas frente ao resultado oficial do TSE no 1º turno de 2026." />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/desempenho.css" />
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="marca">
+      <strong>FOCCUS PESQUISAS</strong>
+      <span>Pesquisa × Urna — 1º turno 2026</span>
+    </div>
+    <div class="flex-entre" style="gap:0.6rem;">
+      <div id="status-conexao" class="status-conexao">-</div>
+    </div>
+  </header>
+
+  <nav class="abas">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="relatorio.html">Relatório</a>
+    <a href="desempenho.html" class="ativo">Pesquisa × Urna</a>
+  </nav>
+
+  <main class="container container-dashboard pagina-desempenho">
+    <section class="abertura">
+      <p class="sobretitulo">Auditoria de desempenho · fonte oficial: TSE</p>
+      <h1>Nossas pesquisas frente à urna</h1>
+      <p class="texto-suave abertura-texto" id="abertura-texto">
+        Cada pesquisa municipal que realizamos antes do 1º turno, comparada com o resultado oficial
+        do município — acertos e erros, com a mesma régua usada para avaliar os grandes institutos.
+      </p>
+    </section>
+
+    <section class="barra-controles" aria-label="Filtros da página">
+      <div class="segmentado" role="group" aria-label="Estado">
+        <button type="button" data-uf="" class="ativo">TO + MA</button>
+        <button type="button" data-uf="TO">Tocantins</button>
+        <button type="button" data-uf="MA">Maranhão</button>
+      </div>
+      <div class="segmentado" role="group" aria-label="Visão">
+        <button type="button" data-visao="publica" class="ativo">Visão pública</button>
+        <button type="button" data-visao="analitica">Visão analítica</button>
+      </div>
+      <span class="texto-suave mono" id="carimbo-dados"></span>
+    </section>
+
+    <div class="aviso-metodologico oculto" id="aviso-visao"></div>
+
+    <div id="estado-carregando" class="cartao estado-carregando" role="status">
+      <span class="spinner spinner-escuro"></span> Carregando resultados oficiais e pesquisas…
+    </div>
+    <div id="estado-erro" class="cartao estado-erro oculto" role="alert"></div>
+
+    <div id="conteudo" class="oculto">
+      <h2 class="titulo-bloco">Placar do 1º turno</h2>
+      <section class="grade-kpis grade-kpis-desempenho" id="kpis" aria-live="polite"></section>
+
+      <h2 class="titulo-bloco">Leitura executiva</h2>
+      <section class="grade-leitura" id="leitura-executiva"></section>
+
+      <h2 class="titulo-bloco">Placar por município</h2>
+      <p class="texto-suave descricao-bloco">
+        ✓ a pesquisa apontou quem foi o mais votado no município · ✗ apontou outro nome · ≈ empate na pesquisa.
+        No Senado, quantos dos dois mais votados estavam entre os dois líderes da pesquisa. Abaixo de cada
+        sinal, o erro médio por candidato em pontos percentuais (votos válidos). Toque numa linha para ver o detalhe.
+      </p>
+      <section class="cartao cartao-tabela">
+        <div class="tabela-scroll"><table class="tabela-placar" id="tabela-placar"></table></div>
+      </section>
+
+      <h2 class="titulo-bloco">Detalhe por município</h2>
+      <section class="cartao">
+        <div class="detalhe-cabecalho">
+          <label class="texto-suave" for="seletor-municipio">Município</label>
+          <select id="seletor-municipio"></select>
+          <ul class="legenda" aria-label="Legenda">
+            <li><span class="chave chave-pesquisa" aria-hidden="true"></span>Pesquisa (votos válidos)</li>
+            <li><span class="chave chave-urna" aria-hidden="true"></span>Urna (TSE)</li>
+          </ul>
+        </div>
+        <div id="detalhe-municipio" class="grade-detalhe"></div>
+      </section>
+
+      <h2 class="titulo-bloco">Diagnóstico — onde e por que erramos</h2>
+      <p class="texto-suave descricao-bloco">
+        Erro assinado de cada candidato (pesquisa − urna, em p.p.): barra = média entre os municípios;
+        pontos = cada município. Barra para a direita, a pesquisa mostrou o candidato acima do que ele fez na urna.
+      </p>
+      <section class="grade-diagnostico" id="diagnostico-vies"></section>
+
+      <section class="cartao">
+        <div class="grafico-cabecalho"><h3 class="titulo-grafico">Erro × distância da eleição</h3></div>
+        <p class="texto-suave nota-grafico" id="nota-dispersao"></p>
+        <div id="grafico-dispersao" class="grafico-dispersao"></div>
+      </section>
+
+      <h2 class="titulo-bloco">Régua de mercado</h2>
+      <p class="texto-suave descricao-bloco">
+        As últimas pesquisas dos grandes institutos, avaliadas com exatamente a mesma métrica. Escopo
+        diferente do nosso (amostras estaduais/nacionais, campo na véspera), por isso não é um ranking —
+        é a régua do que o mercado entregou em 2026.
+      </p>
+      <section class="cartao cartao-tabela">
+        <div class="tabela-scroll"><table class="tabela-mercado" id="tabela-mercado"></table></div>
+      </section>
+
+      <h2 class="titulo-bloco">O que muda no 2º turno</h2>
+      <section class="grade-leitura" id="plano-segundo-turno"></section>
+
+      <h2 class="titulo-bloco">Nota metodológica</h2>
+      <section class="cartao metodologia" id="metodologia"></section>
+    </div>
+  </main>
+
+  <div id="dica" class="dica" role="tooltip" hidden></div>
+
+  <script type="module" src="config/supabase.js"></script>
+  <script type="module" src="config/pesquisa.js"></script>
+  <script type="module" src="js/desempenho.js"></script>
+</body>
+</html>

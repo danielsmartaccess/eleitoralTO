@@ -33,6 +33,8 @@ coleta.html    → wizard da entrevista, uma pergunta por tela, 100% offline-fir
 dashboard.html/relatorio.html → resultado da pesquisa em percentual — PÚBLICOS
                  (sem login, é o link que vai ao cliente), com seletor de
                  município/pesquisa para separar os resultados
+desempenho.html → "Pesquisa × Urna": auditoria pública das pesquisas do
+                 1º turno 2026 contra o resultado oficial do TSE
 admin.html      → gestão de campo (Supabase Auth): produtividade por
                  pesquisador, entrevistas paginadas, export CSV
 supabase-*.sql → schema, RLS/RPC e views
@@ -47,11 +49,15 @@ config/pesquisa.js → registro de pesquisas (por município), questionário e
 ├── coleta.html          → wizard da entrevista
 ├── dashboard.html        → resultado em % — gráficos por pergunta + cruzamentos analíticos (público)
 ├── relatorio.html       → resultado em % — tabelas por pergunta (público)
+├── desempenho.html      → Pesquisa × Urna: pesquisas do 1º turno × resultado oficial do TSE (público)
 ├── admin.html           → gestão de campo: produtividade, entrevistas paginadas, export CSV (Supabase Auth)
 ├── css/                  → um arquivo por área + app.css com os tokens de design
 ├── js/                   → um módulo por responsabilidade
 ├── config/pesquisa.js    → TODA a configuração do questionário/candidatos
 ├── config/supabase.js    → URL + anon key (público por natureza, protegido por RLS)
+├── data/urna-2026.json   → resultado oficial do TSE (1º turno 2026) dos municípios pesquisados — gerado
+├── scripts/              → gerar-urna-2026.js (baixa o TSE e casa nomes com o questionário)
+├── tests/                → testes das métricas Pesquisa × Urna (`node --test "tests/*.test.js"`)
 ├── sw.js / manifest.json → PWA
 └── supabase-*.sql        → schema, políticas/RPCs, views
 ```
@@ -66,6 +72,8 @@ config/pesquisa.js → registro de pesquisas (por município), questionário e
 | `js/utils.js` | funções puras (uuid, embaralhar, formatação, escape, `distribuirPercentuais`, casamento de resposta espontânea com candidato) |
 | `js/dashboard.js` | gráficos de resultado + cruzamentos analíticos (voto × voto, transferência de turno, espontânea × estimulada) — sempre em %, lê a view pública |
 | `js/relatorio.js` | mesmo resultado em formato de tabela, por pergunta — página pública |
+| `js/acuracia.js` | métricas puras Pesquisa × Urna (votos válidos, erro médio, vencedor, erro na margem, viés) — sem DOM, testadas em `tests/` |
+| `js/desempenho.js` | página Pesquisa × Urna: lê `data/urna-2026.json` + a view pública e renderiza placar, leitura executiva, gráficos e régua de mercado |
 | `js/admin.js` | gestão de campo atrás de Supabase Auth (produtividade, entrevistas, export CSV) |
 
 ## Sem autenticação no app de campo
@@ -236,6 +244,47 @@ filtros de pesquisador/período:
 - `valor` de pergunta `single_choice` guarda o **texto** da opção (ex.:
   `"Professora Dorinha"`), não o id; `two_votes` (Senado) serializa como
   `q7_1voto` / `q7_2voto`.
+
+### Pesquisa × Urna (`desempenho.html`)
+
+Auditoria pública de desempenho: cada pesquisa municipal (sede) feita antes
+do 1º turno de 04/10/2026 comparada com o resultado oficial do TSE no mesmo
+município, com a régua que imprensa e agregadores usaram para avaliar os
+institutos em 2026.
+
+- **Dados oficiais:** `data/urna-2026.json`, gerado por
+  `node scripts/gerar-urna-2026.js` (Node 18+, internet) a partir de
+  `resultados.tse.jus.br` (eleição 6257 = Presidente; 6259 = Governador,
+  Senado e Deputados). O script casa o nome de urna com o rótulo do
+  questionário (`config/pesquisa.js`); rode com `--revisar` para listar os
+  casamentos não exatos e fixe exceções em `CASAMENTOS_MANUAIS`. O arquivo
+  só tem dado público do TSE — o lado "pesquisa" é lido ao vivo da view,
+  como no dashboard (nenhum resultado de pesquisa entra no repositório).
+- **Base da comparação:** só entrevistas completas feitas até 03/10;
+  povoados (recortes territoriais) e bases abaixo de 30 ficam fora, listados
+  na nota metodológica.
+- **Métricas** (`js/acuracia.js`): votos válidos (exclui NS/NO e
+  renormaliza entre os candidatos de fato apresentados no disco — lidos do
+  log de randomização `q*__ordem`); vencedor no município; erro médio
+  absoluto dos candidatos com ≥ 2% ou top-4 na urna; erro na margem 1º–2º;
+  Senado = menções do 1º + 2º voto; deputados = comparação restrita aos
+  nomes testados. **Empate na pesquisa nunca conta como acerto** (inclusive
+  na fronteira do top-2 do Senado e do top-3 de deputados).
+- **Régua de mercado:** últimas pesquisas de Quaest, Datafolha e
+  AtlasIntel (com fonte), avaliadas com a mesma métrica —
+  `REFERENCIAS_MERCADO` no script gerador.
+- **Visão pública × analítica:** até o 2º turno (25/10), a visão pública
+  (padrão) não mostra percentual por candidato nem erro na margem das
+  disputas que seguem em 2º turno (Presidente; Governador no TO) —
+  divulgar intenção de voto de candidato em disputa aberta exige registro no
+  PesqEle (Lei 9.504/97, art. 33; Res. TSE 23.600/2019). `?visao=analitica`
+  mostra tudo, para apresentação reservada. A restrição expira sozinha
+  depois de 25/10.
+- Como no dashboard, a página nunca mostra N nem contagem de entrevistas; a
+  margem de erro de cada pesquisa só é usada internamente (indicador "dentro
+  da margem").
+
+Testes das métricas: `node --test "tests/*.test.js"`.
 
 ### Ainda não coberto (depende do instrumento, não do código)
 
