@@ -30,8 +30,8 @@ index.html    → app de campo (pesquisador): escolha da pesquisa/município,
                  identificação por nome (sem login), nova entrevista,
                  retomar entrevistas pendentes
 coleta.html    → wizard da entrevista, uma pergunta por tela, 100% offline-first
-dashboard.html/relatorio.html → resultado da pesquisa em percentual — PÚBLICOS
-                 (sem login, é o link que vai ao cliente), com seletor de
+dashboard.html/relatorio.html → resultado da pesquisa em percentual — RESTRITOS
+                 (login Supabase Auth, como o admin), com seletor de
                  município/pesquisa para separar os resultados
 desempenho.html → "Pesquisa × Urna": auditoria pública das pesquisas do
                  1º turno 2026 contra o resultado oficial do TSE
@@ -47,8 +47,8 @@ config/pesquisa.js → registro de pesquisas (por município), questionário e
 ├── index.html          → tela inicial do pesquisador (identificação/retomar/nova)
 ├── login.html          → login do admin (só `admin.html` exige)
 ├── coleta.html          → wizard da entrevista
-├── dashboard.html        → resultado em % — gráficos por pergunta + cruzamentos analíticos (público)
-├── relatorio.html       → resultado em % — tabelas por pergunta (público)
+├── dashboard.html        → resultado em % — gráficos por pergunta + cruzamentos analíticos (login)
+├── relatorio.html       → resultado em % — tabelas por pergunta (login)
 ├── desempenho.html      → Pesquisa × Urna: pesquisas do 1º turno × resultado oficial do TSE (público)
 ├── admin.html           → gestão de campo: produtividade, entrevistas paginadas, export CSV (Supabase Auth)
 ├── css/                  → um arquivo por área + app.css com os tokens de design
@@ -71,7 +71,7 @@ config/pesquisa.js → registro de pesquisas (por município), questionário e
 | `js/sync.js` | fila de sincronização, idempotente, nunca apaga local antes de confirmar servidor |
 | `js/utils.js` | funções puras (uuid, embaralhar, formatação, escape, `distribuirPercentuais`, casamento de resposta espontânea com candidato) |
 | `js/dashboard.js` | gráficos de resultado + cruzamentos analíticos (voto × voto, transferência de turno, espontânea × estimulada) — sempre em %, lê a view pública |
-| `js/relatorio.js` | mesmo resultado em formato de tabela, por pergunta — página pública |
+| `js/relatorio.js` | mesmo resultado em formato de tabela, por pergunta — restrito (login) |
 | `js/acuracia.js` | métricas puras Pesquisa × Urna (votos válidos, erro médio, vencedor, erro na margem, viés) — sem DOM, testadas em `tests/` |
 | `js/desempenho.js` | página Pesquisa × Urna: lê `data/urna-2026.json` + a view pública e renderiza placar, leitura executiva, gráficos e régua de mercado |
 | `js/admin.js` | gestão de campo atrás de Supabase Auth (produtividade, entrevistas, export CSV) |
@@ -84,17 +84,21 @@ primeira vez que abre o app (`index.html`) — o nome fica salvo no aparelho
 "Trocar pesquisador". Não há perguntas de caracterização da amostra (sexo,
 faixa etária, escolaridade etc.) nem captura de GPS.
 
-**`dashboard.html` e `relatorio.html` também são públicos** (sem login) — é o
-link que a Foccus envia ao cliente para acompanhar o resultado. Eles só
-consultam a view `vw_respostas_dashboard`, que expõe apenas respostas de
-entrevistas completas, sem nenhum dado do entrevistado (o questionário nunca
-coleta nome, telefone ou perfil), e a tela nunca mostra número absoluto nem
-o N da amostra.
+**Desde 05/10/2026, `dashboard.html`, `relatorio.html` e `admin.html` exigem
+login** real via **Supabase Auth** (e-mail/senha, criado pela Foccus no
+Supabase Studio; este app não cadastra administradores sozinho). Sem sessão,
+`exigirLoginAdmin()` (`js/auth.js`) manda para `login.html?voltar=<página>`
+e, depois do login, devolve o usuário à página pedida (só páginas da lista
+`PAGINAS_RESTRITAS` — sem open redirect). Para um cliente acompanhar o
+resultado, crie uma conta para ele no Supabase Auth.
 
-Só `admin.html` — gestão de campo, com contagens operacionais por
-pesquisador e export CSV — continua exigindo login real via **Supabase Auth**
-(e-mail/senha, criado pela Foccus no Supabase Studio; este app não cadastra
-administradores sozinho).
+A única página de resultado **pública** é `desempenho.html` (Pesquisa × Urna).
+Ela lê a view `vw_respostas_dashboard`, que por isso continua com `select`
+para `anon`: o bloqueio das outras páginas tira os resultados do ar para o
+público, mas não fecha a view — os dados seguem consultáveis pela API com a
+anon key. A view expõe apenas respostas de entrevistas completas, sem nenhum
+dado do entrevistado (o questionário nunca coleta nome, telefone ou perfil),
+e nenhuma tela mostra número absoluto nem o N da amostra.
 
 ## Modelo de dados
 

@@ -2,15 +2,16 @@
 // js/dashboard.js — resultados da pesquisa (intenção de voto/avaliação),
 // sempre em percentual — nunca exibe contagens absolutas nem o N da amostra.
 //
-// Página pública (sem login): este é o link que vai para o cliente. O
-// Supabase libera SELECT no role `anon` só para a view vw_respostas_dashboard
-// (ver supabase-views.sql) — nada de autenticação aqui. A área administrativa
-// (pesquisadores em campo, exportação CSV) continua exigindo login, em
-// admin.html/js/admin.js.
+// Página restrita à equipe desde 05/10/2026: exige login do Supabase Auth
+// (exigirLoginAdmin, o mesmo de admin.html) antes de consultar qualquer
+// dado. A view vw_respostas_dashboard continua com SELECT para `anon` porque
+// a página pública desempenho.html depende dela (ver supabase-views.sql) —
+// o bloqueio aqui tira a página do ar para o público, não fecha a view.
 // ============================================================================
 
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
+import { exigirLoginAdmin } from "./auth.js";
 import { getPassos } from "./questionario.js";
 import { agregarTextoLivre, distribuirPercentuais, escapeHtml, LIMITE_MENCOES_ESPONTANEAS } from "./utils.js";
 
@@ -806,6 +807,9 @@ async function carregarTudo() {
 
 async function inicializar() {
   registrarServiceWorker();
+  // Restrito à equipe (Supabase Auth) desde 05/10/2026: só desempenho.html
+  // segue público. Nada é consultado antes de confirmar a sessão.
+  if (!(await exigirLoginAdmin("dashboard.html"))) return;
   iniciarIndicadorConexao();
 
   preencherFiltroMunicipio();

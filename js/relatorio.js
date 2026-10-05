@@ -3,11 +3,13 @@
 // percentual. Nunca exibe N/contagens absolutas — nem o total de
 // entrevistados.
 //
-// Página pública (sem login) — ver nota equivalente em js/dashboard.js.
+// Página restrita à equipe (login do Supabase Auth) — ver nota equivalente
+// em js/dashboard.js.
 // ============================================================================
 
 import { supabase } from "./supabaseClient.js";
 import { registrarServiceWorker, iniciarIndicadorConexao } from "./app.js";
+import { exigirLoginAdmin } from "./auth.js";
 import { escapeHtml, agregarTextoLivre, distribuirPercentuais, LIMITE_MENCOES_ESPONTANEAS } from "./utils.js";
 
 let municipioSelecionado = null;
@@ -141,6 +143,7 @@ async function recarregarTudo() {
 
 async function inicializar() {
   registrarServiceWorker();
+  if (!(await exigirLoginAdmin("relatorio.html"))) return;
   iniciarIndicadorConexao();
 
   preencherFiltroMunicipio();

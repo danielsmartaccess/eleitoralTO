@@ -24,11 +24,17 @@ export async function logoutAdmin() {
   await supabase.auth.signOut();
 }
 
-/** Usado no topo de dashboard.html/relatorio.html/admin.html. */
-export async function exigirLoginAdmin() {
+// Páginas para onde o login pode devolver o usuário (lista fechada: nunca
+// redirecionar para um endereço vindo da URL sem conferir — open redirect).
+export const PAGINAS_RESTRITAS = ["admin.html", "dashboard.html", "relatorio.html"];
+
+/** Usado no topo de dashboard.html/relatorio.html/admin.html. `voltar` é a
+ *  página atual: depois do login, login.js devolve o usuário para ela. */
+export async function exigirLoginAdmin(voltar = "admin.html") {
   const usuario = await obterUsuarioAdmin();
   if (!usuario) {
-    window.location.href = "login.html";
+    const destino = PAGINAS_RESTRITAS.includes(voltar) ? voltar : "admin.html";
+    window.location.replace(`login.html?voltar=${encodeURIComponent(destino)}`);
     return null;
   }
   return usuario;

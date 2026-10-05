@@ -3,10 +3,14 @@
 // O app de campo não tem login: ver index.html/js/inicio.js.
 // ============================================================================
 
-import { loginAdmin, obterUsuarioAdmin } from "./auth.js";
+import { loginAdmin, obterUsuarioAdmin, PAGINAS_RESTRITAS } from "./auth.js";
 import { registrarServiceWorker } from "./app.js";
 
 registrarServiceWorker();
+
+// Página que pediu o login (dashboard/relatório/admin) — só aceita as da lista.
+const pedida = new URLSearchParams(window.location.search).get("voltar");
+const DESTINO = PAGINAS_RESTRITAS.includes(pedida) ? pedida : "admin.html";
 
 function mostrarErro(id, mensagem) {
   const el = document.getElementById(id);
@@ -20,7 +24,7 @@ function limparErro(id) {
 
 async function redirecionarSeJaLogado() {
   const usuario = await obterUsuarioAdmin();
-  if (usuario) window.location.href = "admin.html";
+  if (usuario) window.location.href = DESTINO;
 }
 
 document.getElementById("form-login-admin").addEventListener("submit", async (evt) => {
@@ -34,7 +38,7 @@ document.getElementById("form-login-admin").addEventListener("submit", async (ev
   btn.innerHTML = `<span class="spinner"></span> Entrando...`;
   try {
     await loginAdmin(email, senha);
-    window.location.href = "admin.html";
+    window.location.href = DESTINO;
   } catch (erro) {
     mostrarErro("erro-login-admin", erro.message);
     btn.disabled = false;
