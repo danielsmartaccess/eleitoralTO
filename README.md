@@ -7,18 +7,21 @@ IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
-do mesmo estado). Coleta em campo atualmente aberta no **Tocantins**
-(**Araguatins** e **Xambioá**) e no **Maranhão** (**Campestre do Maranhão** —
-povoados Cabeceira Grande e Vila Nova; a sede e o povoado Cachimbeiro já foram
-encerrados); os
-demais municípios já coletados do Maranhão (**João Lisboa**, **São Bernardo**,
+do mesmo estado). Coleta em campo atualmente aberta só para o **2º turno**
+(25/10/2026), no **Tocantins**: **Carrasco Bonito**, **Darcinópolis** e
+**Aguiarnópolis** — instrumento próprio de 6 ou 7 perguntas (Presidente e
+Governador no 2º turno, aprovação do prefeito e bloco municipal de 2028),
+apurado só pelo relatório Excel, sem painel no dashboard. Todas as coletas do
+1º turno estão encerradas e seguem só para consulta em
+dashboard/relatório/admin (`ativoParaColeta: false` em `config/pesquisa.js`):
+no Maranhão, **João Lisboa**, **São Bernardo**,
 **Magalhães de Almeida**, **Araioses**, **Tutóia**,
 **Santa Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**,
-**Brejo**, **Mata Roma**, **Vargem Grande**, **Itapecuru Mirim** e
-**Itinga do Maranhão** — sede, Paulistão e Cajuapará) e do Tocantins
-(**Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional**,
-**Paraíso do Tocantins** e **Piraquê**) seguem só para consulta em
-dashboard/relatório/admin (`ativoParaColeta: false` em `config/pesquisa.js`).
+**Brejo**, **Mata Roma**, **Vargem Grande**, **Itapecuru Mirim**,
+**Itinga do Maranhão** (sede, Paulistão e Cajuapará) e
+**Campestre do Maranhão** (sede, Cabeceira Grande, Cachimbeiro e Vila Nova);
+no Tocantins, **Araguaína**, **Palmas**, **Gurupi**, **Porto Nacional**,
+**Paraíso do Tocantins**, **Piraquê**, **Araguatins** e **Xambioá**.
 O pesquisador
 escolhe qual pesquisa vai coletar na tela inicial, e a escolha fica salva
 no aparelho.

@@ -663,7 +663,7 @@ const PESQUISA_ARAGUATINS_TO = {
     nome: "Pesquisa Eleitoral Araguatins (TO) 2026",
     municipio: "Araguatins",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   prefeitoAtual: "Aquiles da Areia",
   NSNO_ID,
   NSNO_TEXTO,
@@ -719,7 +719,7 @@ const PESQUISA_XAMBIOA_TO = {
     nome: "Pesquisa Eleitoral Xambioá (TO) 2026",
     municipio: "Xambioá",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   prefeitoAtual: "Dr. Mayck Câmara",
   NSNO_ID,
   NSNO_TEXTO,
@@ -751,6 +751,208 @@ const PESQUISA_XAMBIOA_TO = {
   perguntas: criarPerguntasXambioaTO(),
   perguntasSemanticas: PERGUNTAS_SEMANTICAS_PIRAQUE_TO,
 };
+
+// --------------------------------------------------------------------
+// Questionário — 2º turno, Tocantins (Carrasco Bonito, Darcinópolis,
+// Aguiarnópolis). Instrumentos pós-1º turno (eleição em 25/10/2026): só as
+// duas disputas que seguem em 2º turno no TO (Presidente e Governador,
+// estimuladas com os dois finalistas), aprovação binária do prefeito e um
+// bloco municipal de 2028 — espontânea e estimulada para prefeito,
+// espontânea para vereador e "vereador mais atuante" entre os atuais da
+// Câmara.
+//
+// Os instrumentos variam no tamanho: Darcinópolis não tem a espontânea de
+// prefeito (6 perguntas; a estimulada abre o bloco de 2028 e por isso traz
+// o "Em relação às eleições municipais de 2028" no próprio texto). Os ids
+// são sempre sequenciais e batem com a numeração do instrumento do cliente
+// (q1..q6 ou q1..q7). Logo, o mesmo id NÃO significa a mesma pergunta entre
+// municípios (q4 é a espontânea em Carrasco Bonito e a estimulada em
+// Darcinópolis): quem cruza municípios resolve pelo papel em
+// `perguntasSemanticas`, nunca pelo id. O banco (EAV) não depende do número
+// de perguntas — cada resposta é uma linha (entrevista_id, questao).
+//
+// Os papéis municipais (prefeito2028*, vereador*) existem para o relatório
+// Excel; dashboard.js/relatorio.js/desempenho.js só consultam os papéis que
+// conhecem e ignoram estes.
+// --------------------------------------------------------------------
+function criarPerguntasSegundoTurnoMunicipalTO(cidadeUF, { espontaneaPrefeito = true } = {}) {
+  const perguntas = [
+    {
+      papel: "presidente2Turno",
+      tipo: "single_choice",
+      texto:
+        "Nesta eleição de 2º turno para Presidente, entre Lula e Flávio Bolsonaro, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "presidente2Turno",
+    },
+    {
+      papel: "governador2Turno",
+      tipo: "single_choice",
+      texto:
+        "Nesta eleição de 2º turno para Governo do Estado, entre Professora Dorinha e Vicentinho Júnior, em quem você votaria?",
+      obrigatoria: true,
+      randomize: false,
+      opcoesRef: "governador2Turno",
+    },
+    {
+      papel: "avaliacaoPrefeito",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova a administração do atual prefeito {{prefeito}}?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+    espontaneaPrefeito && {
+      papel: "prefeito2028Aberta",
+      tipo: "open_text",
+      texto: `Em relação às eleições municipais de 2028, quem você acha que seria um bom nome para prefeito(a) de ${cidadeUF}?`,
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      papel: "prefeito2028Estimulada",
+      tipo: "single_choice",
+      texto: espontaneaPrefeito
+        ? `Dentre estes nomes, em quem você simpatizaria em votar para prefeito(a) de ${cidadeUF} em 2028?`
+        : `Em relação às eleições municipais de 2028, em qual destes nomes você simpatizaria em votar para prefeito(a) de ${cidadeUF}?`,
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "prefeito2028",
+    },
+    {
+      papel: "vereador2028Aberta",
+      tipo: "open_text",
+      texto: "Quem você queria como vereador(a) eleito(a) ou reeleito(a) nas eleições municipais de 2028?",
+      obrigatoria: true,
+      maxLength: 120,
+      atalhos: ["Não sabe", "Não opinou", "Nenhum"],
+    },
+    {
+      papel: "vereadorMaisAtuante",
+      tipo: "single_choice",
+      texto: `Na sua visão política, qual dos atuais vereadores de ${cidadeUF} é o mais atuante na Câmara Municipal?`,
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "vereadoresAtuais",
+    },
+  ].filter(Boolean);
+  return perguntas.map(({ papel, ...pergunta }, i) => ({ id: `q${i + 1}`, papel, ...pergunta }));
+}
+
+/** Mapa papel → id derivado das próprias perguntas, para não manter à mão
+ *  um mapa por variante de tamanho do instrumento. */
+function mapaSemantico(perguntas) {
+  return Object.fromEntries(perguntas.filter((p) => p.papel).map((p) => [p.papel, p.id]));
+}
+
+function criarPesquisaSegundoTurnoMunicipalTO({ id, municipio, prefeitoAtual, prefeito2028, vereadoresAtuais, espontaneaPrefeito }) {
+  const perguntas = criarPerguntasSegundoTurnoMunicipalTO(`${municipio}-TO`, { espontaneaPrefeito });
+  return {
+    id,
+    pesquisa: {
+      nome: `Pesquisa Eleitoral ${municipio} (TO) 2026 — 2º turno`,
+      municipio,
+    },
+    ativoParaColeta: true,
+    prefeitoAtual,
+    NSNO_ID,
+    NSNO_TEXTO,
+    candidatos: {
+      presidente2Turno: CANDIDATOS_ESTADUAIS_TOCANTINS.presidente2Turno,
+      governador2Turno: CANDIDATOS_ESTADUAIS_TOCANTINS.governador2Turno,
+      prefeito2028,
+      vereadoresAtuais,
+    },
+    perguntas,
+    perguntasSemanticas: mapaSemantico(perguntas),
+  };
+}
+
+// --------------------------------------------------------------------
+// Pesquisa: Carrasco Bonito (TO) 2026 — 2º turno (7 perguntas)
+// --------------------------------------------------------------------
+const PESQUISA_CARRASCO_BONITO_TO = criarPesquisaSegundoTurnoMunicipalTO({
+  id: "carrasco_bonito_to",
+  municipio: "Carrasco Bonito",
+  prefeitoAtual: "Nego do Foguim",
+  prefeito2028: [
+    { id: "adriano_do_edmundo", texto: "Adriano do Edmundo" },
+    { id: "carlos_alberto", texto: "Carlos Alberto" },
+  ],
+  vereadoresAtuais: [
+    { id: "johnnatan", texto: "Johnnatan" },
+    { id: "chico_dodo", texto: "Chico Dodó" },
+    { id: "nena", texto: "Nena" },
+    { id: "danilo_martins", texto: "Danilo Martins" },
+    { id: "rafael_da_nubia", texto: "Rafael da Núbia" },
+    { id: "ronildo_ferraz", texto: "Ronildo Ferraz" },
+    { id: "negao", texto: "Negão" },
+    { id: "carlinhos_pit_dog", texto: "Carlinhos Pit Dog" },
+    { id: "jocelma_da_jovita", texto: "Jocelma da Jovita" },
+  ],
+});
+
+// --------------------------------------------------------------------
+// Pesquisa: Darcinópolis (TO) 2026 — 2º turno (6 perguntas: sem a
+// espontânea de prefeito 2028)
+// --------------------------------------------------------------------
+const PESQUISA_DARCINOPOLIS_TO = criarPesquisaSegundoTurnoMunicipalTO({
+  id: "darcinopolis_to",
+  municipio: "Darcinópolis",
+  prefeitoAtual: "Raimundo Curica",
+  espontaneaPrefeito: false,
+  prefeito2028: [
+    { id: "raimundo_curica", texto: "Raimundo Curica" },
+    { id: "professora_marcela", texto: "Professora Marcela" },
+    { id: "denize_valeria", texto: "Denize Valéria" },
+    { id: "roberto_da_farmacia", texto: "Roberto da Farmácia" },
+  ],
+  vereadoresAtuais: [
+    { id: "junior_pescoco", texto: "Júnior Pescoço" },
+    { id: "professora_marcela", texto: "Professora Marcela" },
+    { id: "edyneilla", texto: "Edyneilla" },
+    { id: "gilson", texto: "Gilson" },
+    { id: "james_vaqueiro", texto: "James Vaqueiro" },
+    { id: "edimilson", texto: "Edimilson" },
+    { id: "daniel_do_povo", texto: "Daniel do Povo" },
+    { id: "jeovane_pesado", texto: "Jeovane Pesado" },
+    { id: "zezinho", texto: "Zezinho" },
+  ],
+});
+
+// --------------------------------------------------------------------
+// Pesquisa: Aguiarnópolis (TO) 2026 — 2º turno (7 perguntas)
+// --------------------------------------------------------------------
+const PESQUISA_AGUIARNOPOLIS_TO = criarPesquisaSegundoTurnoMunicipalTO({
+  id: "aguiarnopolis_to",
+  municipio: "Aguiarnópolis",
+  prefeitoAtual: "Wanderly",
+  prefeito2028: [
+    { id: "ivan_paz", texto: "Ivan Paz" },
+    { id: "keninha", texto: "Keninha" },
+    { id: "elias_junior", texto: "Elias Júnior" },
+    { id: "gildete_cabral", texto: "Gildete Cabral" },
+    { id: "jean_oliveira", texto: "Jean Oliveira" },
+    { id: "marcio_araujo", texto: "Márcio Araújo" },
+  ],
+  vereadoresAtuais: [
+    { id: "vaqueiro", texto: "Vaqueiro" },
+    { id: "ruberval", texto: "Ruberval" },
+    { id: "wdson", texto: "Wdson" },
+    { id: "jean_oliveira", texto: "Jean Oliveira" },
+    { id: "isaque_do_laboratorio", texto: "Isaque do Laboratório" },
+    { id: "elias_junior", texto: "Elias Júnior" },
+    { id: "nonatinho_do_coco", texto: "Nonatinho do Coco" },
+    { id: "gean_carlos", texto: "Gean Carlos" },
+    { id: "rafael", texto: "Rafael" },
+  ],
+});
 
 // --------------------------------------------------------------------
 // Disputas estaduais/nacionais — Maranhão. Compartilhadas entre todas as
@@ -2058,7 +2260,7 @@ const PESQUISA_CAMPESTRE_MARANHAO_CABECEIRA_GRANDE_MA = {
     nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Cabeceira Grande (MA) 2026",
     municipio: "Campestre do Maranhão - Povoado Cabeceira Grande",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   NSNO_ID,
   NSNO_TEXTO,
   candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
@@ -2086,7 +2288,7 @@ const PESQUISA_CAMPESTRE_MARANHAO_VILA_NOVA_MA = {
     nome: "Pesquisa Eleitoral Campestre do Maranhão - Povoado Vila Nova (MA) 2026",
     municipio: "Campestre do Maranhão - Povoado Vila Nova",
   },
-  ativoParaColeta: true,
+  ativoParaColeta: false,
   NSNO_ID,
   NSNO_TEXTO,
   candidatos: { ...CANDIDATOS_CAMPESTRE_MARANHAO },
@@ -2116,6 +2318,9 @@ const PESQUISA_JOAO_LISBOA_MA = {
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
+  carrasco_bonito_to: PESQUISA_CARRASCO_BONITO_TO,
+  darcinopolis_to: PESQUISA_DARCINOPOLIS_TO,
+  aguiarnopolis_to: PESQUISA_AGUIARNOPOLIS_TO,
   joao_lisboa_ma: PESQUISA_JOAO_LISBOA_MA,
   chapadinha_ma: PESQUISA_CHAPADINHA_MA,
   brejo_ma: PESQUISA_BREJO_MA,
