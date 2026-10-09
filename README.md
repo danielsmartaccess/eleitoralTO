@@ -8,10 +8,11 @@ Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
 do mesmo estado). Coleta em campo atualmente aberta só para o **2º turno**
-(25/10/2026), no **Tocantins**: **Carrasco Bonito**, **Darcinópolis** e
-**Aguiarnópolis** — instrumento próprio de 6 ou 7 perguntas (Presidente e
-Governador no 2º turno, aprovação do prefeito e bloco municipal de 2028),
-apurado só pelo relatório Excel, sem painel no dashboard. Todas as coletas do
+(25/10/2026), no **Tocantins**: **Carrasco Bonito** e **Darcinópolis** —
+instrumento próprio de 6 ou 7 perguntas (Presidente e Governador no 2º turno,
+aprovação do prefeito e bloco municipal de 2028), apurado só pelo relatório
+Excel, sem painel no dashboard. **Aguiarnópolis**, no mesmo instrumento, já
+encerrou a coleta do 2º turno. Todas as coletas do
 1º turno estão encerradas e seguem só para consulta em
 dashboard/relatório/admin (`ativoParaColeta: false` em `config/pesquisa.js`):
 no Maranhão, **João Lisboa**, **São Bernardo**,

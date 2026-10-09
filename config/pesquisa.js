@@ -851,7 +851,7 @@ function mapaSemantico(perguntas) {
   return Object.fromEntries(perguntas.filter((p) => p.papel).map((p) => [p.papel, p.id]));
 }
 
-function criarPesquisaSegundoTurnoMunicipalTO({ id, municipio, prefeitoAtual, prefeito2028, vereadoresAtuais, espontaneaPrefeito }) {
+function criarPesquisaSegundoTurnoMunicipalTO({ id, municipio, prefeitoAtual, prefeito2028, vereadoresAtuais, espontaneaPrefeito, ativoParaColeta = true }) {
   const perguntas = criarPerguntasSegundoTurnoMunicipalTO(`${municipio}-TO`, { espontaneaPrefeito });
   return {
     id,
@@ -859,7 +859,7 @@ function criarPesquisaSegundoTurnoMunicipalTO({ id, municipio, prefeitoAtual, pr
       nome: `Pesquisa Eleitoral ${municipio} (TO) 2026 — 2º turno`,
       municipio,
     },
-    ativoParaColeta: true,
+    ativoParaColeta,
     prefeitoAtual,
     NSNO_ID,
     NSNO_TEXTO,
@@ -933,6 +933,7 @@ const PESQUISA_AGUIARNOPOLIS_TO = criarPesquisaSegundoTurnoMunicipalTO({
   id: "aguiarnopolis_to",
   municipio: "Aguiarnópolis",
   prefeitoAtual: "Wanderly",
+  ativoParaColeta: false,
   prefeito2028: [
     { id: "ivan_paz", texto: "Ivan Paz" },
     { id: "keninha", texto: "Keninha" },
