@@ -940,6 +940,8 @@ const PESQUISA_AGUIARNOPOLIS_TO = criarPesquisaSegundoTurnoMunicipalTO({
     { id: "gildete_cabral", texto: "Gildete Cabral" },
     { id: "jean_oliveira", texto: "Jean Oliveira" },
     { id: "marcio_araujo", texto: "Márcio Araújo" },
+    { id: "paulo_labre", texto: "Paulo Labre" },
+    { id: "amanda_cunha", texto: "Amanda Cunha" },
   ],
   vereadoresAtuais: [
     { id: "vaqueiro", texto: "Vaqueiro" },
