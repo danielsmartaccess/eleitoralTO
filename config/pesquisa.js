@@ -881,6 +881,7 @@ const PESQUISA_CARRASCO_BONITO_TO = criarPesquisaSegundoTurnoMunicipalTO({
   id: "carrasco_bonito_to",
   municipio: "Carrasco Bonito",
   prefeitoAtual: "Nego do Foguim",
+  ativoParaColeta: false,
   prefeito2028: [
     { id: "adriano_do_edmundo", texto: "Adriano do Edmundo" },
     { id: "carlos_alberto", texto: "Carlos Alberto" },
@@ -907,6 +908,7 @@ const PESQUISA_DARCINOPOLIS_TO = criarPesquisaSegundoTurnoMunicipalTO({
   municipio: "Darcinópolis",
   prefeitoAtual: "Raimundo Curica",
   espontaneaPrefeito: false,
+  ativoParaColeta: false,
   prefeito2028: [
     { id: "raimundo_curica", texto: "Raimundo Curica" },
     { id: "professora_marcela", texto: "Professora Marcela" },
@@ -1660,6 +1662,152 @@ const CANDIDATOS_JOAO_LISBOA_MARANHAO = {
 };
 
 // --------------------------------------------------------------------
+// Questionário — João Lisboa (MA), pesquisa municipal / cenário 2028.
+// Segunda coleta em João Lisboa, com instrumento TOTALMENTE diferente da
+// primeira (intenção de voto 2026): por isso é uma pesquisa à parte, com
+// `municipio` próprio ("João Lisboa - Municipal 2028"). `municipio` é a chave
+// única de tudo (entrevistas, dashboard, relatório); reaproveitar "João Lisboa"
+// misturaria as duas coletas. Os ids são sequenciais (q1..q13); a
+// correspondência com o instrumento do cliente é feita por `papel`.
+//
+// Todas as estimuladas recebem "Não sabe / Não opinou" automaticamente (motor).
+// Só `avaliacaoPrefeito` (escala de 5 pontos) é conhecido pelo dashboard; os
+// demais papéis servem ao relatório Excel (dashboard os ignora).
+// --------------------------------------------------------------------
+function criarPerguntasJoaoLisboaMunicipal2028() {
+  const abertaComAtalhos = { tipo: "open_text", obrigatoria: true, maxLength: 120, atalhos: ["Não sabe", "Não opinou", "Nenhum"] };
+  const simulacao = (letra) => ({
+    papel: `simulacao${letra}`,
+    tipo: "single_choice",
+    texto: `Simulação ${letra} — Se, nas eleições municipais de 2028, o cenário político para prefeito de João Lisboa-MA fosse apenas estes dois nomes, em quem você votaria?`,
+    obrigatoria: true,
+    randomize: true,
+    opcoesRef: `simulacao${letra}`,
+  });
+  const perguntas = [
+    {
+      papel: "avaliacaoPrefeito",
+      tipo: "single_choice",
+      texto: "De modo geral, como você avalia a administração municipal atual?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "otima", texto: "Ótima", valorNum: 5 },
+        { id: "boa", texto: "Boa", valorNum: 4 },
+        { id: "regular", texto: "Regular", valorNum: 3 },
+        { id: "ruim", texto: "Ruim", valorNum: 2 },
+        { id: "pessima", texto: "Péssima", valorNum: 1 },
+      ],
+    },
+    {
+      papel: "aprovacaoPrefeito",
+      tipo: "single_choice",
+      // {{prefeito}} é substituído em tempo de execução por config.prefeitoAtual
+      texto: "Você aprova ou desaprova o desempenho de {{prefeito}} como prefeito municipal?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "aprova", texto: "Aprova" },
+        { id: "desaprova", texto: "Desaprova" },
+      ],
+    },
+    {
+      papel: "vereadorMaisAtuante",
+      tipo: "single_choice",
+      texto: "Na sua visão política, qual dos vereadores você considera o mais atuante na Câmara Municipal de João Lisboa-MA?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "vereadoresAtuais",
+    },
+    {
+      papel: "prefeito2028Aberta",
+      ...abertaComAtalhos,
+      texto: "Em relação às eleições municipais de 2028, quem você queria que fosse candidato(a) a prefeito(a) de João Lisboa-MA?",
+    },
+    {
+      papel: "prefeito2028Estimulada",
+      tipo: "single_choice",
+      texto: "Se os candidatos fossem estes seguintes nomes, em quem você votaria para prefeito(a) de João Lisboa-MA?",
+      obrigatoria: true,
+      randomize: true,
+      opcoesRef: "prefeito2028",
+    },
+    simulacao("A"),
+    simulacao("B"),
+    simulacao("C"),
+    {
+      papel: "vice2028Aberta",
+      ...abertaComAtalhos,
+      texto: "Na sua opinião, quem você acha que seria um bom nome para ser vice-prefeito(a) de João Lisboa-MA em 2028?",
+    },
+    {
+      papel: "vereador2028Aberta",
+      ...abertaComAtalhos,
+      texto: "Em 2028, quem você queria eleito(a) ou reeleito(a) vereador(a) de João Lisboa-MA?",
+    },
+    {
+      papel: "grupoWhatsAppAberta",
+      ...abertaComAtalhos,
+      texto: "Na sua opinião, qual é o grupo de WhatsApp mais movimentado da cidade de João Lisboa-MA?",
+    },
+    {
+      papel: "veiculoComunicacao",
+      tipo: "single_choice",
+      texto: "Qual é o veículo de comunicação que você mais usa para se informar com as notícias do dia?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "redes_sociais", texto: "Redes sociais" },
+        { id: "televisao", texto: "Televisão" },
+        { id: "radio", texto: "Rádio" },
+      ],
+    },
+    {
+      papel: "redeSocial",
+      tipo: "single_choice",
+      texto: "Qual rede social você mais usa para se atualizar e interagir?",
+      obrigatoria: true,
+      randomize: false,
+      opcoes: [
+        { id: "whatsapp", texto: "WhatsApp" },
+        { id: "instagram", texto: "Instagram" },
+        { id: "tiktok", texto: "TikTok" },
+        { id: "facebook", texto: "Facebook" },
+        { id: "youtube", texto: "YouTube" },
+        { id: "kwai", texto: "Kwai" },
+      ],
+    },
+  ];
+  return perguntas.map(({ papel, ...pergunta }, i) => ({ id: `q${i + 1}`, papel, ...pergunta }));
+}
+
+const FABIO_HOLANDA = { id: "fabio_holanda", texto: "Fábio Holanda" };
+const CANDIDATOS_JOAO_LISBOA_MUNICIPAL_2028 = {
+  vereadoresAtuais: [
+    { id: "roni_marcelino", texto: "Roni Marcelino" },
+    { id: "meuryane_bezerra", texto: "Meuryane Bezerra" },
+    { id: "geneilson_dourado", texto: "Geneilson Dourado" },
+    { id: "marcones_oliveira", texto: "Marcones Oliveira" },
+    { id: "berlande", texto: "Berlande" },
+    { id: "carla_rocha", texto: "Carla Rocha" },
+    { id: "evaldo_seledor", texto: "Evaldo Seledor" },
+    { id: "joao_filho", texto: "João Filho" },
+    { id: "prof_eva_magda", texto: "Prof. Eva Magda" },
+    { id: "jackson_rocha", texto: "Jackson Rocha" },
+    { id: "jose_do_valdimiro", texto: "José do Valdimiro" },
+  ],
+  prefeito2028: [
+    FABIO_HOLANDA,
+    { id: "branco_diorgenes", texto: "Branco Diorgenes" },
+    { id: "jairo_madeira", texto: "Jairo Madeira" },
+    { id: "roni_marcelino", texto: "Roni Marcelino" },
+  ],
+  simulacaoA: [FABIO_HOLANDA, { id: "branco_diorgenes", texto: "Branco Diorgenes" }],
+  simulacaoB: [FABIO_HOLANDA, { id: "jairo_madeira", texto: "Jairo Madeira" }],
+  simulacaoC: [FABIO_HOLANDA, { id: "roni_marcelino", texto: "Roni Marcelino" }],
+};
+
+// --------------------------------------------------------------------
 // Pesquisa: São Bernardo (MA) 2026
 // --------------------------------------------------------------------
 const PESQUISA_SAO_BERNARDO_MA = {
@@ -2318,9 +2466,32 @@ const PESQUISA_JOAO_LISBOA_MA = {
 };
 
 // --------------------------------------------------------------------
+// Pesquisa: João Lisboa (MA) — municipal / cenário 2028 (coleta ABERTA).
+// Pesquisa à parte da "João Lisboa" acima (intenção de voto 2026, encerrada).
+// --------------------------------------------------------------------
+const PESQUISA_JOAO_LISBOA_MUNICIPAL_2028_MA = (() => {
+  const perguntas = criarPerguntasJoaoLisboaMunicipal2028();
+  return {
+    id: "joao_lisboa_municipal_2028_ma",
+    pesquisa: {
+      nome: "Pesquisa Municipal João Lisboa (MA) — Cenário 2028",
+      municipio: "João Lisboa - Municipal 2028",
+    },
+    ativoParaColeta: true,
+    prefeitoAtual: "Fábio Holanda",
+    NSNO_ID,
+    NSNO_TEXTO,
+    candidatos: { ...CANDIDATOS_JOAO_LISBOA_MUNICIPAL_2028 },
+    perguntas,
+    perguntasSemanticas: mapaSemantico(perguntas),
+  };
+})();
+
+// --------------------------------------------------------------------
 // Registro de pesquisas disponíveis + seleção ativa no aparelho.
 // --------------------------------------------------------------------
 const PESQUISAS_CONFIG = {
+  joao_lisboa_municipal_2028_ma: PESQUISA_JOAO_LISBOA_MUNICIPAL_2028_MA,
   carrasco_bonito_to: PESQUISA_CARRASCO_BONITO_TO,
   darcinopolis_to: PESQUISA_DARCINOPOLIS_TO,
   aguiarnopolis_to: PESQUISA_AGUIARNOPOLIS_TO,
