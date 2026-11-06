@@ -2,15 +2,10 @@
 -- supabase-views.sql
 -- Views de leitura para dashboard/relatório/admin.
 --
--- dashboard.html e relatorio.html agora são páginas PÚBLICAS (sem login —
--- é o link que vai para o cliente ver o resultado). Só admin.html continua
--- atrás do Supabase Auth. Por isso vw_respostas_dashboard é liberada para o
--- role `anon`: ela só expõe respostas de entrevistas completas (sem nome,
--- telefone ou qualquer dado do entrevistado — o questionário nunca coleta
--- isso), então não há problema em deixá-la pública. vw_coleta_resumo é dado
--- operacional de gestão de campo (produtividade por pesquisador) e continua
--- restrita a `authenticated`, junto com as tabelas base (entrevistas,
--- respostas, pesquisas — ver supabase-policies.sql).
+-- Desde 04/11/2026 as três views são legíveis SOMENTE por `authenticated`
+-- (dashboard, relatório e admin exigem login). A anon key é pública e a view
+-- de respostas expõe o resultado completo da pesquisa, então ela NÃO deve
+-- ter grant para `anon`. Ver supabase-migration-restringe-views.sql.
 -- ============================================================================
 
 -- Join respostas + entrevistas já filtrado para status completo — base
@@ -68,6 +63,9 @@ alter view public.vw_respostas_dashboard set (security_invoker = false);
 alter view public.vw_coleta_resumo set (security_invoker = true);
 alter view public.vw_resumo_municipio set (security_invoker = true);
 
-grant select on public.vw_respostas_dashboard to anon, authenticated;
+revoke all on public.vw_respostas_dashboard from anon;
+revoke all on public.vw_coleta_resumo from anon;
+revoke all on public.vw_resumo_municipio from anon;
+grant select on public.vw_respostas_dashboard to authenticated;
 grant select on public.vw_coleta_resumo to authenticated;
 grant select on public.vw_resumo_municipio to authenticated;

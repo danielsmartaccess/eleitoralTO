@@ -7,15 +7,16 @@ IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
-do mesmo estado). Coleta em campo atualmente aberta só para o **2º turno**
-(25/10/2026), no **Tocantins**: **Carrasco Bonito** e **Darcinópolis** —
-instrumento próprio de 6 ou 7 perguntas (Presidente e Governador no 2º turno,
-aprovação do prefeito e bloco municipal de 2028), apurado só pelo relatório
-Excel, sem painel no dashboard. **Aguiarnópolis**, no mesmo instrumento, já
-encerrou a coleta do 2º turno. Todas as coletas do
+do mesmo estado). Coleta em campo atualmente aberta só em **João Lisboa (MA)**,
+na pesquisa **"João Lisboa - Municipal 2028"** (13 perguntas: avaliação da
+administração, aprovação do prefeito, vereador mais atuante, cenários de
+prefeito/vice/vereador 2028 com 3 simulações de dois nomes, grupo de WhatsApp,
+veículo e rede social mais usados) — coleta separada da intenção de voto 2026
+de João Lisboa, com `municipio` próprio. As coletas do 2º turno (Tocantins:
+**Carrasco Bonito**, **Darcinópolis** e **Aguiarnópolis**) e todas as do
 1º turno estão encerradas e seguem só para consulta em
 dashboard/relatório/admin (`ativoParaColeta: false` em `config/pesquisa.js`):
-no Maranhão, **João Lisboa**, **São Bernardo**,
+no Maranhão, **João Lisboa** (intenção de voto 2026), **São Bernardo**,
 **Magalhães de Almeida**, **Araioses**, **Tutóia**,
 **Santa Quitéria do Maranhão**, **Água Doce do Maranhão**, **Chapadinha**,
 **Brejo**, **Mata Roma**, **Vargem Grande**, **Itapecuru Mirim**,
@@ -96,13 +97,15 @@ e, depois do login, devolve o usuário à página pedida (só páginas da lista
 `PAGINAS_RESTRITAS` — sem open redirect). Para um cliente acompanhar o
 resultado, crie uma conta para ele no Supabase Auth.
 
-A única página de resultado **pública** é `desempenho.html` (Pesquisa × Urna).
-Ela lê a view `vw_respostas_dashboard`, que por isso continua com `select`
-para `anon`: o bloqueio das outras páginas tira os resultados do ar para o
-público, mas não fecha a view — os dados seguem consultáveis pela API com a
-anon key. A view expõe apenas respostas de entrevistas completas, sem nenhum
-dado do entrevistado (o questionário nunca coleta nome, telefone ou perfil),
-e nenhuma tela mostra número absoluto nem o N da amostra.
+`desempenho.html` (Pesquisa × Urna) foi pensada como página pública e lê a view
+`vw_respostas_dashboard`. **Desde 04/11/2026 essa view é legível só por
+`authenticated`** (ver `supabase-migration-restringe-views.sql`): com a anon
+key pública, qualquer pessoa conseguiria ler todas as respostas pela API. Por
+isso `desempenho.html` não recebe mais dados enquanto for acessada sem login.
+Para reabri-la ao público, crie uma view agregada separada (só percentuais) e
+libere apenas essa para `anon`. A view expõe apenas respostas de entrevistas
+completas, sem nenhum dado do entrevistado (o questionário nunca coleta nome,
+telefone ou perfil), e nenhuma tela mostra número absoluto nem o N da amostra.
 
 ## Modelo de dados
 
@@ -129,12 +132,12 @@ Toda escrita do app de campo passa por duas funções `SECURITY DEFINER`:
 - `rpc_sync_respostas(entrevista_id, respostas)` — upsert em lote no EAV,
   só aceito se a entrevista existir.
 
-Leitura de resultado: `vw_respostas_dashboard` tem `grant select` para `anon`
-(é `security_invoker = false`, roda com o privilégio de quem a criou, então
-o `anon` não precisa de nenhum grant nas tabelas base) — só ela. As tabelas
-`entrevistas`/`respostas` e as views operacionais (`vw_coleta_resumo`,
-`vw_resumo_municipio`, usadas só pelo `admin.html`) seguem restritas a
-`authenticated`. `admin.html` usa **Supabase Auth real**.
+Leitura de resultado: `vw_respostas_dashboard` (é `security_invoker = false`,
+roda com o privilégio de quem a criou), as views operacionais
+(`vw_coleta_resumo`, `vw_resumo_municipio`) e as tabelas `entrevistas`/
+`respostas` são legíveis **só por `authenticated`**; `anon` não tem grant em
+nenhuma delas. A escrita do campo passa apenas pelas duas funções acima.
+`admin.html`, `dashboard.html` e `relatorio.html` usam **Supabase Auth real**.
 
 Nunca há `service_role key`, senha ou token administrativo no frontend —
 apenas `SUPABASE_URL` e a `anon key` (`config/supabase.js`), públicas por
@@ -321,9 +324,8 @@ Para recriar em outro projeto do zero, execute nesta ordem via SQL Editor (ou
 # 3. supabase-views.sql    → views de dashboard/admin
 ```
 
-`supabase-views.sql` já cria as três views (`vw_respostas_dashboard` pública
-para `anon`; `vw_coleta_resumo` e `vw_resumo_municipio` só para
-`authenticated`). Depois, crie ao menos um usuário em **Authentication →
+`supabase-views.sql` já cria as três views, todas legíveis só por
+`authenticated` (nenhuma tem grant para `anon`). Depois, crie ao menos um usuário em **Authentication →
 Users → Add user** no Supabase Studio para acessar `admin.html`.
 
 Se o projeto **já está em produção** (Araguaína já coletando em campo),
@@ -399,4 +401,4 @@ automaticamente a entrevista em "Entrevistas pendentes", com opção de
 | Entrevista não sincroniza | Sem rede | A fila tenta de novo sozinha ao reconectar |
 | `admin.html` pede login de novo | Sessão do Supabase Auth expirou ou não existe | Criar/usar uma conta em Authentication → Users no Supabase Studio |
 | Bloco "Cruzamentos analíticos" aparece vazio / "base insuficiente" | Poucas entrevistas nos filtros, ou candidato abaixo do limiar de base | Ampliar o período/remover filtro de pesquisador; linhas abaixo de 30 entrevistas (20 em 2º turno/Senado) são omitidas de propósito |
-| Cruzamentos não carregam, resto do dashboard sim | Erro nas consultas extras — ver console (`Falha ao carregar análises avançadas`) | Confirmar que `supabase-views.sql` foi reexecutado e que `vw_respostas_dashboard` tem `grant select` para `anon` |
+| Cruzamentos não carregam, resto do dashboard sim | Erro nas consultas extras — ver console (`Falha ao carregar análises avançadas`) | Confirmar que `supabase-views.sql` foi reexecutado e que `vw_respostas_dashboard` tem `grant select` para `authenticated` (e que você está logado) |

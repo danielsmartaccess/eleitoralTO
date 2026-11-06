@@ -4,9 +4,9 @@
 //
 // Página restrita à equipe desde 05/10/2026: exige login do Supabase Auth
 // (exigirLoginAdmin, o mesmo de admin.html) antes de consultar qualquer
-// dado. A view vw_respostas_dashboard continua com SELECT para `anon` porque
-// a página pública desempenho.html depende dela (ver supabase-views.sql) —
-// o bloqueio aqui tira a página do ar para o público, não fecha a view.
+// dado. Desde 04/11/2026 a view vw_respostas_dashboard também só é legível
+// por `authenticated` (ver supabase-migration-restringe-views.sql): o login
+// aqui é o que dá acesso aos dados, não só à página.
 // ============================================================================
 
 import { supabase } from "./supabaseClient.js";
