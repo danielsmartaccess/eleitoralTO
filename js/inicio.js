@@ -27,6 +27,11 @@ function renderizarListaPesquisas() {
   const lista = document.getElementById("lista-pesquisas");
   const disponiveis = window.listarPesquisasParaColeta();
 
+  if (disponiveis.length === 0) {
+    lista.innerHTML = '<p class="texto-suave">Nenhuma coleta aberta no momento. Aguarde a próxima pesquisa.</p>';
+    return;
+  }
+
   lista.innerHTML = disponiveis
     .map(
       (p) => `
