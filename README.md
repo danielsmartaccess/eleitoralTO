@@ -7,12 +7,13 @@ IndexedDB, Supabase e GitHub Pages — no espírito do projeto Coleta Canaã.
 Cobre mais de um município/estado na mesma instância do app, cada um como uma
 pesquisa própria em `config/pesquisa.js` (candidatos e prefeito atual
 diferentes; questionário e disputas estaduais/nacionais compartilhados dentro
-do mesmo estado). Coleta em campo atualmente aberta só em **João Lisboa (MA)**,
-na pesquisa **"João Lisboa - Municipal 2028"** (13 perguntas: avaliação da
+do mesmo estado). **Não há coleta aberta no momento.** A última, **João Lisboa
+(MA) — "João Lisboa - Municipal 2028"** (13 perguntas: avaliação da
 administração, aprovação do prefeito, vereador mais atuante, cenários de
 prefeito/vice/vereador 2028 com 3 simulações de dois nomes, grupo de WhatsApp,
-veículo e rede social mais usados) — coleta separada da intenção de voto 2026
-de João Lisboa, com `municipio` próprio. As coletas do 2º turno (Tocantins:
+veículo e rede social mais usados), foi encerrada em 09/11/2026 com 201
+entrevistas — coleta separada da intenção de voto 2026 de João Lisboa, com
+`municipio` próprio. As coletas do 2º turno (Tocantins:
 **Carrasco Bonito**, **Darcinópolis** e **Aguiarnópolis**) e todas as do
 1º turno estão encerradas e seguem só para consulta em
 dashboard/relatório/admin (`ativoParaColeta: false` em `config/pesquisa.js`):

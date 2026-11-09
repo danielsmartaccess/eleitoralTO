@@ -2477,7 +2477,8 @@ const PESQUISA_JOAO_LISBOA_MUNICIPAL_2028_MA = (() => {
       nome: "Pesquisa Municipal João Lisboa (MA) — Cenário 2028",
       municipio: "João Lisboa - Municipal 2028",
     },
-    ativoParaColeta: true,
+    // Coleta encerrada em 09/11/2026 (201 entrevistas) — segue só para consulta.
+    ativoParaColeta: false,
     prefeitoAtual: "Fábio Holanda",
     NSNO_ID,
     NSNO_TEXTO,
